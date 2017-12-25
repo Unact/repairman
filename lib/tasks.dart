@@ -93,6 +93,80 @@ return new GestureDetector(
 }
 
 
+Widget oneCGroup(BuildContext context, String name, int freeremains) {
+
+
+return new GestureDetector(
+           onTap: () async
+           {
+              //Здесь будет рутинг
+              //await Navigator.of(context).pushNamed(terminalSubpageRoute);
+           },
+           child: new Container(
+                height: 48.0,
+                child:
+                   new Column(
+                     children: <Widget>[
+                       new Text(name),
+                       new Text("Остаток: $freeremains", style: new TextStyle(color: Colors.blue))
+                     ]
+                   )
+                )
+         );
+}
+
+
+//Возможно следует переименовать
+class CGroupPage extends StatefulWidget {
+  CGroupPage({Key key, this.cfg}) : super(key: key);
+  final DbSynch cfg;
+  @override
+  _CGroupPageState createState() => new _CGroupPageState(cfg: cfg);
+}
+
+class _CGroupPageState extends State<CGroupPage> {
+  _CGroupPageState({this.cfg});
+  DbSynch cfg;
+  List<Widget> cgrouplist;
+  List<Map> _cgroups=[];
+
+  @override
+  void initState() {
+    super.initState();
+    cfg.getCGroups().then((List<Map> list){
+      setState((){
+        _cgroups = list;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    cgrouplist = [];
+    for (var r in _cgroups) {
+
+      cgrouplist.add(oneCGroup(context,r["name"],r["freeremains"]));
+
+    }
+
+
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("ЗИПы тест")
+      ),
+      body: new ListView(
+      shrinkWrap: true,
+      children: cgrouplist,
+    )
+    );
+  }
+
+}
+
+
+
+
+
 
 
 

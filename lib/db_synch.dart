@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 const String taskPageRoute = "/tasks";
 const String terminalsPageRoute = "/terminals";
 const String taskSubpageRoute = "/tasks/one";
+const String cgroupPageRoute = "/cgroup";
 
 
 class DbSynch {
@@ -71,6 +72,40 @@ class DbSynch {
             )"""
           );
 
+          await d.execute("""
+            CREATE TABLE component(
+              id INTEGER PRIMARY KEY,
+              short_name TEXT,
+              serial TEXT,
+              xid TEXT,
+              componentgroupxid TEXT
+            )"""
+          );
+
+          //Некоторые поля, возможно, бесполезны. Непонятно с PK
+          await d.execute("""
+            CREATE TABLE taskcomponent(
+              taskid INTEGER,
+              taskxid TEXT,
+              component INT,
+              componentxid TEXT,
+              xid TEXT,
+              terminalId INT,
+              terminalxid TEXT,
+              isBroken INT,
+              id INT
+            )"""
+          );
+
+
+          await d.execute("""
+            CREATE TABLE componentgroup(
+              id INTEGER PRIMARY KEY,
+              xid TEXT,
+              name TEXT,
+              isManualReplacement INT
+            )"""
+          );
 
           await d.insert("info", {"name":"server", "value":"http://localhost:3000/api/v1/"});
           await d.insert("info", {"name":"client_id", "value":"repairman"});
@@ -217,6 +252,9 @@ Future<String> fillDB() async {
 
   await db.execute("DELETE FROM task");
   await db.execute("DELETE FROM terminal");
+  await db.execute("DELETE FROM componentgroup");
+  await db.execute("DELETE FROM component");
+  await db.execute("DELETE FROM taskcomponent");
 
   for (var tasks in data["tasks"]) {
     await db.execute("""
@@ -245,6 +283,44 @@ Future<String> fillDB() async {
              '${terminals["mobileop"]}')
     """);
   }
+
+  for (var componentgroups in data["componentgroups"]) {
+    await db.execute("""
+      INSERT INTO componentgroup (id, xid, name, isManualReplacement)
+      VALUES(${componentgroups["id"]},
+             '${componentgroups["xid"]}',
+             '${componentgroups["name"]}',
+             ${componentgroups["isManualReplacement"]})
+    """);
+  }
+
+  for (var components in data["components"]) {
+    await db.execute("""
+      INSERT INTO component (id,short_name,serial,xid,componentgroupxid)
+      VALUES(${components["id"]},
+             '${components["short_name"]}',
+             '${components["serial"]}',
+             '${components["xid"]}',
+             '${components["componentgroupxid"]}')
+    """);
+  }
+
+
+
+for (var taskcomponents in data["taskcomponents"]) {
+  await db.execute("""
+    INSERT INTO taskcomponent(taskid,taskxid,component,componentxid,xid,terminalId,terminalxid,isBroken,id)
+    VALUES(${taskcomponents["taskid"]},
+           '${taskcomponents["taskxid"]}',
+           ${taskcomponents["component"]},
+           '${taskcomponents["componentxid"]}',
+           '${taskcomponents["xid"]}',
+           ${taskcomponents["terminalId"]},
+           '${taskcomponents["terminalxid"]}',
+           ${taskcomponents["isBroken"]},
+           ${taskcomponents["id"]})
+  """);
+}
 
 
   return null;
@@ -288,6 +364,24 @@ Future<List<Map>> getTerminals() async {
     where errortext is not null
   """);
 //Нет сортировки, какая-то нужна
+  return list;
+}
+
+Future<List<Map>> getCGroups() async {
+  List<Map> list;
+  ////not exists (select * from taskcomponent where componentxid = c.xid and coalesce(removed, '0') <> '1') and
+  list = await db.rawQuery("""
+    select
+           id,
+           xid,
+           name,
+           isManualReplacement,
+           (select count(*) from component c
+            where c.componentgroupxid = cg.xid) freeremains
+   from componentgroup cg
+  where freeremains > 0
+  """);
+
   return list;
 }
 

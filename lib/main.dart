@@ -22,6 +22,7 @@ class _MyAppState extends State<MyApp> {
           taskPageRoute: (BuildContext context) => new TaskPage(cfg: cfg),
           terminalsPageRoute: (BuildContext context) => new TerminalsPage(cfg: cfg),
           taskSubpageRoute: (BuildContext context) => new TaskSubpage(cfg: cfg),
+          cgroupPageRoute: (BuildContext context) => new CGroupPage(cfg: cfg),
     };
   }
 
@@ -128,6 +129,18 @@ void initState() {
 
     ),
   ),
+  new GestureDetector(
+   onTap: () async
+   {
+      await Navigator.of(context).pushNamed(cgroupPageRoute);
+   },
+   child: new Container(
+     color: Colors.yellow,
+     child: new Text('ЗИПы тест'),
+     height: 60.0,
+
+   ),
+ ),
 
 new RaisedButton(
   color: Colors.blue,
