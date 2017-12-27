@@ -104,8 +104,15 @@ void initState() {
       },
     );
 
-  final Widget mainPage = new Column(
+
+  final Widget mainPage = new ListView(
+  shrinkWrap: true,
   children: <Widget>[
+    new Container(
+      height: 40.0,
+      child: new Text("Задачи"),
+      color: Colors.grey.shade300,
+    ),
     new GestureDetector(
      onTap: () async
      {
@@ -117,18 +124,28 @@ void initState() {
        height: 40.0,
      ),
    ),
-   new GestureDetector(
-    onTap: () async
-    {
-       await Navigator.of(context).pushNamed(terminalsPageRoute);
-    },
-    child: new Container(
-      color: Colors.yellow,
-      child: new Text('Терминалы'),
-      height: 60.0,
-
+    new Container(
+      height: 40.0,
+      child: new Text("Терминалы"),
+      color: Colors.grey.shade300,
     ),
-  ),
+    new GestureDetector(
+     onTap: () async
+     {
+        await Navigator.of(context).pushNamed(terminalsPageRoute);
+     },
+     child: new Container(
+       color: Colors.yellow,
+       child: new Text('Терминалы'),
+       height: 60.0,
+
+     ),
+   ),
+    new Container(
+      height: 40.0,
+      child: new Text("Управление"),
+      color: Colors.grey.shade300,
+    ),
   new GestureDetector(
    onTap: () async
    {
