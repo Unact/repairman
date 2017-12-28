@@ -109,7 +109,7 @@ void initState() {
   shrinkWrap: true,
   children: <Widget>[
     new Container(
-      height: 40.0,
+      height: 20.0,
       child: new Text("Задачи"),
       color: Colors.grey.shade300,
     ),
@@ -125,7 +125,7 @@ void initState() {
      ),
    ),
     new Container(
-      height: 40.0,
+      height: 20.0,
       child: new Text("Терминалы"),
       color: Colors.grey.shade300,
     ),
@@ -137,12 +137,12 @@ void initState() {
      child: new Container(
        color: Colors.yellow,
        child: new Text('Терминалы'),
-       height: 60.0,
+       height: 40.0,
 
      ),
    ),
     new Container(
-      height: 40.0,
+      height: 20.0,
       child: new Text("Управление"),
       color: Colors.grey.shade300,
     ),
@@ -153,12 +153,19 @@ void initState() {
    },
    child: new Container(
      color: Colors.yellow,
-     child: new Text('ЗИПы тест'),
-     height: 60.0,
+     child: new Text('ЗИПы'),
+     height: 40.0,
 
    ),
  ),
-
+ new Container(
+   height: 20.0,
+   child: new Text(""),
+ ),
+ new Container(
+   height: 20.0,
+   child: new Text(""),
+ ),
 new RaisedButton(
   color: Colors.blue,
   onPressed: () async {
@@ -167,7 +174,7 @@ new RaisedButton(
     print("completed...");
 
   },
-  child: new Text('тест', style: new TextStyle(color: Colors.white)),
+  child: new Text('Обновить данные', style: new TextStyle(color: Colors.white)),
 )
   ],
 );

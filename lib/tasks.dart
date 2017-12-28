@@ -82,7 +82,7 @@ return new GestureDetector(
                            new Text(fmtSrok(dobefore), style: new TextStyle(color: Colors.blue)),
                          ]
                        ),
-                       new Text(address, style: new TextStyle(color: tcolor))
+                       new Text(address, style: new TextStyle(color: tcolor, fontSize: 12.0))
                      ]
                    )
                   //]
@@ -104,13 +104,17 @@ return new GestureDetector(
            },
            child: new Container(
                 height: 48.0,
+                decoration: const BoxDecoration(
+                  border: const Border(
+                        bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000))
+                )),
                 child:
                    new Column(
                      children: <Widget>[
                        new Text(name),
                        new Text("Остаток: $freeremains", style: new TextStyle(color: Colors.blue))
                      ]
-                   )
+                   ),
                 )
          );
 }

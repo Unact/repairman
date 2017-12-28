@@ -361,8 +361,8 @@ Future<List<Map>> getTerminals() async {
            longitude,
            mobileop
       from terminal
-    where errortext is not null
-  """);
+    where errortext<>'null'
+  """); //Нулл в кавычках - АД. Но пока работает только так.
 //Нет сортировки, какая-то нужна
   return list;
 }
