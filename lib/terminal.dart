@@ -36,10 +36,12 @@ class _TerminalPageState extends State<TerminalPage> {
         child: new ListView(
           children: [
             new Text("Тест карты"),
-            new Image.network('https://static-maps.yandex.ru/1.x/?ll=$_logitude,$_latitude&size=250,200&z=13&l=map&pt=$_logitude,$_latitude,pm2gnm', fit: BoxFit.cover),
-            new RaisedButton(
-              onPressed: _launchURL,
-              child: new Text('Показать терминал на карте'),
+            new GestureDetector(
+                       onTap: () async
+                       {
+                          _launchURL();
+                       },
+                       child: new Image.network('https://static-maps.yandex.ru/1.x/?ll=$_logitude,$_latitude&size=250,200&z=15&l=map&pt=$_logitude,$_latitude,pm2gnm', fit: BoxFit.cover),
             ),
           ]
         )
