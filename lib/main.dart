@@ -23,6 +23,10 @@ class _MyAppState extends State<MyApp> {
           terminalsPageRoute: (BuildContext context) => new TerminalsPage(cfg: cfg),
           taskSubpageRoute: (BuildContext context) => new TaskSubpage(cfg: cfg),
           cgroupPageRoute: (BuildContext context) => new CGroupPage(cfg: cfg),
+
+
+          taskDefectsSubpageRoute: (BuildContext context) => new TaskDefectsSubpage(cfg: cfg),
+
     };
   }
 
@@ -175,6 +179,19 @@ new RaisedButton(
 
   },
   child: new Text('Обновить данные', style: new TextStyle(color: Colors.white)),
+
+
+),
+new RaisedButton(
+  color: Colors.red,
+  onPressed: () async {
+
+    await cfg.synchDB();
+    print("completed synchDB...");
+
+  },
+  child: new Text('Тест апдейт', style: new TextStyle(color: Colors.white)),
+
 )
   ],
 );

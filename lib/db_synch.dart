@@ -11,6 +11,11 @@ const String taskSubpageRoute = "/tasks/one";
 const String cgroupPageRoute = "/cgroup";
 
 
+const String taskDefectsSubpageRoute = "/tasks/one/defects";
+const String taskRepairsSubpageRoute = "/tasks/one/repairs";
+
+
+
 class DbSynch {
   Database db;
   String login;
@@ -22,7 +27,7 @@ class DbSynch {
   String clientName="";
   int closed=0;
 
-  //int cur_task; //Непонятно насколько адекватный способ организации рутинга
+  int cur_task; //Непонятно насколько адекватный способ организации рутинга
 
   Future<Database> initDB() async {
     String dir = (await getApplicationDocumentsDirectory()).path;
@@ -98,6 +103,9 @@ class DbSynch {
           );
 
 
+
+
+
           await d.execute("""
             CREATE TABLE componentgroup(
               id INTEGER PRIMARY KEY,
@@ -106,6 +114,41 @@ class DbSynch {
               isManualReplacement INT
             )"""
           );
+
+
+
+          await d.execute("""
+            CREATE TABLE repairs(
+              id INTEGER PRIMARY KEY,
+              name TEXT
+            )"""
+          );
+
+          await d.execute("""
+            CREATE TABLE defects(
+              id INTEGER PRIMARY KEY,
+              name TEXT
+            )"""
+          );
+
+          await d.execute("""
+            CREATE TABLE taskdefectlink(
+              id INTEGER PRIMARY KEY DEFAULT AUTO_INCREMENT,
+              task_id INTEGER,
+              defect_id INTEGER,
+              syncstatus INTEGER DEFAULT 0
+            )"""
+          );
+
+          await d.execute("""
+            CREATE TABLE taskrepairlink(
+              id INTEGER PRIMARY KEY DEFAULT AUTO_INCREMENT,
+              task_id INTEGER,
+              repair_id INTEGER,
+              syncstatus INTEGER DEFAULT 0
+            )"""
+          );
+
 
           await d.insert("info", {"name":"server", "value":"http://localhost:3000/api/v1/"});
           await d.insert("info", {"name":"client_id", "value":"repairman"});
@@ -256,10 +299,18 @@ Future<String> fillDB() async {
   await db.execute("DELETE FROM component");
   await db.execute("DELETE FROM taskcomponent");
 
+
+  await db.execute("DELETE FROM repairs");
+  await db.execute("DELETE FROM defects");
+  await db.execute("DELETE FROM taskdefectlink");
+  await db.execute("DELETE FROM taskrepairlink");
+
+
   for (var tasks in data["tasks"]) {
     await db.execute("""
-      INSERT INTO task (servstatus, dobefore, terminalbreakname, routepriority, terminalxid)
-      VALUES(${tasks["servstatus"]},
+      INSERT INTO task (id, servstatus, dobefore, terminalbreakname, routepriority, terminalxid)
+      VALUES(${tasks["id"]},
+             ${tasks["servstatus"]},
              '${tasks["dobefore"]}',
              '${tasks["terminal_break_name"]}',
              '${tasks["route_priority"]}',
@@ -307,6 +358,41 @@ Future<String> fillDB() async {
 
 
 
+  for (var repairs in data["repairs"]) {
+    await db.execute("""
+      INSERT INTO repairs (id,name)
+      VALUES(${repairs["id"]},
+             '${repairs["repair_name"]}')
+    """);
+  }
+
+  for (var defects in data["defects"]) {
+    await db.execute("""
+      INSERT INTO defects (id,name)
+      VALUES(${defects["id"]},
+             '${defects["name"]}')
+    """);
+  }
+
+  for (var taskdefectlink in data["taskdefectlink"]) {
+    await db.execute("""
+      INSERT INTO taskdefectlink (task_id,defect_id)
+      VALUES(${taskdefectlink["task_id"]},
+             ${taskdefectlink["defect_id"]})
+    """);
+  }
+
+    for (var taskrepairlink in data["taskrepairlink"]) {
+      await db.execute("""
+        INSERT INTO taskrepairlink (task_id,repair_id)
+        VALUES(${taskrepairlink["task_id"]},
+               ${taskrepairlink["repair_id"]})
+      """);
+  }
+
+
+
+
 for (var taskcomponents in data["taskcomponents"]) {
   await db.execute("""
     INSERT INTO taskcomponent(taskid,taskxid,component,componentxid,xid,terminalId,terminalxid,isBroken,id)
@@ -331,6 +417,7 @@ Future<List<Map>> getTasks() async {
   List<Map> list;
   list = await db.rawQuery("""
     select
+      task.id,
       task.servstatus,
       task.dobefore,
       task.terminalbreakname,
@@ -384,6 +471,126 @@ Future<List<Map>> getCGroups() async {
 
   return list;
 }
+
+
+
+//Нужно отобрать весь справочник дефектов, передав status=1 там, где была вставлена запись.. гм.. оч понятно =)
+Future<List<Map>> getDefects(int taskid) async {
+  List<Map> list;
+
+  //СОРТИРОВКА?!
+  list = await db.rawQuery("""
+    select
+           defects.id,
+           defects.name,
+           CASE WHEN taskdefectlink.id IS NOT NULL THEN 1 ELSE 0 END status
+   from defects
+        left outer join taskdefectlink on taskdefectlink.task_id = $taskid and
+                                          taskdefectlink.defect_id = defects.id and
+                                          taskdefectlink.syncstatus <> -1
+  """);
+
+  //if taskdefectlink.id is not null then 1 else 0 endif status
+  return list;
+}
+
+Future<List<Map>> getOneTask(int taskid) async {
+  List<Map> list;
+
+  list = await db.rawQuery("""
+    select (select count(*)
+              from taskdefectlink
+             where taskdefectlink.task_id = $taskid and
+                   taskdefectlink.syncstatus <> -1) defectcnt,
+           (select count(*)
+              from taskrepairlink
+             where taskrepairlink.task_id = $taskid and
+                   taskrepairlink.syncstatus <> -1) repaircnt
+  """);
+
+  return list;
+
+}
+
+
+
+Future<String> synchDB() async {
+  var response;
+  List<Map> list;
+
+  list = await db.rawQuery("select id, name from componentgroup r");
+
+  var httpClient = createHttpClient();
+  String url = server + "repairman/save";
+  try {
+    print("url = $url");
+    print("RApi client_id=$clientId,token=$token");
+    response = await httpClient.post(url,
+      headers: {"Authorization": "RApi client_id=$clientId,token=$token",
+                "Accept": "application/json", "Content-Type": "application/json"},
+      body: JSON.encode(list)
+    );
+  } catch(exception) {
+    return 'Сервер $server недоступен!\n$exception';
+  }
+
+
+  return null;
+
+/*
+  String s;
+  int i = 0;
+  var data;
+  list = await db.rawQuery("select * from repayment r");
+
+  do {
+    if (token==null) {
+      s = (await makeConnection());
+      if (s != null) {
+        return s;
+      }
+    }
+    var httpClient = createHttpClient();
+    String url = server + "forwarder/save";
+    try {
+      print("url = $url");
+      print("RApi client_id=$clientId,token=$token");
+      response = await httpClient.post(url,
+        headers: {"Authorization": "RApi client_id=$clientId,token=$token",
+                  "Accept": "application/json", "Content-Type": "application/json"},
+        body: JSON.encode(list)
+      );
+    } catch(exception) {
+      return 'Сервер $server недоступен!\n$exception';
+    }
+    try {
+      data = JSON.decode(response.body);
+      if (data["error"] != null) {
+        if (i == 1) {
+          return data["error"];
+        }
+        token = null;
+        i++;
+      }
+    } catch(exception) {
+      return 'Ответ сервера: ${response.body}\n$exception';
+    }
+  } while (i == 1);
+
+  for (var i = 0; i < list.length; i++) {
+    list[i]["repayment_id"] = data["repayment"][i];
+    await db.execute("""
+      UPDATE repayment
+      SET repayment_id = ${list[i]["repayment_id"]}
+      WHERE debt_id=${list[i]["debt_id"]}
+    """);
+  }
+  return null;
+*/
+}
+
+
+
 
 
 }

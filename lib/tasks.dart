@@ -31,7 +31,7 @@ return strdate+date.hour.toString()+":"+_twoDigits(date.minute);
 }
 
 
-Widget oneTask(BuildContext context, DateTime dobefore, int servstatus, int routepriority, int task_id, String code, String address) {
+Widget oneTask(DbSynch cfg, BuildContext context, DateTime dobefore, int servstatus, int routepriority, int task_id, String code, String address) {
 var bcolor;
 var tcolor;
 
@@ -58,6 +58,7 @@ else
 return new GestureDetector(
            onTap: () async
            {
+              cfg.cur_task = task_id;
               await Navigator.of(context).pushNamed(taskSubpageRoute);
            },
            child: new Container(
@@ -121,6 +122,66 @@ return new GestureDetector(
 
 
 //Возможно следует переименовать
+
+
+class MyCheckBox extends StatefulWidget {
+  MyCheckBox({Key key, this.status}) : super(key: key);
+  final bool status;
+
+  @override
+  _MyCheckBoxState createState() => new _MyCheckBoxState(status: status);
+}
+
+class _MyCheckBoxState extends State<MyCheckBox> {
+  bool status;
+  _MyCheckBoxState({this.status});
+
+
+/*
+  @override
+  void initState() {
+    super.initState();
+    status = false;
+  }
+*/
+
+  @override
+  Widget build(BuildContext context) {
+    return new Checkbox(
+      value: status,
+      onChanged: (bool value) {
+        setState((){status = value;});
+      }
+    );
+  }
+}
+
+
+Widget oneDefect(DbSynch cfg, BuildContext context, String name, int status) {
+bool initstatus = false;
+
+if (status == 1) {initstatus = true;}
+
+return new Container(
+                height: 48.0,
+                decoration: const BoxDecoration(
+                  border: const Border(
+                        bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000))
+                )),
+                child:
+                   new Row(
+                     children: <Widget>[
+                       new Text(name,  style: new TextStyle(fontSize: 12.0)),
+                       new MyCheckBox(status: initstatus)
+                     ]
+                   ),
+                );
+
+}
+
+
+//Возможно следует переименовать
+
 class CGroupPage extends StatefulWidget {
   CGroupPage({Key key, this.cfg}) : super(key: key);
   final DbSynch cfg;
@@ -232,7 +293,7 @@ else
   {code = r["code"];
    address = r["address"];}
 
-      tasklist.add(oneTask(context,DateTime.parse(r["dobefore"]),r["servstatus"],r["routepriority"],0,code,address));
+      tasklist.add(oneTask(cfg,context,DateTime.parse(r["dobefore"]),r["servstatus"],r["routepriority"],r["id"],code,address));
 
     }
 
@@ -263,12 +324,119 @@ class _TaskSubpageState extends State<TaskSubpage> {
   DbSynch cfg;
 
   @override
+  void initState() {
+    super.initState();
+    cfg.getOneTask(cfg.cur_task).then((List<Map> list){
+      setState((){
+
+      });
+    });
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text("одна задача")
       ),
-      body: new Text("здесь будет карточка задачи"));
+      body: new Column(
+              children:
+
+              [
+              new Text("здесь будет карточка задачи: "+cfg.cur_task.toString()),
+
+               new GestureDetector(
+                         onTap: () async
+                         {
+
+                            await Navigator.of(context).pushNamed(taskDefectsSubpageRoute);
+                         },
+                         child: new Container(
+                              color: Colors.teal,
+                              height: 48.0,
+                              child:
+
+                                 new Column(
+                                   children: <Widget>[
+                                     /*
+                                     new Row(
+                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                       children: <Widget>[
+                                         new Text("code"),
+                                         new Text(fmtSrok(dobefore), style: new TextStyle(color: Colors.blue)),
+                                       ]
+                                     ),*/
+                                     new Text("Поломки (х)", style: new TextStyle(color: Colors.white, fontSize: 12.0))
+                                   ]
+                                 )
+                              )
+                       ),
+
+
+
+
+            ]
+            )
+        );
+
+  }
+
+
+}
+
+
+
+/////////////////////////
+
+class TaskDefectsSubpage extends StatefulWidget {
+  TaskDefectsSubpage({Key key, this.cfg}) : super(key: key);
+  final DbSynch cfg;
+  @override
+  _TaskDefectsSubpageState createState() => new _TaskDefectsSubpageState(cfg: cfg);
+}
+
+class _TaskDefectsSubpageState extends State<TaskDefectsSubpage> {
+  _TaskDefectsSubpageState({this.cfg});
+  DbSynch cfg;
+  List<Widget> defectslist;
+  List<Map> _defects=[]; //Странно что атом дает ворнинг. Выше, в аналогичном случае - не дает
+
+
+  @override
+  void initState() {
+    super.initState();
+    cfg.getDefects(cfg.cur_task).then((List<Map> list){
+      setState((){
+        _defects = list;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+
+    defectslist = [];
+
+
+    for (var r in _defects) {
+      defectslist.add(oneDefect(cfg,context,r["name"],r["status"]));
+    }
+
+
+
+
+
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("Дефекты")
+      ),
+      body: new ListView(
+      shrinkWrap: true,
+      children: defectslist,
+    )
+    );
 
   }
 
