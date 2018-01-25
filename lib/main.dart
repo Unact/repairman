@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'db_synch.dart';
 import 'tasks.dart';
 import 'terminals.dart';
+import 'terminal.dart';
 import 'auth.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -23,6 +24,7 @@ class _MyAppState extends State<MyApp> {
           terminalsPageRoute: (BuildContext context) => new TerminalsPage(cfg: cfg),
           taskSubpageRoute: (BuildContext context) => new TaskSubpage(cfg: cfg),
           cgroupPageRoute: (BuildContext context) => new CGroupPage(cfg: cfg),
+          terminalPageRoute: (BuildContext context) => new TerminalPage(cfg: cfg),
     };
   }
 

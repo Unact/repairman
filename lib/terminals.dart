@@ -8,8 +8,7 @@ Widget oneTerminal(BuildContext context, String code, DateTime lastactivitytime,
 return new GestureDetector(
            onTap: () async
            {
-              //Здесь будет рутинг
-              //await Navigator.of(context).pushNamed(terminalSubpageRoute);
+              await Navigator.of(context).pushNamed(terminalPageRoute);
            },
            child: new Container(
                 height: 48.0,

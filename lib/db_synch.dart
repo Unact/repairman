@@ -9,7 +9,7 @@ const String taskPageRoute = "/tasks";
 const String terminalsPageRoute = "/terminals";
 const String taskSubpageRoute = "/tasks/one";
 const String cgroupPageRoute = "/cgroup";
-
+const String terminalPageRoute = "/terminal";
 
 class DbSynch {
   Database db;
