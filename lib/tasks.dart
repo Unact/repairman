@@ -120,21 +120,23 @@ return new GestureDetector(
          );
 }
 
-
+//updateDefect(int task_id, int defect_id, bool status)
 //Возможно следует переименовать
-
-
 class MyCheckBox extends StatefulWidget {
-  MyCheckBox({Key key, this.status}) : super(key: key);
+  MyCheckBox({Key key, this.cfg, this.defectid, this.status}) : super(key: key);
+  final DbSynch cfg;
   final bool status;
+  final int defectid;
 
   @override
-  _MyCheckBoxState createState() => new _MyCheckBoxState(status: status);
+  _MyCheckBoxState createState() => new _MyCheckBoxState(cfg: cfg, defectid: defectid, status: status);
 }
 
 class _MyCheckBoxState extends State<MyCheckBox> {
+  DbSynch cfg;
   bool status;
-  _MyCheckBoxState({this.status});
+  int defectid;
+  _MyCheckBoxState({this.cfg, this.defectid, this.status});
 
 
 /*
@@ -150,14 +152,14 @@ class _MyCheckBoxState extends State<MyCheckBox> {
     return new Checkbox(
       value: status,
       onChanged: (bool value) {
-        setState((){status = value;});
+        cfg.updateDefect(cfg.cur_task, defectid, value).then((v){setState((){status = value;});});
       }
     );
   }
 }
 
 
-Widget oneDefect(DbSynch cfg, BuildContext context, String name, int status) {
+Widget oneDefect(DbSynch cfg, BuildContext context, String name, int status, int defectid) {
 bool initstatus = false;
 
 if (status == 1) {initstatus = true;}
@@ -172,7 +174,7 @@ return new Container(
                    new Row(
                      children: <Widget>[
                        new Text(name,  style: new TextStyle(fontSize: 12.0)),
-                       new MyCheckBox(status: initstatus)
+                       new MyCheckBox(cfg: cfg, defectid: defectid, status: initstatus)
                      ]
                    ),
                 );
@@ -181,7 +183,6 @@ return new Container(
 
 
 //Возможно следует переименовать
-
 class CGroupPage extends StatefulWidget {
   CGroupPage({Key key, this.cfg}) : super(key: key);
   final DbSynch cfg;
@@ -322,15 +323,21 @@ class TaskSubpage extends StatefulWidget {
 class _TaskSubpageState extends State<TaskSubpage> {
   _TaskSubpageState({this.cfg});
   DbSynch cfg;
+  int repaircnt;
+  int defectcnt;
 
   @override
   void initState() {
     super.initState();
+    print(cfg.cur_task);
     cfg.getOneTask(cfg.cur_task).then((List<Map> list){
-      setState((){
+      for (var r in list) { //сделать без цикла
+        repaircnt = r["repaircnt"];
+        defectcnt = r["defectcnt"];
+      }
+   }
+  );
 
-      });
-    });
   }
 
 
@@ -421,7 +428,7 @@ class _TaskDefectsSubpageState extends State<TaskDefectsSubpage> {
 
 
     for (var r in _defects) {
-      defectslist.add(oneDefect(cfg,context,r["name"],r["status"]));
+      defectslist.add(oneDefect(cfg,context,r["name"],r["status"],r["defect_id"]));
     }
 
 

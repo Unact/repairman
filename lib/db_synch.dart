@@ -481,7 +481,7 @@ Future<List<Map>> getDefects(int taskid) async {
   //СОРТИРОВКА?!
   list = await db.rawQuery("""
     select
-           defects.id,
+           defects.id defect_id,
            defects.name,
            CASE WHEN taskdefectlink.id IS NOT NULL THEN 1 ELSE 0 END status
    from defects
@@ -512,13 +512,51 @@ Future<List<Map>> getOneTask(int taskid) async {
 
 }
 
+//List<Map> list = await widget.cfg.database.rawQuery("SELECT MAX(ts) mts FROM schedule_requests");
+//DateTime ts = DateTime.parse(list[0]['mts']).add(new Duration(hours: 3));
+
+//Как-то стремно в целом выглядит вся эта процедура О_О
+Future<String> updateDefect(int task_id, int defect_id, bool status) async {
+int id;
+int syncstatus;
+//Возможно стоит сделать проверку на странное сочетание статусов,
+//типа поставить 1 когда уже стоит 1
+
+print("updateDefect. task_id=$task_id  defect_id=$defect_id  newstatus = $status");
+
+List<Map> list = await db.rawQuery("SELECT id, syncstatus FROM taskdefectlink WHERE task_id = $task_id and defect_id = $defect_id");
+print("Лок. запись: id = $id  syncstatus = $syncstatus");
+  if (list.length > 0) {
+    id = list[0]['id'];
+    syncstatus = list[0]['syncstatus'];
+  }
+  if (status == true) {
+    if (syncstatus==null) {
+      print("  <1> вставляем в # с сюнкстатусом 1");
+      await db.execute("insert into taskdefectlink (task_id, defect_id, syncstatus) select $task_id, $defect_id, 1");
+    } else {
+      print("  <2> апдейтим в # на сюнкстатус 0");
+      await db.execute("update taskdefectlink set syncstatus = 0 where id = $id");
+    }
+  } else {
+    if (syncstatus==0) {
+      print("  <3> апдейтим в # на сюнкстатус -1");
+      await db.execute("update taskdefectlink set syncstatus = -1 where id = $id");
+    } else {
+      print("  <4> удаляем запись из #");
+      await db.execute("delete from taskdefectlink where id = $id");
+    }
+  }
+
+  return null;
+}
 
 
 Future<String> synchDB() async {
   var response;
   List<Map> list;
 
-  list = await db.rawQuery("select id, name from componentgroup r");
+  list = await db.rawQuery("select task_id, defect_id, syncstatus from taskdefectlink where syncstatus <> 0");
 
   var httpClient = createHttpClient();
   String url = server + "repairman/save";
@@ -530,6 +568,9 @@ Future<String> synchDB() async {
                 "Accept": "application/json", "Content-Type": "application/json"},
       body: JSON.encode(list)
     );
+
+    //После успешного выполнения надо удалить со статусом -1 а статус 1 перебросить на 0
+    //Либо же запросить заново всю БД, как?
   } catch(exception) {
     return 'Сервер $server недоступен!\n$exception';
   }
