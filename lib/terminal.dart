@@ -11,10 +11,19 @@ class TerminalPage extends StatefulWidget {
 
 class _TerminalPageState extends State<TerminalPage> {
   DbSynch cfg;
+  double _latitude;
+  double _logitude;
+
   _TerminalPageState({this.cfg});
   @override
   void initState() {
     super.initState();
+    cfg.getTerminal().then((List<Map> list){
+      setState((){
+        _latitude = list[0]["latitude"].toDouble();
+        _logitude = list[0]["longitude"].toDouble();
+      });
+    });
   }
   @override
   Widget build(BuildContext context) {
@@ -27,7 +36,7 @@ class _TerminalPageState extends State<TerminalPage> {
         child: new ListView(
           children: [
             new Text("Тест карты"),
-            new Image.network('https://static-maps.yandex.ru/1.x/?ll=37.620070,55.753630&size=250,200&z=13&l=map&pt=37.620070,55.753630,pm2gnm', fit: BoxFit.cover),
+            new Image.network('https://static-maps.yandex.ru/1.x/?ll=$_logitude,$_latitude&size=250,200&z=13&l=map&pt=$_logitude,$_latitude,pm2gnm', fit: BoxFit.cover),
             new RaisedButton(
               onPressed: _launchURL,
               child: new Text('Показать терминал на карте'),
@@ -38,7 +47,7 @@ class _TerminalPageState extends State<TerminalPage> {
     );
   }
   _launchURL() async {
-    const url = 'https://maps.yandex.ru/?pt=30.335429,59.944869&ll=30.335429,59.944869&z=18&l=map';
+    String url = 'https://maps.yandex.ru/?pt=$_logitude,$_latitude&ll=$_logitude,$_latitude&z=18&l=map';
     if (await canLaunch(url)) {
       await launch(url);
     } else {

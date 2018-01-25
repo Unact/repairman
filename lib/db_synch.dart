@@ -18,7 +18,7 @@ class DbSynch {
   String clientId;
   String server;
   String token;
-  int dbClientId=0;
+  int dbTerminalId=0;
   String clientName="";
   int closed=0;
 
@@ -385,5 +385,24 @@ Future<List<Map>> getCGroups() async {
   return list;
 }
 
+Future<List<Map>> getTerminal() async {
+  List<Map> list;
+  list = await db.rawQuery("""
+    select
+           id,
+           code,
+           address,
+           lastactivitytime,
+           lastpaymenttime,
+           errortext,
+           src_system_name,
+           latitude,
+           longitude,
+           mobileop
+      from terminal
+    where id = $dbTerminalId
+  """);
+  return list;
+}
 
 }

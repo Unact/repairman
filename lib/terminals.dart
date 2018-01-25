@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'db_synch.dart';
 
 
-Widget oneTerminal(BuildContext context, String code, DateTime lastactivitytime, String address) {
+Widget oneTerminal(DbSynch cfg, BuildContext context, String code, DateTime lastactivitytime, String address, int terminalId) {
 
 
 return new GestureDetector(
            onTap: () async
            {
+              cfg.dbTerminalId = terminalId;
               await Navigator.of(context).pushNamed(terminalPageRoute);
            },
            child: new Container(
@@ -68,7 +69,7 @@ class _TerminalsPageState extends State<TerminalsPage> {
 
       print(r["errortext"]);
       print("---------");
-      terminallist.add(oneTerminal(context,r["code"],DateTime.parse(r["lastactivitytime"]),r["address"]));
+      terminallist.add(oneTerminal(cfg, context,r["code"],DateTime.parse(r["lastactivitytime"]),r["address"], r["id"] ));
 
     }
 
