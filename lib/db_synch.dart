@@ -554,9 +554,11 @@ print("Лок. запись: id = $id  syncstatus = $syncstatus");
 
 Future<String> synchDB() async {
   var response;
-  List<Map> list;
+  List<Map> taskdefectlink;
+  List<Map> info;
 
-  list = await db.rawQuery("select task_id, defect_id, syncstatus from taskdefectlink where syncstatus <> 0");
+  taskdefectlink = await db.rawQuery("select task_id, defect_id, syncstatus from taskdefectlink where syncstatus <> 0");
+  info = await db.rawQuery("select id, name from info");
 
   var httpClient = createHttpClient();
   String url = server + "repairman/save";
@@ -566,7 +568,7 @@ Future<String> synchDB() async {
     response = await httpClient.post(url,
       headers: {"Authorization": "RApi client_id=$clientId,token=$token",
                 "Accept": "application/json", "Content-Type": "application/json"},
-      body: JSON.encode(list)
+      body: JSON.encode({"taskdefectlink": taskdefectlink, "info": info})
     );
 
     //После успешного выполнения надо удалить со статусом -1 а статус 1 перебросить на 0
