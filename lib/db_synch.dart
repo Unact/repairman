@@ -9,7 +9,7 @@ const String taskPageRoute = "/tasks";
 const String terminalsPageRoute = "/terminals";
 const String taskSubpageRoute = "/tasks/one";
 const String cgroupPageRoute = "/cgroup";
-
+const String terminalPageRoute = "/terminal";
 
 const String taskDefectsSubpageRoute = "/tasks/one/defects";
 const String taskRepairsSubpageRoute = "/tasks/one/repairs";
@@ -23,7 +23,7 @@ class DbSynch {
   String clientId;
   String server;
   String token;
-  int dbClientId=0;
+  int dbTerminalId=0;
   String clientName="";
   int closed=0;
 
@@ -472,6 +472,25 @@ Future<List<Map>> getCGroups() async {
   return list;
 }
 
+Future<List<Map>> getTerminal() async {
+  List<Map> list;
+  list = await db.rawQuery("""
+    select
+           id,
+           code,
+           address,
+           lastactivitytime,
+           lastpaymenttime,
+           errortext,
+           src_system_name,
+           latitude,
+           longitude,
+           mobileop
+      from terminal
+    where id = $dbTerminalId
+  """);
+  return list;
+}
 
 
 //Нужно отобрать весь справочник дефектов, передав status=1 там, где была вставлена запись.. гм.. оч понятно =)
