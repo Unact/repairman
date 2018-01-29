@@ -24,7 +24,7 @@ return new GestureDetector(
                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                          children: <Widget>[
                            new Text(code),
-                           new Text(lastactivitytime.toString(), style: new TextStyle(color: Colors.blue)),
+                           new Text(dateFormat.format(lastactivitytime), style: new TextStyle(color: Colors.blue)),
                          ]
                        ),
                        new Text(address, style: new TextStyle(color: Colors.green, fontSize: 12.0))

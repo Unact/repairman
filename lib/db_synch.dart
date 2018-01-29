@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 //следует получше понеймить роуты
 const String taskPageRoute = "/tasks";
@@ -14,7 +15,7 @@ const String terminalPageRoute = "/terminal";
 const String taskDefectsSubpageRoute = "/tasks/one/defects";
 const String taskRepairsSubpageRoute = "/tasks/one/repairs";
 
-
+final dateFormat = new DateFormat("HH:mm dd.MM.yy") ;
 
 class DbSynch {
   Database db;
@@ -308,12 +309,13 @@ Future<String> fillDB() async {
 
   for (var tasks in data["tasks"]) {
     await db.execute("""
-      INSERT INTO task (id, servstatus, dobefore, terminalbreakname, routepriority, terminalxid)
+      INSERT INTO task (id, servstatus, dobefore, terminalbreakname, routepriority, terminal, terminalxid)
       VALUES(${tasks["id"]},
              ${tasks["servstatus"]},
              '${tasks["dobefore"]}',
              '${tasks["terminal_break_name"]}',
              '${tasks["route_priority"]}',
+             '${tasks["terminal"]}',
              '${tasks["terminal_xid"]}')
     """);
   }
@@ -492,6 +494,23 @@ Future<List<Map>> getTerminal() async {
   return list;
 }
 
+Future<List<Map>> getTerminalTasks() async {
+  List<Map> list;
+  list = await db.rawQuery("""
+    select
+      id,
+      servstatus,
+      dobefore,
+      terminalbreakname,
+      routepriority
+   from
+      task
+  where 
+      terminal = $dbTerminalId
+   order by servstatus, routepriority DESC, dobefore
+  """);
+  return list;
+}
 
 //Нужно отобрать весь справочник дефектов, передав status=1 там, где была вставлена запись.. гм.. оч понятно =)
 Future<List<Map>> getDefects(int taskid) async {
