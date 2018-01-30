@@ -11,14 +11,14 @@ class TerminalPage extends StatefulWidget {
 
 class _TerminalPageState extends State<TerminalPage> {
   DbSynch cfg;
-  double _latitude;
-  double _logitude;
-  String _code;
-  String _srcSystemName;
-  DateTime _lastActivityTime;
-  DateTime _lastPaymentTime;
-  String _address;
-  String _errorText;
+  double _latitude = 55.754226;
+  double _logitude = 37.617582;
+  String _code = "";
+  String _srcSystemName = "";
+  DateTime _lastActivityTime = new DateTime(1999, 1, 1);
+  DateTime _lastPaymentTime = new DateTime(1999, 1, 1);
+  String _address = "";
+  String _errorText = "";
   List<Map> _tasks=[];
 
   _TerminalPageState({this.cfg});
@@ -37,7 +37,7 @@ class _TerminalPageState extends State<TerminalPage> {
           _lastPaymentTime = DateTime.parse(list[0]["lastpaymenttime"]);
           _address = list[0]["address"];
           _errorText = list[0]["errortext"];
-          tt = _tasks;
+          _tasks = tt;
         });
       });
     });
@@ -51,7 +51,7 @@ class _TerminalPageState extends State<TerminalPage> {
       body: new Container(
         padding: const EdgeInsets.all(8.0),
         child: new ListView(
-          children: [
+          children: [[
             new Row(
               children: [
                 new Expanded(
@@ -141,13 +141,10 @@ class _TerminalPageState extends State<TerminalPage> {
                 fontWeight: FontWeight.bold,
                 fontSize: 16.0
               )
-            ) /*,
-            new ListView(
-              children: _tasks.map((var a) {
-                return new Text("terminalbreakname");
-              }).toList()
-            )*/
-          ]
+            )
+          ], _tasks.map((var a) {
+            return new Text(a["terminalbreakname"]);
+          }).toList()].expand((x) => x).toList()
         )
       )
     );
