@@ -2,36 +2,7 @@ import 'package:flutter/material.dart';
 import 'db_synch.dart';
 
 
-
-
-String fmtSrok(DateTime date) {
-
-  String _twoDigits(int n) {
-    if (n >= 10) return "$n";
-    return "0$n";
-  }
-
- DateTime today = new DateTime(new DateTime.now().year, new DateTime.now().month, new DateTime.now().day);
- DateTime yesterday = today.subtract(new Duration(days:1));
- DateTime yesterday2 = today.subtract(new Duration(days:2));
- DateTime tomorrow = today.add(new Duration(days:1));
- DateTime tomorrow2 = today.add(new Duration(days:2));
- DateTime tomorrow3 = today.add(new Duration(days:3));
- String strdate;
-
-if ((date.isAfter(yesterday2))&&(date.isBefore(yesterday))) {strdate="Позавчера, ";}
-if ((date.isAfter(yesterday))&&(date.isBefore(today))) {strdate="Вчера, ";}
-if ((date.isAfter(today))&&(date.isBefore(tomorrow))) {strdate="";}
-if ((date.isAfter(tomorrow))&&(date.isBefore(tomorrow2))) {strdate="Завтра, ";}
-if ((date.isAfter(tomorrow2))&&(date.isBefore(tomorrow3))) {strdate="Послезавтра, ";}
-if (strdate==null) {strdate = _twoDigits(date.day)+"."+_twoDigits(date.month)+" ";}
-
-return strdate+date.hour.toString()+":"+_twoDigits(date.minute);
-
-}
-
-
-Widget oneTask(DbSynch cfg, BuildContext context, DateTime dobefore, int servstatus, int routepriority, int task_id, String code, String address) {
+Widget oneTask(DbSynch cfg, BuildContext context, DateTime dobefore, int servstatus, int routepriority, int taskId, String code, String address) {
 var bcolor;
 var tcolor;
 
@@ -58,7 +29,7 @@ else
 return new GestureDetector(
            onTap: () async
            {
-              cfg.cur_task = task_id;
+              cfg.curTask = taskId;
               await Navigator.of(context).pushNamed(taskSubpageRoute);
            },
            child: new Container(
@@ -120,7 +91,7 @@ return new GestureDetector(
          );
 }
 
-//updateDefect(int task_id, int defect_id, bool status)
+//updateDefect(int taskId, int defect_id, bool status)
 //Возможно следует переименовать
 class MyCheckBox extends StatefulWidget {
   MyCheckBox({Key key, this.cfg, this.defectid, this.status}) : super(key: key);
@@ -152,7 +123,7 @@ class _MyCheckBoxState extends State<MyCheckBox> {
     return new Checkbox(
       value: status,
       onChanged: (bool value) {
-        cfg.updateDefect(cfg.cur_task, defectid, value).then((v){setState((){status = value;});});
+        cfg.updateDefect(cfg.curTask, defectid, value).then((v){setState((){status = value;});});
       }
     );
   }
@@ -329,8 +300,8 @@ class _TaskSubpageState extends State<TaskSubpage> {
   @override
   void initState() {
     super.initState();
-    print(cfg.cur_task);
-    cfg.getOneTask(cfg.cur_task).then((List<Map> list){
+    print(cfg.curTask);
+    cfg.getOneTask(cfg.curTask).then((List<Map> list){
       for (var r in list) { //сделать без цикла
         repaircnt = r["repaircnt"];
         defectcnt = r["defectcnt"];
@@ -351,7 +322,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
               children:
 
               [
-              new Text("здесь будет карточка задачи: "+cfg.cur_task.toString()),
+              new Text("здесь будет карточка задачи: "+cfg.curTask.toString()),
 
                new GestureDetector(
                          onTap: () async
@@ -413,7 +384,7 @@ class _TaskDefectsSubpageState extends State<TaskDefectsSubpage> {
   @override
   void initState() {
     super.initState();
-    cfg.getDefects(cfg.cur_task).then((List<Map> list){
+    cfg.getDefects(cfg.curTask).then((List<Map> list){
       setState((){
         _defects = list;
       });

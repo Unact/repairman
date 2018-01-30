@@ -17,6 +17,32 @@ const String taskRepairsSubpageRoute = "/tasks/one/repairs";
 
 final dateFormat = new DateFormat("HH:mm dd.MM.yy") ;
 
+String fmtSrok(DateTime date) {
+
+  String _twoDigits(int n) {
+    if (n >= 10) return "$n";
+    return "0$n";
+  }
+
+  DateTime today = new DateTime(new DateTime.now().year, new DateTime.now().month, new DateTime.now().day);
+  DateTime yesterday = today.subtract(new Duration(days:1));
+  DateTime yesterday2 = today.subtract(new Duration(days:2));
+  DateTime tomorrow = today.add(new Duration(days:1));
+  DateTime tomorrow2 = today.add(new Duration(days:2));
+  DateTime tomorrow3 = today.add(new Duration(days:3));
+  String strdate;
+
+  if ((date.isAfter(yesterday2))&&(date.isBefore(yesterday))) {strdate="Позавчера, ";}
+  if ((date.isAfter(yesterday))&&(date.isBefore(today))) {strdate="Вчера, ";}
+  if ((date.isAfter(today))&&(date.isBefore(tomorrow))) {strdate="";}
+  if ((date.isAfter(tomorrow))&&(date.isBefore(tomorrow2))) {strdate="Завтра, ";}
+  if ((date.isAfter(tomorrow2))&&(date.isBefore(tomorrow3))) {strdate="Послезавтра, ";}
+  if (strdate==null) {strdate = _twoDigits(date.day)+"."+_twoDigits(date.month)+" ";}
+
+  return strdate+date.hour.toString()+":"+_twoDigits(date.minute);
+
+}
+
 class DbSynch {
   Database db;
   String login;
@@ -28,7 +54,7 @@ class DbSynch {
   String clientName="";
   int closed=0;
 
-  int cur_task; //Непонятно насколько адекватный способ организации рутинга
+  int curTask; //Непонятно насколько адекватный способ организации рутинга
 
   Future<Database> initDB() async {
     String dir = (await getApplicationDocumentsDirectory()).path;
@@ -505,7 +531,7 @@ Future<List<Map>> getTerminalTasks() async {
       routepriority
    from
       task
-  where 
+  where
       terminal = $dbTerminalId
    order by servstatus, routepriority DESC, dobefore
   """);
@@ -513,7 +539,7 @@ Future<List<Map>> getTerminalTasks() async {
 }
 
 //Нужно отобрать весь справочник дефектов, передав status=1 там, где была вставлена запись.. гм.. оч понятно =)
-Future<List<Map>> getDefects(int taskid) async {
+Future<List<Map>> getDefects(int taskId) async {
   List<Map> list;
 
   //СОРТИРОВКА?!
@@ -523,7 +549,7 @@ Future<List<Map>> getDefects(int taskid) async {
            defects.name,
            CASE WHEN taskdefectlink.id IS NOT NULL THEN 1 ELSE 0 END status
    from defects
-        left outer join taskdefectlink on taskdefectlink.task_id = $taskid and
+        left outer join taskdefectlink on taskdefectlink.task_id = $taskId and
                                           taskdefectlink.defect_id = defects.id and
                                           taskdefectlink.syncstatus <> -1
   """);
@@ -532,17 +558,17 @@ Future<List<Map>> getDefects(int taskid) async {
   return list;
 }
 
-Future<List<Map>> getOneTask(int taskid) async {
+Future<List<Map>> getOneTask(int taskId) async {
   List<Map> list;
 
   list = await db.rawQuery("""
     select (select count(*)
               from taskdefectlink
-             where taskdefectlink.task_id = $taskid and
+             where taskdefectlink.task_id = $taskId and
                    taskdefectlink.syncstatus <> -1) defectcnt,
            (select count(*)
               from taskrepairlink
-             where taskrepairlink.task_id = $taskid and
+             where taskrepairlink.task_id = $taskId and
                    taskrepairlink.syncstatus <> -1) repaircnt
   """);
 
@@ -554,15 +580,15 @@ Future<List<Map>> getOneTask(int taskid) async {
 //DateTime ts = DateTime.parse(list[0]['mts']).add(new Duration(hours: 3));
 
 //Как-то стремно в целом выглядит вся эта процедура О_О
-Future<String> updateDefect(int task_id, int defect_id, bool status) async {
+Future<String> updateDefect(int taskId, int defectId, bool status) async {
 int id;
 int syncstatus;
 //Возможно стоит сделать проверку на странное сочетание статусов,
 //типа поставить 1 когда уже стоит 1
 
-print("updateDefect. task_id=$task_id  defect_id=$defect_id  newstatus = $status");
+print("updateDefect. task_id=$taskId  defect_id=$defectId  newstatus = $status");
 
-List<Map> list = await db.rawQuery("SELECT id, syncstatus FROM taskdefectlink WHERE task_id = $task_id and defect_id = $defect_id");
+List<Map> list = await db.rawQuery("SELECT id, syncstatus FROM taskdefectlink WHERE task_id = $taskId and defect_id = $defectId");
 print("Лок. запись: id = $id  syncstatus = $syncstatus");
   if (list.length > 0) {
     id = list[0]['id'];
@@ -571,7 +597,7 @@ print("Лок. запись: id = $id  syncstatus = $syncstatus");
   if (status == true) {
     if (syncstatus==null) {
       print("  <1> вставляем в # с сюнкстатусом 1");
-      await db.execute("insert into taskdefectlink (task_id, defect_id, syncstatus) select $task_id, $defect_id, 1");
+      await db.execute("insert into taskdefectlink (task_id, defect_id, syncstatus) select $taskId, $defectId, 1");
     } else {
       print("  <2> апдейтим в # на сюнкстатус 0");
       await db.execute("update taskdefectlink set syncstatus = 0 where id = $id");
@@ -591,7 +617,7 @@ print("Лок. запись: id = $id  syncstatus = $syncstatus");
 
 
 Future<String> synchDB() async {
-  var response;
+  //var response;
   List<Map> taskdefectlink;
   List<Map> info;
 
@@ -603,7 +629,7 @@ Future<String> synchDB() async {
   try {
     print("url = $url");
     print("RApi client_id=$clientId,token=$token");
-    response = await httpClient.post(url,
+    /*response =*/ await httpClient.post(url,
       headers: {"Authorization": "RApi client_id=$clientId,token=$token",
                 "Accept": "application/json", "Content-Type": "application/json"},
       body: JSON.encode({"taskdefectlink": taskdefectlink, "info": info})

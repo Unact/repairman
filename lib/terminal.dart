@@ -93,7 +93,7 @@ class _TerminalPageState extends State<TerminalPage> {
                 new Expanded(
                   flex: 50,
                   child: new Text(
-                    dateFormat.format(_lastActivityTime),
+                    fmtSrok(_lastActivityTime),
                     textAlign: TextAlign.start
                   )
                 )
@@ -117,7 +117,7 @@ class _TerminalPageState extends State<TerminalPage> {
                 new Expanded(
                   flex: 50,
                   child: new Text(
-                    dateFormat.format(_lastPaymentTime),
+                    fmtSrok(_lastPaymentTime),
                     textAlign: TextAlign.start
                   )
                 )
@@ -143,7 +143,64 @@ class _TerminalPageState extends State<TerminalPage> {
               )
             )
           ], _tasks.map((var a) {
-            return new Text(a["terminalbreakname"]);
+
+            var bcolor;
+
+            if (a["servstatus"] == 1)
+              bcolor = Colors.grey;
+            else
+              switch (a["routepriority"]) {
+                case 3:
+                  bcolor = Colors.red;
+                  break;
+                case 2:
+                  bcolor = Colors.yellow;
+                  break;
+                case 1:
+                  bcolor = Colors.green;
+                  break;
+                case 0:
+                  bcolor = Colors.white;
+              }
+
+            return
+              new GestureDetector(
+              onTap: () async {
+                  cfg.curTask = a["id"];
+                  await Navigator.of(context).pushNamed(taskSubpageRoute);
+              },
+              child: new Column(
+              children: [
+                new Container(
+                  color: bcolor,
+                  height: 32.0,
+                  child: new Row(
+                    children: [
+                      new Expanded(
+                        flex: 2,
+                        child: new Text("${a["routepriority"]}", textAlign: TextAlign.end)
+                      ),
+                      new Expanded(
+                        flex: 1,
+                        child: new Text(":")
+                      ),
+                      new Expanded(
+                        flex: 20,
+                        child: new Text(a["terminalbreakname"])
+                      ),
+                      new Expanded(
+                        flex: 10,
+                        child: new Text(fmtSrok(DateTime.parse(a["dobefore"])),
+                          textAlign: TextAlign.end,
+                          style: new TextStyle(color: Colors.blue)
+                        )
+                      ),
+                    ]
+                  )
+                ),
+                new Divider(),
+              ]
+            ));
           }).toList()].expand((x) => x).toList()
         )
       )
