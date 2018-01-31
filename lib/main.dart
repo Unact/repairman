@@ -5,9 +5,6 @@ import 'terminals.dart';
 import 'terminal.dart';
 import 'auth.dart';
 import 'package:sqflite/sqflite.dart';
-import 'dart:async';
-import 'package:flutter/services.dart';
-import 'package:location/location.dart';
 
 void main() => runApp(new MyApp());
 
@@ -35,7 +32,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      title: 'Репейрмэн',
+      title: 'Семен',
       theme: new ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -63,26 +60,15 @@ bool sendingConnect = false;
 bool sendingPwd = false;
 bool loading = false;
 
-Map<String,double> _currentLocation;
-//StreamSubscription<Map<String,double>> _locationSubscription;
-Location _location = new Location();
-
 @override
 void initState() {
   super.initState();
-  initPlatformState();
-  //  _locationSubscription =
-        _location.onLocationChanged.listen((Map<String,double> result) {
-          setState(() {
-            _currentLocation = result;
-            //print ("_currentLocation = $_currentLocation");
-            //latitude: 37.34332805, longitude: -122.09343444, accuracy: 5.0, altitude: 0.0
-          });
-        });
+
   loading = true;
   cfg.initDB().then((Database db){
     print('Connected to db!');
-
+    cfg.getGeo();
+    cfg.saveGeo();
 //Это нужно, но не в таком виде
 /*
     if (cfg.login == null || cfg.login == '' ||
@@ -90,34 +76,10 @@ void initState() {
       _currentIndex = 1;
     }
 */
-
-
   });
 
 }
 
-// Platform messages are asynchronous, so we initialize in an async method.
-initPlatformState() async {
-  Map<String,double> location;
-  // Platform messages may fail, so we use a try/catch PlatformException.
-
-
-  try {
-    location = await _location.getLocation;
-  } on PlatformException {
-    location = null;
-  }
-
-  // If the widget was removed from the tree while the asynchronous platform
-  // message was in flight, we want to discard the reply rather than calling
-  // setState to update our non-existent appearance.
-  if (!mounted)
-    return;
-
-  setState(() {
-    _currentLocation = location;
-  });
-}
 
   @override
   Widget build(BuildContext context) {
@@ -147,9 +109,6 @@ initPlatformState() async {
   final Widget mainPage = new ListView(
   shrinkWrap: true,
   children: <Widget>[
-
-    _currentLocation == null ? new Text("") : new Text("Geo ${_currentLocation["latitude"]},${_currentLocation["longitude"]}"),
-
     new Container(
       height: 20.0,
       child: new Text("Задачи"),

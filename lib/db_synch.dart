@@ -4,6 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:location/location.dart';
 
 //следует получше понеймить роуты
 const String taskPageRoute = "/tasks";
@@ -53,8 +54,35 @@ class DbSynch {
   int dbTerminalId=0;
   String clientName="";
   int closed=0;
+  Location location = new Location();
+  //StreamSubscription<Map<String,double>> _locationSubscription;
 
-  int curTask; //Непонятно насколько адекватный способ организации рутинга
+  int curTask;
+
+  Future<Null> saveGeo() async {
+    try {
+      print("saved!");
+    } catch(exception) {
+      print("Ошибка! $exception");
+    }
+
+    new Timer(const Duration(minutes: 1), saveGeo);
+    return;
+  }
+
+  Future<Null> getGeo() async {
+    Map<String,double> myLocation;
+    DateTime dt = new DateTime.now();
+    try {
+      myLocation = await location.getLocation;
+      print("Ka $myLocation $dt");
+    } catch(exception) {
+      print("Ошибка! $exception");
+    }
+
+    new Timer(const Duration(seconds: 10), getGeo);
+    return;
+  }
 
   Future<Database> initDB() async {
     String dir = (await getApplicationDocumentsDirectory()).path;
