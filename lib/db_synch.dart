@@ -20,6 +20,7 @@ const String taskRepairsSubpageRoute = "/tasks/one/repairs";
 final dateFormat = new DateFormat("HH:mm dd.MM.yy") ;
 final numFormat = new NumberFormat("#,##0.00", "ru_RU");
 
+
 String fmtSrok(DateTime date) {
 
   String _twoDigits(int n) {
@@ -27,22 +28,28 @@ String fmtSrok(DateTime date) {
     return "0$n";
   }
 
-  DateTime today = new DateTime(new DateTime.now().year, new DateTime.now().month, new DateTime.now().day);
-  DateTime yesterday = today.subtract(new Duration(days:1));
-  DateTime yesterday2 = today.subtract(new Duration(days:2));
-  DateTime tomorrow = today.add(new Duration(days:1));
-  DateTime tomorrow2 = today.add(new Duration(days:2));
-  DateTime tomorrow3 = today.add(new Duration(days:3));
-  String strdate;
+  if (date==null) {
+    return "";
+  }
+  else
+  {
+    DateTime today = new DateTime(new DateTime.now().year, new DateTime.now().month, new DateTime.now().day);
+    DateTime yesterday = today.subtract(new Duration(days:1));
+    DateTime yesterday2 = today.subtract(new Duration(days:2));
+    DateTime tomorrow = today.add(new Duration(days:1));
+    DateTime tomorrow2 = today.add(new Duration(days:2));
+    DateTime tomorrow3 = today.add(new Duration(days:3));
+    String strdate;
 
-  if ((date.isAfter(yesterday2))&&(date.isBefore(yesterday))) {strdate="Позавчера, ";}
-  if ((date.isAfter(yesterday))&&(date.isBefore(today))) {strdate="Вчера, ";}
-  if ((date.isAfter(today))&&(date.isBefore(tomorrow))) {strdate="";}
-  if ((date.isAfter(tomorrow))&&(date.isBefore(tomorrow2))) {strdate="Завтра, ";}
-  if ((date.isAfter(tomorrow2))&&(date.isBefore(tomorrow3))) {strdate="Послезавтра, ";}
-  if (strdate==null) {strdate = _twoDigits(date.day)+"."+_twoDigits(date.month)+" ";}
+    if ((date.isAfter(yesterday2))&&(date.isBefore(yesterday))) {strdate="Позавчера, ";}
+    if ((date.isAfter(yesterday))&&(date.isBefore(today))) {strdate="Вчера, ";}
+    if ((date.isAfter(today))&&(date.isBefore(tomorrow))) {strdate="";}
+    if ((date.isAfter(tomorrow))&&(date.isBefore(tomorrow2))) {strdate="Завтра, ";}
+    if ((date.isAfter(tomorrow2))&&(date.isBefore(tomorrow3))) {strdate="Послезавтра, ";}
+    if (strdate==null) {strdate = _twoDigits(date.day)+"."+_twoDigits(date.month)+" ";}
 
-  return strdate+date.hour.toString()+":"+_twoDigits(date.minute);
+    return strdate+date.hour.toString()+":"+_twoDigits(date.minute);
+  }
 
 }
 
@@ -490,7 +497,7 @@ Future<List<Map>> getTasks() async {
       terminal.code,
       terminal.address
    from task
-        left outer join terminal on terminal.xid = task.terminalxid
+        left outer join terminal on terminal.id = task.terminal
    order by servstatus, routepriority DESC, dobefore
   """);
   //Еще нужна сортировка по tt.code
@@ -601,12 +608,20 @@ Future<List<Map>> getOneTask(int taskId) async {
   list = await db.rawQuery("""
     select (select count(*)
               from taskdefectlink
-             where taskdefectlink.task_id = $taskId and
+             where taskdefectlink.task_id = task.id and
                    taskdefectlink.syncstatus <> -1) defectcnt,
            (select count(*)
               from taskrepairlink
-             where taskrepairlink.task_id = $taskId and
-                   taskrepairlink.syncstatus <> -1) repaircnt
+             where taskrepairlink.task_id = task.id and
+                   taskrepairlink.syncstatus <> -1) repaircnt,
+           task.terminalbreakname terminalbreakname,
+           terminal.code code,
+           task.dobefore dobefore,
+           task.servstatus servstatus,
+           task.routepriority routepriority
+      from task
+           left outer join terminal on terminal.id = task.terminal
+     where task.id = $taskId
   """);
 
   return list;
