@@ -5,6 +5,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
+import 'package:great_circle_distance/great_circle_distance.dart';
 
 //следует получше понеймить роуты
 const String taskPageRoute = "/tasks";
@@ -17,6 +18,7 @@ const String taskDefectsSubpageRoute = "/tasks/one/defects";
 const String taskRepairsSubpageRoute = "/tasks/one/repairs";
 
 final dateFormat = new DateFormat("HH:mm dd.MM.yy") ;
+final numFormat = new NumberFormat("#,##0.00", "ru_RU");
 
 String fmtSrok(DateTime date) {
 
@@ -83,7 +85,7 @@ class DbSynch {
       print("Ошибка! $exception");
     }
 
-    new Timer(const Duration(seconds: 30), getGeo);
+    new Timer(const Duration(seconds: 15), getGeo);
     return;
   }
 
@@ -609,6 +611,39 @@ Future<List<Map>> getOneTask(int taskId) async {
 
   return list;
 
+}
+
+Future<double> getDistance() async {
+  double distance = 0.0;
+  double lat1 = 0.0;
+  double lon1 = 0.0;
+
+  double lat2 = 0.0;
+  double lon2 = 0.0;
+
+  List<Map> ld = await db.rawQuery("select value from info where name = 'distance'");
+  if (ld.length > 0) {
+    distance = double.parse(ld[0]['value']);
+  }
+
+  List<Map> list = await db.rawQuery("select latitude, longitude from location order by ts");
+  int i = 0;
+  for(Map r in list) {
+    if (i > 0) {
+      lat1 = lat2;
+      lon1 = lon2;
+      lat2 = r["latitude"];
+      lon2 = r["longitude"];
+      distance += new GreatCircleDistance.fromDegrees(
+            latitude1: lat1, longitude1: lon1, latitude2: lat2, longitude2: lon2).haversineDistance() / 1000.0;
+    }
+    else {
+      lat2 = r["latitude"];
+      lon2 = r["longitude"];
+    }
+    i++;
+  }
+  return distance;
 }
 
 //List<Map> list = await widget.cfg.database.rawQuery("SELECT MAX(ts) mts FROM schedule_requests");

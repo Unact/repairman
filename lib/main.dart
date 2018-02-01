@@ -5,6 +5,7 @@ import 'terminals.dart';
 import 'terminal.dart';
 import 'auth.dart';
 import 'package:sqflite/sqflite.dart';
+import 'dart:async';
 
 void main() => runApp(new MyApp());
 
@@ -61,6 +62,17 @@ class _MyHomePageState extends State<MyHomePage> {
   bool loading = false;
   double _distance = 0.0;
 
+  void refreshDistance(){
+    DateTime dt = new DateTime.now();
+    print("test $dt");
+    cfg.getDistance().then((double res) {
+      setState((){
+        _distance = res;
+      });
+    });
+    new Timer(const Duration(seconds: 10), refreshDistance);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -70,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print('Connected to db!');
       cfg.getGeo();
       cfg.saveGeo();
+      refreshDistance();
   //Это нужно, но не в таком виде
   /*
       if (cfg.login == null || cfg.login == '' ||
@@ -153,11 +166,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           new Expanded(
             flex: 10,
-            child: new Text("$_distance", textAlign: TextAlign.end)
+            child: new Text("${numFormat.format(_distance)}", textAlign: TextAlign.end)
           ),
           new Expanded(
             flex: 2,
-            child: new Text("км")
+            child: new Text(" км")
           )
         ]
       ),
