@@ -55,13 +55,12 @@ class DbSynch {
   String clientName="";
   int closed=0;
   Location location = new Location();
-  //StreamSubscription<Map<String,double>> _locationSubscription;
 
   int curTask;
 
   Future<Null> saveGeo() async {
     try {
-      print("saved!");
+      //print("saved!");
     } catch(exception) {
       print("Ошибка! $exception");
     }
@@ -72,15 +71,19 @@ class DbSynch {
 
   Future<Null> getGeo() async {
     Map<String,double> myLocation;
-    DateTime dt = new DateTime.now();
     try {
       myLocation = await location.getLocation;
-      print("Ka $myLocation $dt");
+      await db.insert("location", {
+        "latitude": myLocation["latitude"],
+        "longitude": myLocation["longitude"],
+        "accuracy": myLocation["accuracy"],
+        "altitude": myLocation["altitude"]
+      });
     } catch(exception) {
       print("Ошибка! $exception");
     }
 
-    new Timer(const Duration(seconds: 10), getGeo);
+    new Timer(const Duration(seconds: 30), getGeo);
     return;
   }
 
@@ -157,10 +160,6 @@ class DbSynch {
             )"""
           );
 
-
-
-
-
           await d.execute("""
             CREATE TABLE componentgroup(
               id INTEGER PRIMARY KEY,
@@ -169,8 +168,6 @@ class DbSynch {
               isManualReplacement INT
             )"""
           );
-
-
 
           await d.execute("""
             CREATE TABLE repairs(
@@ -204,12 +201,22 @@ class DbSynch {
             )"""
           );
 
+          await d.execute("""
+            CREATE TABLE location(
+              latitude  DECIMAL(18,10),
+              longitude DECIMAL(18,10),
+              accuracy  DECIMAL(18,10),
+              altitude  DECIMAL(18,10),
+              ts        DATETIME DEFAULT CURRENT_TIMESTAMP
+            )"""
+          );
 
           await d.insert("info", {"name":"server", "value":"http://localhost:3000/api/v1/"});
           await d.insert("info", {"name":"client_id", "value":"repairman"});
           await d.insert("info", {"name":"login"});
           await d.insert("info", {"name":"password"});
           await d.insert("info", {"name":"token"});
+          await d.insert("info", {"name":"distance", "value": "0"});
         },
         onUpgrade: (Database database, int oldVersion, int newVersion) async {
           isUpgrage = true;
