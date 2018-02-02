@@ -319,6 +319,8 @@ class _TaskSubpageState extends State<TaskSubpage> {
   var tcolor;
   var dvcolor = Colors.brown;
   var btnfontsize = 16.0;
+  double _latitude = 55.754226;
+  double _longitude = 37.617582;
 
   @override
   void initState() {
@@ -338,6 +340,9 @@ class _TaskSubpageState extends State<TaskSubpage> {
         colors = taskColors(servstatus, routepriority);
         tcolor = colors["tcolor"];
         bcolor = colors["bcolor"];
+        _latitude=r["latitude"];
+        _longitude=r["longitude"];
+        cfg.curComment = r["comm"];
       } });
    }
 
@@ -349,11 +354,41 @@ class _TaskSubpageState extends State<TaskSubpage> {
 
   @override
   Widget build(BuildContext context) {
+    Widget addCommBtn;
+
+    if (cfg.curComment == "")
+    {
+    addCommBtn = new GestureDetector(
+              onTap: () async
+              {
+
+                 await Navigator.of(context).pushNamed(taskSubpageRouteComment);
+              },
+              child:
+                    new Text("Добавить комментарий", textAlign: TextAlign.center,  style: new TextStyle(color: Colors.blue, fontSize: btnfontsize))
+            );
+
+    } else {
+
+      addCommBtn = new GestureDetector(
+                onTap: () async
+                {
+
+                   await Navigator.of(context).pushNamed(taskSubpageRouteComment);
+                },
+                child:
+                      new Text(cfg.curComment, textAlign: TextAlign.left, style: new TextStyle(fontSize: btnfontsize))
+              );
+
+    }
+
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(terminalcode+" "+terminalbreakname)
       ),
-      body: new Column(
+      body: new ListView(
+      shrinkWrap: true,
+      children: [new Column(
               children:
 
               [
@@ -454,15 +489,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
                              height: 48.0,
                              child:
                   new Row(
-                  children: [new Expanded(child: new GestureDetector(
-                            onTap: () async
-                            {
-
-                               await Navigator.of(context).pushNamed(taskDefectsSubpageRoute);
-                            },
-                            child:
-                                  new Text("Добавить комментарий", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
-                          ))])
+                  children: [new Expanded(child: addCommBtn)])
                ),
                new Container(color: dvcolor, height: 12.0),
                new Container(
@@ -496,6 +523,13 @@ class _TaskSubpageState extends State<TaskSubpage> {
                                   new Text("[инфа терминала]", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
                           ))])
                ),
+               new GestureDetector(
+                          onTap: () async
+                          {
+                            // _launchURL();
+                          },
+                          child: new Image.network('https://static-maps.yandex.ru/1.x/?ll=$_longitude,$_latitude&size=250,200&z=15&l=map&pt=$_longitude,$_latitude,pm2gnm', fit: BoxFit.cover),
+               ),
 
 
 
@@ -506,7 +540,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
 
 
             ]
-            )
+          )])
         );
 
   }
@@ -571,6 +605,56 @@ class _TaskDefectsSubpageState extends State<TaskDefectsSubpage> {
 
 
 }
+
+
+
+//Страница "Комментарий"
+class TaskCommentSubpage extends StatefulWidget {
+  TaskCommentSubpage({Key key, this.cfg}) : super(key: key);
+  final DbSynch cfg;
+  @override
+  _TaskCommentSubpageState createState() => new _TaskCommentSubpageState(cfg: cfg);
+}
+
+class _TaskCommentSubpageState extends State<TaskCommentSubpage> {
+  _TaskCommentSubpageState({this.cfg});
+  DbSynch cfg;
+
+  final TextEditingController _ctlComment = new TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _ctlComment.text = cfg.curComment;
+    _ctlComment.addListener(() {
+      cfg.updateComment(_ctlComment.text);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+
+
+
+
+
+
+
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("")
+      ),
+      body: new TextField(
+                 controller: _ctlComment
+                ),
+    );
+
+  }
+
+
+}
+
 
 
 

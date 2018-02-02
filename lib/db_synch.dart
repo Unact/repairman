@@ -11,6 +11,7 @@ import 'package:great_circle_distance/great_circle_distance.dart';
 const String taskPageRoute = "/tasks";
 const String terminalsPageRoute = "/terminals";
 const String taskSubpageRoute = "/tasks/one";
+const String taskSubpageRouteComment = "/tasks/one/comment";
 const String cgroupPageRoute = "/cgroup";
 const String terminalPageRoute = "/terminal";
 
@@ -66,6 +67,7 @@ class DbSynch {
   Location location = new Location();
 
   int curTask;
+  String curComment="";
 
   Future<Null> saveGeo() async {
     List<Map> locations;
@@ -171,6 +173,7 @@ class DbSynch {
               terminalbreakname TEXT,
               routepriority INTEGER,
               terminalxid TEXT,
+              comment TEXT,
               ts DATETIME DEFAULT CURRENT_TIMESTAMP
             )"""
           );
@@ -319,6 +322,11 @@ class DbSynch {
     await db.execute("UPDATE info SET value = '$server' WHERE name = 'server'");
   }
 
+  Future<Null> updateComment(String s) async {
+    await db.execute("UPDATE task SET comment = '$s' WHERE id = $curTask");
+    curComment = s;
+  }
+
 
   Future<String> makeConnection() async {
     var httpClient = createHttpClient();
@@ -426,14 +434,15 @@ Future<String> fillDB() async {
 
   for (var tasks in data["tasks"]) {
     await db.execute("""
-      INSERT INTO task (id, servstatus, dobefore, terminalbreakname, routepriority, terminal, terminalxid)
+      INSERT INTO task (id, servstatus, dobefore, terminalbreakname, routepriority, terminal, terminalxid, comment)
       VALUES(${tasks["id"]},
              ${tasks["servstatus"]},
              '${tasks["dobefore"]}',
              '${tasks["terminal_break_name"]}',
              '${tasks["route_priority"]}',
              '${tasks["terminal"]}',
-             '${tasks["terminal_xid"]}')
+             '${tasks["terminal_xid"]}',
+             '${tasks["comm"]}')
     """);
   }
 
@@ -665,7 +674,14 @@ Future<List<Map>> getOneTask(int taskId) async {
            terminal.code code,
            task.dobefore dobefore,
            task.servstatus servstatus,
+<<<<<<< Updated upstream
            task.routepriority routepriority
+=======
+           task.routepriority routepriority,
+           terminal.latitude latitude,
+           terminal.longitude longitude,
+           task.comment comm
+>>>>>>> Stashed changes
       from task
            left outer join terminal on terminal.id = task.terminal
      where task.id = $taskId

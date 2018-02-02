@@ -26,6 +26,7 @@ class _MyAppState extends State<MyApp> {
           taskSubpageRoute: (BuildContext context) => new TaskSubpage(cfg: cfg),
           cgroupPageRoute: (BuildContext context) => new CGroupPage(cfg: cfg),
           taskDefectsSubpageRoute: (BuildContext context) => new TaskDefectsSubpage(cfg: cfg),
+          taskSubpageRouteComment: (BuildContext context) => new TaskCommentSubpage(cfg: cfg),
           terminalPageRoute: (BuildContext context) => new TerminalPage(cfg: cfg),
     };
   }
