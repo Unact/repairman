@@ -674,14 +674,10 @@ Future<List<Map>> getOneTask(int taskId) async {
            terminal.code code,
            task.dobefore dobefore,
            task.servstatus servstatus,
-<<<<<<< Updated upstream
-           task.routepriority routepriority
-=======
            task.routepriority routepriority,
            terminal.latitude latitude,
            terminal.longitude longitude,
            task.comment comm
->>>>>>> Stashed changes
       from task
            left outer join terminal on terminal.id = task.terminal
      where task.id = $taskId
