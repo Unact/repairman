@@ -57,7 +57,7 @@ class DbSynch {
   Database db;
   String login;
   String password;
-  String clientId;
+  String clientId = "repairman";
   String server;
   String token;
   int dbTerminalId=0;
@@ -68,13 +68,56 @@ class DbSynch {
   int curTask;
 
   Future<Null> saveGeo() async {
+    List<Map> locations;
+    var response;
+    var data;
+    bool isError = false;
     try {
-      //print("saved!");
+      locations = await db.rawQuery("select latitude, longitude, accuracy, altitude, ts from location");
+      if (token==null) {
+        String s = (await makeConnection());
+        if (s != null) {
+          print("Connection error! $s");
+          isError = true;
+        }
+      }
+      if (!isError) {
+        var httpClient = createHttpClient();
+        String url = server + "repairman/locations";
+        try {
+          response = await httpClient.post(url,
+            headers: {"Authorization": "RApi client_id=$clientId,token=$token",
+                      "Accept": "application/json", "Content-Type": "application/json"},
+            body: JSON.encode(locations)
+          );
+        } catch(exception) {
+          print('Сервер $server недоступен!\n$exception');
+          isError = true;
+        }
+      }
+      if (!isError) {
+        try {
+          data = JSON.decode(response.body);
+          if (data["error"] != null) {
+              print(data["error"]);
+              isError = true;
+          }
+        } catch(exception) {
+          print('Ответ сервера: ${response.body}\n$exception');
+          isError = true;
+        }
+      }
+      if (!isError) {
+        print("Ok Save!");
+        double distance = await getDistance();
+        await db.execute("UPDATE info SET value = $distance WHERE name = 'distance'");
+        await db.execute("DELETE FROM location WHERE ts < (SELECT max(ts) FROM location)");
+      }
     } catch(exception) {
       print("Ошибка! $exception");
     }
 
-    new Timer(const Duration(minutes: 1), saveGeo);
+    new Timer(const Duration(minutes: 2), saveGeo);
     return;
   }
 
@@ -92,7 +135,7 @@ class DbSynch {
       print("Ошибка! $exception");
     }
 
-    new Timer(const Duration(seconds: 15), getGeo);
+    new Timer(const Duration(seconds: 30), getGeo);
     return;
   }
 
@@ -101,6 +144,10 @@ class DbSynch {
     String path = "$dir/repairman_db.db";
     print ("$path");
     bool isUpgrage;
+
+    location.onLocationChanged.listen((Map<String,double> result) {
+    });
+
     do {
       isUpgrage = false;
       // open the database
@@ -221,7 +268,7 @@ class DbSynch {
           );
 
           await d.insert("info", {"name":"server", "value":"http://localhost:3000/api/v1/"});
-          await d.insert("info", {"name":"client_id", "value":"repairman"});
+          await d.insert("info", {"name":"client_id", "value":clientId});
           await d.insert("info", {"name":"login"});
           await d.insert("info", {"name":"password"});
           await d.insert("info", {"name":"token"});

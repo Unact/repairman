@@ -63,8 +63,6 @@ class _MyHomePageState extends State<MyHomePage> {
   double _distance = 0.0;
 
   void refreshDistance(){
-    DateTime dt = new DateTime.now();
-    print("test $dt");
     cfg.getDistance().then((double res) {
       setState((){
         _distance = res;
