@@ -12,7 +12,8 @@ const String taskPageRoute = "/tasks";
 const String terminalsPageRoute = "/terminals";
 const String taskSubpageRoute = "/tasks/one";
 const String taskSubpageRouteComment = "/tasks/one/comment";
-const String cgroupPageRoute = "/cgroup";
+const String taskSubpageCgroupRoute = "/tasks/one/cgroup";
+const String taskSubpageComponentRoute = "/tasks/one/cgroup/component";
 const String terminalPageRoute = "/terminal";
 
 const String taskDefectsSubpageRoute = "/tasks/one/defects";
@@ -67,6 +68,7 @@ class DbSynch {
   Location location = new Location();
 
   int curTask;
+  int curComponent;
   String curComment="";
 
   Future<Null> saveGeo() async {
@@ -174,6 +176,7 @@ class DbSynch {
               routepriority INTEGER,
               terminalxid TEXT,
               comment TEXT,
+              updcommentflag INTEGER DEFAULT 0,
               ts DATETIME DEFAULT CURRENT_TIMESTAMP
             )"""
           );
@@ -216,6 +219,16 @@ class DbSynch {
               terminalxid TEXT,
               isBroken INT,
               id INT
+            )"""
+          );
+
+          await d.execute("""
+            CREATE TABLE terminalcomponent(
+              terminalid INT,
+              componentid INT,
+              componentgroupxid TEXT,
+              short_name TEXT,
+              serial TEXT
             )"""
           );
 
@@ -323,7 +336,7 @@ class DbSynch {
   }
 
   Future<Null> updateComment(String s) async {
-    await db.execute("UPDATE task SET comment = '$s' WHERE id = $curTask");
+    await db.execute("UPDATE task SET updcommentflag = 1, comment = '$s' WHERE id = $curTask");
     curComment = s;
   }
 
@@ -424,6 +437,7 @@ Future<String> fillDB() async {
   await db.execute("DELETE FROM componentgroup");
   await db.execute("DELETE FROM component");
   await db.execute("DELETE FROM taskcomponent");
+  await db.execute("DELETE FROM terminalcomponent");
 
 
   await db.execute("DELETE FROM repairs");
@@ -484,6 +498,16 @@ Future<String> fillDB() async {
     """);
   }
 
+  for (var terminalcomponents in data["terminalcomponents"]) {
+    await db.execute("""
+      INSERT INTO terminalcomponent(terminalid,componentid,componentgroupxid,short_name,serial)
+      VALUES(${terminalcomponents["terminalid"]},
+             ${terminalcomponents["componentid"]},
+             '${terminalcomponents["componentgroupxid"]}',
+             '${terminalcomponents["short_name"]}',
+             '${terminalcomponents["serial"]}')
+    """);
+  }
 
 
   for (var repairs in data["repairs"]) {
@@ -582,7 +606,7 @@ Future<List<Map>> getTerminals() async {
   return list;
 }
 
-Future<List<Map>> getCGroups() async {
+Future<List<Map>> getCGroups(int taskId) async {
   List<Map> list;
   ////not exists (select * from taskcomponent where componentxid = c.xid and coalesce(removed, '0') <> '1') and
   list = await db.rawQuery("""
@@ -592,7 +616,11 @@ Future<List<Map>> getCGroups() async {
            name,
            isManualReplacement,
            (select count(*) from component c
-            where c.componentgroupxid = cg.xid) freeremains
+            where c.componentgroupxid = cg.xid) freeremains,
+           (select count(*)
+              from terminalcomponent tc
+             where tc.componentgroupxid = cg.xid and
+                   tc.terminalid = (select terminal from task where id = $taskId)) preinstcnt
    from componentgroup cg
   where freeremains > 0
   """);
@@ -764,9 +792,11 @@ Future<String> synchDB() async {
   //var response;
   List<Map> taskdefectlink;
   List<Map> info;
+  List<Map> comments;
 
   taskdefectlink = await db.rawQuery("select task_id, defect_id, syncstatus from taskdefectlink where syncstatus <> 0");
   info = await db.rawQuery("select id, name from info");
+  comments = await db.rawQuery("select id, comment from task where updcommentflag = 1");
 
   var httpClient = createHttpClient();
   String url = server + "repairman/save";
@@ -776,7 +806,7 @@ Future<String> synchDB() async {
     /*response =*/ await httpClient.post(url,
       headers: {"Authorization": "RApi client_id=$clientId,token=$token",
                 "Accept": "application/json", "Content-Type": "application/json"},
-      body: JSON.encode({"taskdefectlink": taskdefectlink, "info": info})
+      body: JSON.encode({"taskdefectlink": taskdefectlink, "info": info, "comments": comments})
     );
 
     //После успешного выполнения надо удалить со статусом -1 а статус 1 перебросить на 0

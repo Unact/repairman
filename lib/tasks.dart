@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'db_synch.dart';
+import 'dart:async';
 
 Map taskColors(int servstatus, int routepriority) {
 var bcolor;
@@ -75,28 +76,44 @@ return new GestureDetector(
 }
 
 
-Widget oneCGroup(BuildContext context, String name, int freeremains) {
 
+
+Widget oneCGroup(DbSynch cfg, BuildContext context, String name, int freeremains, int preinstcnt) {
+String scnt="";
+if (preinstcnt>0) {scnt = preinstcnt.toString();}
 
 return new GestureDetector(
            onTap: () async
            {
-              //Здесь будет рутинг
-              //await Navigator.of(context).pushNamed(terminalSubpageRoute);
+              cfg.curComponent = 0;
+              //await Navigator.of(context).pushNamed(taskSubpageComponentRoute);
+              _neverSatisfied(context).then((res){print(res);});
+
            },
            child: new Container(
                 height: 48.0,
-                decoration: const BoxDecoration(
-                  border: const Border(
-                        bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000))
-                )),
+                //decoration: const BoxDecoration(
+                //  border: const Border(
+                //        bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000))
+                //)),
                 child:
-                   new Column(
+                   new Row(
+                    children: [
+                   new Expanded(
+                     flex: 100,
+
+                   child: new Column(
                      children: <Widget>[
-                       new Text(name),
-                       new Text("Остаток: $freeremains", style: new TextStyle(color: Colors.blue))
+                       new Text(name, textAlign: TextAlign.start),
+                       new Text("Остаток: $freeremains", textAlign: TextAlign.start, style: new TextStyle(color: Colors.blue))
                      ]
-                   ),
+                   )),
+
+                   new Expanded(
+                    flex: 10,
+                   child: new Text(scnt, style: new TextStyle(fontSize: 20.0, color: Colors.blue))
+                   )
+                   ]),
                 )
          );
 }
@@ -163,7 +180,6 @@ return new Container(
 }
 
 
-//Возможно следует переименовать
 class CGroupPage extends StatefulWidget {
   CGroupPage({Key key, this.cfg}) : super(key: key);
   final DbSynch cfg;
@@ -180,7 +196,7 @@ class _CGroupPageState extends State<CGroupPage> {
   @override
   void initState() {
     super.initState();
-    cfg.getCGroups().then((List<Map> list){
+    cfg.getCGroups(cfg.curTask).then((List<Map> list){
       setState((){
         _cgroups = list;
       });
@@ -192,7 +208,8 @@ class _CGroupPageState extends State<CGroupPage> {
     cgrouplist = [];
     for (var r in _cgroups) {
 
-      cgrouplist.add(oneCGroup(context,r["name"],r["freeremains"]));
+      cgrouplist.add(oneCGroup(cfg, context,r["name"],r["freeremains"],r["preinstcnt"]));
+      cgrouplist.add(new Divider(height: 1.0));
 
     }
 
@@ -212,6 +229,52 @@ class _CGroupPageState extends State<CGroupPage> {
 
 
 
+class ComponentPage extends StatefulWidget {
+  ComponentPage({Key key, this.cfg}) : super(key: key);
+  final DbSynch cfg;
+  @override
+  _ComponentPageState createState() => new _ComponentPageState(cfg: cfg);
+}
+
+class _ComponentPageState extends State<ComponentPage> {
+  _ComponentPageState({this.cfg});
+  DbSynch cfg;
+  //List<Widget> cgrouplist;
+  //List<Map> _cgroups=[];
+
+  @override
+  void initState() {
+    super.initState();
+    //cfg.getCGroups().then((List<Map> list){
+    //  setState((){
+    //    _cgroups = list;
+    //  });
+    //});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    //cgrouplist = [];
+    //for (var r in _cgroups) {
+    //
+    //  cgrouplist.add(oneCGroup(context,r["name"],r["freeremains"]));
+    //  cgrouplist.add(new Divider(height: 1.0));
+    //
+    //}
+
+
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("Компонент пейдж")
+      ),
+      body: new ListView(
+      shrinkWrap: true,
+      children: [new Text("la la la")],
+    )
+    );
+  }
+
+}
 
 
 
@@ -276,7 +339,7 @@ else
    address = r["address"];}
 
       tasklist.add(oneTask(cfg,context,DateTime.parse(r["dobefore"]),r["servstatus"],r["routepriority"],r["id"],code,address));
-      //tasklist.add(new Divider());
+      tasklist.add(new Divider(height: 1.0));
     }
 
     return new Scaffold(
@@ -461,10 +524,10 @@ class _TaskSubpageState extends State<TaskSubpage> {
                          onTap: () async
                          {
 
-                            await Navigator.of(context).pushNamed(taskDefectsSubpageRoute);
+                            await Navigator.of(context).pushNamed(taskSubpageCgroupRoute);
                          },
                          child:
-                               new Text("ЗИПы", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
+                               new Text("ЗИПы (х)", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
                        ))])
             ),
             new Divider(height: 1.0),
@@ -654,8 +717,3 @@ class _TaskCommentSubpageState extends State<TaskCommentSubpage> {
 
 
 }
-
-
-
-
-////////////////// ЗИПы
