@@ -68,7 +68,7 @@ class DbSynch {
   Location location = new Location();
 
   int curTask;
-  int curComponent;
+  String curCGroup;
   String curComment="";
 
   Future<Null> saveGeo() async {
@@ -269,6 +269,16 @@ class DbSynch {
               id INTEGER PRIMARY KEY DEFAULT AUTO_INCREMENT,
               task_id INTEGER,
               repair_id INTEGER,
+              syncstatus INTEGER DEFAULT 0
+            )"""
+          );
+
+          await d.execute("""
+            CREATE TABLE terminalcomponentlink(
+              id INT PRIMARY KEY DEFAULT AUTO_INCREMENT,
+              comp_id INT,
+              task_id INT,
+              is_removed INT,
               syncstatus INTEGER DEFAULT 0
             )"""
           );
@@ -604,6 +614,27 @@ Future<List<Map>> getTerminals() async {
   """); //Нулл в кавычках - АД. Но пока работает только так.
 //Нет сортировки, какая-то нужна
   return list;
+}
+
+Future<List<Map>> getComponent(int taskId, String cgroupXid) async {
+  List<Map> list;
+
+  list = await db.rawQuery("""
+   select short_name, serial, 1 preinstflag,
+          (select count(1) from terminalcomponentlink tcl where tcl.comp_id = terminalcomponent.componentid and tcl.task_id = $taskId) chflag
+     from terminalcomponent
+    where componentgroupxid = '$cgroupXid' and
+          terminalid = (select terminal from task where id = $taskId)
+union all
+    select short_name, serial, 0 preinstflag,
+           (select count(1) from terminalcomponentlink tcl where tcl.comp_id = component.id and tcl.task_id = $taskId) chflag
+      from component
+     where componentgroupxid = '$cgroupXid'
+order by preinstflag DESC
+  """);
+
+  return list;
+
 }
 
 Future<List<Map>> getCGroups(int taskId) async {

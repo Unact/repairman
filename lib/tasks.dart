@@ -78,16 +78,97 @@ return new GestureDetector(
 
 
 
-Widget oneCGroup(DbSynch cfg, BuildContext context, String name, int freeremains, int preinstcnt) {
+
+Future<bool> confirmChangeComponent(BuildContext context, int chflag, int preinstflag, String shortName, String serial) async {
+String caption;
+
+caption = "test";
+
+  return showDialog<bool>(
+    context: context,
+    barrierDismissible: false, // user must tap button!
+    child: new AlertDialog(
+      title: new Text(caption),
+      content: new SingleChildScrollView(
+        child: new ListBody(
+          children: <Widget>[
+            new Text(shortName),
+            new Text('Серийный номер:'),
+            new Text(serial)
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        new FlatButton(
+          child: new Text('OK'),
+          onPressed: () {
+            Navigator.of(context).pop(true);
+          },
+        ),
+        new FlatButton(
+          child: new Text('Отмена'),
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
+        ),
+      ],
+    ),
+  );
+}
+//////////////
+
+
+
+Widget oneComponent(DbSynch cfg, BuildContext context, String shortName, String serial, int chflag, int preinstflag) {
+
+return new GestureDetector(
+           onTap: () async
+           {
+             confirmChangeComponent(context, chflag, preinstflag, shortName, serial).then((res){
+               if (chflag==0) {
+
+               } else {
+
+               }
+             });
+              //cfg.curCGroup = 0;
+              //await Navigator.of(context).pushNamed(taskSubpageComponentRoute);
+
+
+           },
+           child: new Container(
+                height: 48.0,
+                //decoration: const BoxDecoration(
+                //  border: const Border(
+                //        bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000))
+                //)),
+                child:
+                   new Row(
+                    children: [
+                   new Expanded(
+                   child: new Column(
+                     children: <Widget>[
+                       new Text(shortName, textAlign: TextAlign.start),
+                       new Text(serial, textAlign: TextAlign.start)
+                     ]
+                   ))
+                   ]),
+                )
+         );
+}
+
+
+
+Widget oneCGroup(DbSynch cfg, BuildContext context, String name, int freeremains, int preinstcnt, String cGroupXid) {
 String scnt="";
 if (preinstcnt>0) {scnt = preinstcnt.toString();}
 
 return new GestureDetector(
            onTap: () async
            {
-              cfg.curComponent = 0;
-              //await Navigator.of(context).pushNamed(taskSubpageComponentRoute);
-              _neverSatisfied(context).then((res){print(res);});
+              cfg.curCGroup = cGroupXid;
+              await Navigator.of(context).pushNamed(taskSubpageComponentRoute);
+              //_neverSatisfied(context).then((res){print(res);});
 
            },
            child: new Container(
@@ -208,7 +289,7 @@ class _CGroupPageState extends State<CGroupPage> {
     cgrouplist = [];
     for (var r in _cgroups) {
 
-      cgrouplist.add(oneCGroup(cfg, context,r["name"],r["freeremains"],r["preinstcnt"]));
+      cgrouplist.add(oneCGroup(cfg, context,r["name"],r["freeremains"],r["preinstcnt"],r["xid"]));
       cgrouplist.add(new Divider(height: 1.0));
 
     }
@@ -239,28 +320,45 @@ class ComponentPage extends StatefulWidget {
 class _ComponentPageState extends State<ComponentPage> {
   _ComponentPageState({this.cfg});
   DbSynch cfg;
-  //List<Widget> cgrouplist;
-  //List<Map> _cgroups=[];
+  List<Widget> complist;
+  List<Map> _comps=[];
+  int preinstflag=-1;
 
   @override
   void initState() {
     super.initState();
-    //cfg.getCGroups().then((List<Map> list){
-    //  setState((){
-    //    _cgroups = list;
-    //  });
-    //});
+    cfg.getComponent(cfg.curTask, cfg.curCGroup).then((List<Map> list){
+      setState((){
+        _comps = list;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    //cgrouplist = [];
-    //for (var r in _cgroups) {
-    //
-    //  cgrouplist.add(oneCGroup(context,r["name"],r["freeremains"]));
-    //  cgrouplist.add(new Divider(height: 1.0));
-    //
-    //}
+    complist = [];
+    for (var r in _comps) {
+      if ((preinstflag!=r["preinstflag"])&&(r["preinstflag"]==1)) {
+        preinstflag=1;
+        complist.add(new Container(
+                height: 20.0,
+                child: new Text("Изначально установленные"),
+                color: Colors.grey.shade300,
+              ),);
+      }
+      if ((preinstflag!=r["preinstflag"])&&(r["preinstflag"]==0)) {
+        preinstflag=0;
+        complist.add(new Container(
+                height: 20.0,
+                child: new Text("Ремфонд"),
+                color: Colors.grey.shade300,
+              ),);
+      }
+
+      complist.add(oneComponent(cfg, context,r["short_name"],r["serial"],r["chflag"],r["preinstflag"]));
+      complist.add(new Divider(height: 1.0));
+
+    }
 
 
     return new Scaffold(
@@ -269,7 +367,7 @@ class _ComponentPageState extends State<ComponentPage> {
       ),
       body: new ListView(
       shrinkWrap: true,
-      children: [new Text("la la la")],
+      children: complist,
     )
     );
   }
