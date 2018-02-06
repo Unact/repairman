@@ -79,7 +79,6 @@ return new GestureDetector(
 
 
 
-
 Future<bool> confirmChangeComponent(BuildContext context, int chflag, int preinstflag, String shortName, String serial) async {
 String caption;
 
