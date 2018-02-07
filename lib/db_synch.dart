@@ -779,6 +779,15 @@ Future<double> getDistance() async {
   return distance;
 }
 
+
+
+
+Future<Null> updateComponent(int compId, int taskId, int preinstflag, int status) async {
+
+
+}
+
+
 //List<Map> list = await widget.cfg.database.rawQuery("SELECT MAX(ts) mts FROM schedule_requests");
 //DateTime ts = DateTime.parse(list[0]['mts']).add(new Duration(hours: 3));
 

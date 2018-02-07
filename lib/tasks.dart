@@ -82,11 +82,24 @@ return new GestureDetector(
 Future<bool> confirmChangeComponent(BuildContext context, int chflag, int preinstflag, String shortName, String serial) async {
 String caption;
 
-caption = "test";
+if (chflag==0)
+{
+  if (preinstflag==0) {
+    caption = "Установить компонент?";
+  } else {
+    caption = "Снять неисправный компонент?";
+  }
+} else {
+  if (preinstflag==0) {
+    caption = "Отменить установку компонента?";
+  } else {
+    caption = "Отменить снятие компонента?";
+  }
+}
 
   return showDialog<bool>(
     context: context,
-    barrierDismissible: false, // user must tap button!
+    barrierDismissible: false,
     child: new AlertDialog(
       title: new Text(caption),
       content: new SingleChildScrollView(
@@ -119,15 +132,20 @@ caption = "test";
 
 
 
-Widget oneComponent(DbSynch cfg, BuildContext context, String shortName, String serial, int chflag, int preinstflag) {
+Widget oneComponent(DbSynch cfg, BuildContext context, String shortName, String serial, int chflag, int preinstflag, int compId) {
+String chtext="";
+
+if (chflag==1) {
+  if (preinstflag==1) {chtext="Снят";} else {chtext="Устан.";}
+}
 
 return new GestureDetector(
            onTap: () async
            {
              confirmChangeComponent(context, chflag, preinstflag, shortName, serial).then((res){
-               if (chflag==0) {
-
-               } else {
+               if (res==true) {
+                 cfg.updateComponent(compId, cfg.curTask, preinstflag, chflag).then((res)
+                 {});
 
                }
              });
@@ -151,7 +169,8 @@ return new GestureDetector(
                        new Text(shortName, textAlign: TextAlign.start),
                        new Text(serial, textAlign: TextAlign.start)
                      ]
-                   ))
+                   )),
+                   new Text(chtext)
                    ]),
                 )
          );
@@ -324,6 +343,8 @@ class _ComponentPageState extends State<ComponentPage> {
   List<Map> _comps=[];
   int preinstflag=-1;
 
+  //void cbsetState = {setState();}
+
   @override
   void initState() {
     super.initState();
@@ -355,7 +376,7 @@ class _ComponentPageState extends State<ComponentPage> {
               ),);
       }
 
-      complist.add(oneComponent(cfg, context,r["short_name"],r["serial"],r["chflag"],r["preinstflag"]));
+      complist.add(oneComponent(cfg, context,r["short_name"],r["serial"],r["chflag"],r["preinstflag"],1111));
       complist.add(new Divider(height: 1.0));
 
     }
