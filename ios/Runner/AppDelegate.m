@@ -47,7 +47,7 @@
         return;
     
     // Save location
-    [self addLocation:location];
+    // [self addLocation:location];
     
     
 }
