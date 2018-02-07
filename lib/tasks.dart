@@ -130,10 +130,11 @@ if (chflag==0)
 }
 //////////////
 
-
-
-Widget oneComponent(DbSynch cfg, BuildContext context, String shortName, String serial, int chflag, int preinstflag, int compId) {
+Widget oneComponent(DbSynch cfg, BuildContext context, String shortName, String serial, int chflag, int preinstflag, int compId, VoidCallback cbSetState) {
 String chtext="";
+int newstatus;
+
+if (chflag==0) {newstatus=1;} else {newstatus=0;}
 
 if (chflag==1) {
   if (preinstflag==1) {chtext="Снят";} else {chtext="Устан.";}
@@ -144,8 +145,8 @@ return new GestureDetector(
            {
              confirmChangeComponent(context, chflag, preinstflag, shortName, serial).then((res){
                if (res==true) {
-                 cfg.updateComponent(compId, cfg.curTask, preinstflag, chflag).then((res)
-                 {});
+                 cfg.updateComponent(compId, cfg.curTask, preinstflag, newstatus).then((res)
+                 {cbSetState();});
 
                }
              });
@@ -336,18 +337,16 @@ class ComponentPage extends StatefulWidget {
   _ComponentPageState createState() => new _ComponentPageState(cfg: cfg);
 }
 
+
 class _ComponentPageState extends State<ComponentPage> {
+
   _ComponentPageState({this.cfg});
   DbSynch cfg;
   List<Widget> complist;
   List<Map> _comps=[];
   int preinstflag=-1;
 
-  //void cbsetState = {setState();}
-
-  @override
-  void initState() {
-    super.initState();
+  doReload() {
     cfg.getComponent(cfg.curTask, cfg.curCGroup).then((List<Map> list){
       setState((){
         _comps = list;
@@ -356,7 +355,15 @@ class _ComponentPageState extends State<ComponentPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    doReload();
+  }
+
+  @override
   Widget build(BuildContext context) {
+
+    var cbfunc = doReload;
     complist = [];
     for (var r in _comps) {
       if ((preinstflag!=r["preinstflag"])&&(r["preinstflag"]==1)) {
@@ -376,7 +383,7 @@ class _ComponentPageState extends State<ComponentPage> {
               ),);
       }
 
-      complist.add(oneComponent(cfg, context,r["short_name"],r["serial"],r["chflag"],r["preinstflag"],1111));
+      complist.add(oneComponent(cfg,context,r["short_name"],r["serial"],r["chflag"],r["preinstflag"],r["comp_id"],cbfunc));
       complist.add(new Divider(height: 1.0));
 
     }

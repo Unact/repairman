@@ -275,7 +275,7 @@ class DbSynch {
 
           await d.execute("""
             CREATE TABLE terminalcomponentlink(
-              id INT PRIMARY KEY DEFAULT AUTO_INCREMENT,
+              id INTEGER PRIMARY KEY DEFAULT AUTO_INCREMENT,
               comp_id INT,
               task_id INT,
               is_removed INT,
@@ -620,14 +620,14 @@ Future<List<Map>> getComponent(int taskId, String cgroupXid) async {
   List<Map> list;
 
   list = await db.rawQuery("""
-   select short_name, serial, 1 preinstflag,
+   select componentid comp_id, short_name, serial, 1 preinstflag,
           (select count(1) from terminalcomponentlink tcl where tcl.comp_id = terminalcomponent.componentid and tcl.task_id = $taskId) chflag
      from terminalcomponent
     where componentgroupxid = '$cgroupXid' and
           terminalid = (select terminal from task where id = $taskId)
 union all
-    select short_name, serial, 0 preinstflag,
-           (select count(1) from terminalcomponentlink tcl where tcl.comp_id = component.id and tcl.task_id = $taskId) chflag
+    select id, short_name, serial, 0,
+           (select count(1) from terminalcomponentlink tcl where tcl.comp_id = component.id and tcl.task_id = $taskId)
       from component
      where componentgroupxid = '$cgroupXid'
 order by preinstflag DESC
@@ -782,14 +782,39 @@ Future<double> getDistance() async {
 
 
 
-Future<Null> updateComponent(int compId, int taskId, int preinstflag, int status) async {
+Future<Null> updateComponent(int compId, int taskId, int preinstflag, int newstatus) async {
 
+  int id;
+  int syncstatus;
+
+  print("updateComponent. task_id=$taskId  comp_id=$compId  preinstflag = $preinstflag  newstatus = $newstatus");
+
+  List<Map> list = await db.rawQuery("SELECT id, syncstatus FROM terminalcomponentlink WHERE task_id = $taskId and comp_id = $compId");
+    if (list.length > 0) {
+      id = list[0]['id'];
+      syncstatus = list[0]['syncstatus'];
+    }
+  print("Лок. запись: id = $id  syncstatus = $syncstatus");
+    if (newstatus == 1) {
+      if (syncstatus==null) {
+        print("  <1> вставляем в # с сюнкстатусом 1");
+        await db.execute("insert into terminalcomponentlink (comp_id, task_id, is_removed, syncstatus) select $compId, $taskId, $preinstflag, 1");
+      } else {
+        print("  <2> апдейтим в # на сюнкстатус 0");
+        await db.execute("update terminalcomponentlink set syncstatus = 0 where id = $id");
+      }
+    } else {
+      if (syncstatus==0) {
+        print("  <3> апдейтим в # на сюнкстатус -1");
+        await db.execute("update terminalcomponentlink set syncstatus = -1 where id = $id");
+      } else {
+        print("  <4> удаляем запись из #");
+        await db.execute("delete from terminalcomponentlink where id = $id");
+      }
+    }
 
 }
 
-
-//List<Map> list = await widget.cfg.database.rawQuery("SELECT MAX(ts) mts FROM schedule_requests");
-//DateTime ts = DateTime.parse(list[0]['mts']).add(new Duration(hours: 3));
 
 //Как-то стремно в целом выглядит вся эта процедура О_О
 Future<String> updateDefect(int taskId, int defectId, bool status) async {
@@ -801,11 +826,11 @@ int syncstatus;
 print("updateDefect. task_id=$taskId  defect_id=$defectId  newstatus = $status");
 
 List<Map> list = await db.rawQuery("SELECT id, syncstatus FROM taskdefectlink WHERE task_id = $taskId and defect_id = $defectId");
-print("Лок. запись: id = $id  syncstatus = $syncstatus");
   if (list.length > 0) {
     id = list[0]['id'];
     syncstatus = list[0]['syncstatus'];
   }
+  print("Лок. запись: id = $id  syncstatus = $syncstatus");
   if (status == true) {
     if (syncstatus==null) {
       print("  <1> вставляем в # с сюнкстатусом 1");
