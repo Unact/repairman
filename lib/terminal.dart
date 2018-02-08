@@ -125,6 +125,7 @@ class _TerminalPageState extends State<TerminalPage> {
             ),
             new Divider(),
             new GestureDetector(
+                       behavior: HitTestBehavior.translucent,
                        onTap: () async
                        {
                           _launchURL();
@@ -165,6 +166,7 @@ class _TerminalPageState extends State<TerminalPage> {
 
             return
               new GestureDetector(
+              behavior: HitTestBehavior.translucent,
               onTap: () async {
                   cfg.curTask = a["id"];
                   await Navigator.of(context).pushNamed(taskSubpageRoute);

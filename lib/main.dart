@@ -28,6 +28,7 @@ class _MyAppState extends State<MyApp> {
           taskSubpageComponentRoute: (BuildContext context) => new ComponentPage(cfg: cfg),
           taskDefectsSubpageRoute: (BuildContext context) => new TaskDefectsSubpage(cfg: cfg),
           terminalPageRoute: (BuildContext context) => new TerminalPage(cfg: cfg),
+          taskSubpageRouteComment: (BuildContext context) => new TaskCommentSubpage(cfg: cfg),
     };
   }
 
@@ -125,6 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
         color: Colors.grey.shade300,
       ),
       new GestureDetector(
+        behavior: HitTestBehavior.translucent,
         onTap: () async
         {
           await Navigator.of(context).pushNamed(taskPageRoute);
@@ -141,6 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
         color: Colors.grey.shade300,
       ),
       new GestureDetector(
+        behavior: HitTestBehavior.translucent,
         onTap: () async
         {
           await Navigator.of(context).pushNamed(terminalsPageRoute);

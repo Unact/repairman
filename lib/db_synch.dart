@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:location/location.dart';
 import 'package:great_circle_distance/great_circle_distance.dart';
+import 'package:flutter/material.dart';
 
 //следует получше понеймить роуты
 const String taskPageRoute = "/tasks";
@@ -71,6 +72,11 @@ class DbSynch {
   String curCGroup;
   String curComment="";
 
+  double lastLatitude;
+  double lastLongitude;
+
+
+
   Future<Null> saveGeo() async {
     List<Map> locations;
     var response;
@@ -129,6 +135,8 @@ class DbSynch {
     Map<String,double> myLocation;
     try {
       myLocation = await location.getLocation;
+      lastLatitude = myLocation["latitude"];
+      lastLongitude = myLocation["longitude"];
       await db.insert("location", {
         "latitude": myLocation["latitude"],
         "longitude": myLocation["longitude"],
@@ -177,6 +185,9 @@ class DbSynch {
               terminalxid TEXT,
               comment TEXT,
               updcommentflag INTEGER DEFAULT 0,
+              mark_latitude DECIMAL,
+              mark_longitude DECIMAL,
+              updmarkflag INTEGER DEFAULT 0,
               ts DATETIME DEFAULT CURRENT_TIMESTAMP
             )"""
           );
@@ -779,6 +790,27 @@ Future<double> getDistance() async {
   return distance;
 }
 
+//Нужно что-то прописать если нет вообще координат
+Future<Null> updateExecutionMark(BuildContext context, double taskLatitude, double taskLongitude) async {
+double distance;
+  distance = new GreatCircleDistance.fromDegrees(
+        latitude1: taskLatitude, longitude1: taskLongitude, latitude2: lastLatitude, longitude2: lastLongitude).haversineDistance();
+
+
+if (distance > 500) {
+  var alert;
+  alert = new AlertDialog(
+    title: new Text("Ошибка отметки"),
+    content: new Text("До терминала ${distance.floor()} м (больше чем 500м)"),
+  );
+  showDialog(context: context, child: alert);
+} else {
+  await db.execute("UPDATE task SET mark_latitude = $taskLatitude, mark_longitude = $taskLongitude, updmarkflag = 1 where id = $curTask");
+}
+
+
+}
+
 
 
 
@@ -816,7 +848,9 @@ Future<Null> updateComponent(int compId, int taskId, int preinstflag, int newsta
 }
 
 
-//Как-то стремно в целом выглядит вся эта процедура О_О
+
+
+
 Future<String> updateDefect(int taskId, int defectId, bool status) async {
 int id;
 int syncstatus;

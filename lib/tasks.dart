@@ -38,6 +38,7 @@ Map colors;
 colors = taskColors(servstatus, routepriority);
 
 return new GestureDetector(
+           behavior: HitTestBehavior.translucent,
            onTap: () async
            {
               cfg.curTask = taskId;
@@ -141,6 +142,7 @@ if (chflag==1) {
 }
 
 return new GestureDetector(
+           behavior: HitTestBehavior.translucent,
            onTap: () async
            {
              confirmChangeComponent(context, chflag, preinstflag, shortName, serial).then((res){
@@ -157,22 +159,29 @@ return new GestureDetector(
            },
            child: new Container(
                 height: 48.0,
-                //decoration: const BoxDecoration(
-                //  border: const Border(
-                //        bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000))
-                //)),
                 child:
-                   new Row(
+                   new Column(
+crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                   new Expanded(
-                   child: new Column(
+
+
+                   new Container(
+                     decoration: const BoxDecoration(
+                       border: const Border(
+                             bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000))
+                     )),
+
+                     child: new Text(shortName, textAlign: TextAlign.start)),
+
+                   new Row(
+                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                      children: <Widget>[
-                       new Text(shortName, textAlign: TextAlign.start),
-                       new Text(serial, textAlign: TextAlign.start)
+                       new Text(serial, textAlign: TextAlign.start),
+                       new Text(chtext, textAlign: TextAlign.end, style: new TextStyle(color: Colors.blue))
                      ]
-                   )),
-                   new Text(chtext)
-                   ]),
+                   ),
+
+                 ]),
                 )
          );
 }
@@ -184,6 +193,7 @@ String scnt="";
 if (preinstcnt>0) {scnt = preinstcnt.toString();}
 
 return new GestureDetector(
+           behavior: HitTestBehavior.translucent,
            onTap: () async
            {
               cfg.curCGroup = cGroupXid;
@@ -548,28 +558,51 @@ class _TaskSubpageState extends State<TaskSubpage> {
     if (cfg.curComment == "")
     {
     addCommBtn = new GestureDetector(
+              behavior: HitTestBehavior.translucent,
               onTap: () async
               {
 
                  await Navigator.of(context).pushNamed(taskSubpageRouteComment);
               },
               child:
-                    new Text("Добавить комментарий", textAlign: TextAlign.center,  style: new TextStyle(color: Colors.blue, fontSize: btnfontsize))
+              new Container(
+                            color: Colors.white,
+                            height: 48.0,
+                            child:
+                            new Row(
+                            children: [new Expanded(
+                                      child:
+                new Text("Добавить комментарий", textAlign: TextAlign.center,  style: new TextStyle(color: Colors.blue, fontSize: btnfontsize))
+              )]))
             );
 
     } else {
 
       addCommBtn = new GestureDetector(
+                behavior: HitTestBehavior.translucent,
                 onTap: () async
                 {
 
                    await Navigator.of(context).pushNamed(taskSubpageRouteComment);
                 },
                 child:
-                      new Text(cfg.curComment, textAlign: TextAlign.left, style: new TextStyle(fontSize: btnfontsize))
+
+                      new Container(
+                                    color: Colors.white,
+                                    height: 48.0,
+                                    child:
+                                    new Row(
+                                    children: [new Expanded(
+                                              child:
+                        new Text(cfg.curComment, textAlign: TextAlign.left, style: new TextStyle(fontSize: btnfontsize))
+                  )]))
+
               );
 
     }
+
+    print(_latitude);
+    print(_longitude);
 
     return new Scaffold(
       appBar: new AppBar(
@@ -609,77 +642,80 @@ class _TaskSubpageState extends State<TaskSubpage> {
                      ),
                      new Container(color: dvcolor, height: 12.0),
 
+            new GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () async
+               {
+                await Navigator.of(context).pushNamed(taskDefectsSubpageRoute);
+                },
+            child:
             new Container(
                           color: Colors.white,
                           height: 48.0,
                           child:
                new Row(
-               children: [new Expanded(child: new GestureDetector(
-                         onTap: () async
-                         {
-
-                            await Navigator.of(context).pushNamed(taskDefectsSubpageRoute);
-                         },
+               children: [new Expanded(
                          child:
                                new Text("Добавить неисправность"+sdefectcnt, textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
-                       ))])
-            ),
+                       )])
+            )),
             new Divider(height: 1.0),
-            new Container(
+
+            new GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () async
+              {
+
+                 await Navigator.of(context).pushNamed(taskDefectsSubpageRoute);
+              },
+            child: new Container(
                           color: Colors.white,
                           height: 48.0,
                           child:
                new Row(
-               children: [new Expanded(child: new GestureDetector(
-                         onTap: () async
-                         {
-
-                            await Navigator.of(context).pushNamed(taskDefectsSubpageRoute);
-                         },
+               children: [new Expanded(
                          child:
                                new Text("Добавить ремонт"+srepaircnt, textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
-                       ))])
-            ),
+                       )])
+            )),
             new Divider(height: 1.0),
-            new Container(
+            new GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () async
+              {
+
+                 await Navigator.of(context).pushNamed(taskSubpageCgroupRoute);
+              },
+            child: new Container(
                           color: Colors.white,
                           height: 48.0,
                           child:
                new Row(
-               children: [new Expanded(child: new GestureDetector(
-                         onTap: () async
-                         {
-
-                            await Navigator.of(context).pushNamed(taskSubpageCgroupRoute);
-                         },
+               children: [new Expanded(
                          child:
                                new Text("ЗИПы (х)", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
-                       ))])
-            ),
+                       )])
+            )),
             new Divider(height: 1.0),
+            new GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () async
+                      {
+                         cfg.updateExecutionMark(context, _latitude,_longitude);
+                      },
+                      child:
             new Container(
                           color: Colors.white,
                           height: 48.0,
                           child:
                new Row(
-               children: [new Expanded(child: new GestureDetector(
-                         onTap: () async
-                         {
-
-                            await Navigator.of(context).pushNamed(taskDefectsSubpageRoute);
-                         },
+               children: [new Expanded(
                          child:
                                new Text("Поставить геометку", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
-                       ))])
-            ),
+                       )])
+            )),
                new Container(color: dvcolor, height: 12.0),
-               new Container(
-                             color: Colors.white,
-                             height: 48.0,
-                             child:
-                  new Row(
-                  children: [new Expanded(child: addCommBtn)])
-               ),
+               addCommBtn,
                new Container(color: dvcolor, height: 12.0),
                new Container(
                              color: Colors.white,
@@ -687,6 +723,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
                              child:
                   new Row(
                   children: [new Expanded(child: new GestureDetector(
+                            behavior: HitTestBehavior.translucent,
                             onTap: () async
                             {
 
@@ -703,6 +740,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
                              child:
                   new Row(
                   children: [new Expanded(child: new GestureDetector(
+                            behavior: HitTestBehavior.translucent,
                             onTap: () async
                             {
 
@@ -713,6 +751,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
                           ))])
                ),
                new GestureDetector(
+                          behavior: HitTestBehavior.translucent,
                           onTap: () async
                           {
                             // _launchURL();

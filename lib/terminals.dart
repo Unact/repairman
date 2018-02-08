@@ -6,6 +6,7 @@ Widget oneTerminal(DbSynch cfg, BuildContext context, String code, DateTime last
 
 
 return new GestureDetector(
+           behavior: HitTestBehavior.translucent,
            onTap: () async
            {
               cfg.dbTerminalId = terminalId;
