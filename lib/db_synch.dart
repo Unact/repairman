@@ -61,7 +61,7 @@ class DbSynch {
   String login;
   String password;
   String clientId = "repairman";
-  String server;
+  String server = "https://rapi.unact.ru/api/v1/";
   String token;
   int dbTerminalId=0;
   String clientName="";
@@ -304,7 +304,7 @@ class DbSynch {
             )"""
           );
 
-          await d.insert("info", {"name":"server", "value":"http://localhost:3000/api/v1/"});
+          await d.insert("info", {"name":"server", "value": server});
           await d.insert("info", {"name":"client_id", "value":clientId});
           await d.insert("info", {"name":"login"});
           await d.insert("info", {"name":"password"});
@@ -764,7 +764,7 @@ Future<double> getDistance() async {
 
   double lat2 = 0.0;
   double lon2 = 0.0;
-  
+
   List<Map> ld = await db.rawQuery("select value from info where name = 'distance' and ts >= date('now')");
   if (ld.length > 0) {
     distance = double.parse(ld[0]['value']);

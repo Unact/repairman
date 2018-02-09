@@ -52,7 +52,7 @@ class _AuthPageState extends State<AuthPage> {
         children: [
           new GestureDetector(
             onTap: () {
-              setState(() {  });
+              setState(() { _srvVisible++; });
             },
             child: new Text('Телефон или e-mail или имя'),
           ),
