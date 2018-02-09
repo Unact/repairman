@@ -98,7 +98,7 @@ class DbSynch {
           response = await httpClient.post(url,
             headers: {"Authorization": "RApi client_id=$clientId,token=$token",
                       "Accept": "application/json", "Content-Type": "application/json"},
-            body: JSON.encode(locations)
+            body: JSON.encode({"locations": locations})
           );
         } catch(exception) {
           print('Сервер $server недоступен!\n$exception');
@@ -764,13 +764,16 @@ Future<double> getDistance() async {
 
   double lat2 = 0.0;
   double lon2 = 0.0;
-
-  List<Map> ld = await db.rawQuery("select value from info where name = 'distance'");
+  
+  List<Map> ld = await db.rawQuery("select value from info where name = 'distance' and ts >= date('now')");
   if (ld.length > 0) {
     distance = double.parse(ld[0]['value']);
+  } else {
+    await db.execute("DELETE FROM info WHERE name = 'distance'");
+    await db.insert("info", {"name":"distance", "value": "0"});
   }
 
-  List<Map> list = await db.rawQuery("select latitude, longitude from location order by ts");
+  List<Map> list = await db.rawQuery("select latitude, longitude from location where ts >= date('now') order by ts");
   int i = 0;
   for(Map r in list) {
     if (i > 0) {
