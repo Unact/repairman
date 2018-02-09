@@ -14,7 +14,7 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - Flutter (from `/Users/vsudakov/flutter/bin/cache/artifacts/engine/ios`)
+  - Flutter (from `/Users/vsudakov/flutter/bin/cache/artifacts/engine/ios-release`)
   - location (from `/Users/vsudakov/.pub-cache/hosted/pub.dartlang.org/location-1.1.7/ios`)
   - path_provider (from `/Users/vsudakov/.pub-cache/hosted/pub.dartlang.org/path_provider-0.2.2/ios`)
   - sqflite (from `/Users/vsudakov/.pub-cache/hosted/pub.dartlang.org/sqflite-0.2.4/ios`)
@@ -22,7 +22,7 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   Flutter:
-    :path: /Users/vsudakov/flutter/bin/cache/artifacts/engine/ios
+    :path: /Users/vsudakov/flutter/bin/cache/artifacts/engine/ios-release
   location:
     :path: /Users/vsudakov/.pub-cache/hosted/pub.dartlang.org/location-1.1.7/ios
   path_provider:
