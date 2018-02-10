@@ -198,15 +198,9 @@ return new GestureDetector(
            {
               cfg.curCGroup = cGroupXid;
               await Navigator.of(context).pushNamed(taskSubpageComponentRoute);
-              //_neverSatisfied(context).then((res){print(res);});
-
            },
            child: new Container(
                 height: 48.0,
-                //decoration: const BoxDecoration(
-                //  border: const Border(
-                //        bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000))
-                //)),
                 child:
                    new Row(
                     children: [
@@ -229,66 +223,42 @@ return new GestureDetector(
          );
 }
 
-//updateDefect(int taskId, int defect_id, bool status)
-//Возможно следует переименовать
-class MyCheckBox extends StatefulWidget {
-  MyCheckBox({Key key, this.cfg, this.defectid, this.status}) : super(key: key);
-  final DbSynch cfg;
-  final bool status;
-  final int defectid;
-
-  @override
-  _MyCheckBoxState createState() => new _MyCheckBoxState(cfg: cfg, defectid: defectid, status: status);
-}
-
-class _MyCheckBoxState extends State<MyCheckBox> {
-  DbSynch cfg;
-  bool status;
-  int defectid;
-  _MyCheckBoxState({this.cfg, this.defectid, this.status});
 
 
-/*
-  @override
-  void initState() {
-    super.initState();
-    status = false;
-  }
-*/
-
-  @override
-  Widget build(BuildContext context) {
-    return new Checkbox(
-      value: status,
-      onChanged: (bool value) {
-        cfg.updateDefect(cfg.curTask, defectid, value).then((v){setState((){status = value;});});
-      }
-    );
-  }
-}
-
-
-Widget oneDefect(DbSynch cfg, BuildContext context, String name, int status, int defectid) {
+Widget oneDefect(DbSynch cfg, BuildContext context, String name, int status, int defectid, VoidCallback cbSetState) {
 bool initstatus = false;
+bool newstatus = true;
+if (status == 1) {initstatus = true; newstatus = false;}
 
-if (status == 1) {initstatus = true;}
 
-return new Container(
+return new GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async
+          {
+            //Как-то мне не нравится, что в ответ на интерактивное действие мы ждем отработки БД, но как еще?..
+            cfg.updateDefect(cfg.curTask, defectid, newstatus).then((v){cbSetState();});
+          },
+          child:
+              new Container(
                 height: 48.0,
-                decoration: const BoxDecoration(
-                  border: const Border(
-                        bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000))
-                )),
+                padding: const EdgeInsets.all(4.0),
                 child:
                    new Row(
+                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                      children: <Widget>[
-                       new Text(name,  style: new TextStyle(fontSize: 12.0)),
-                       new MyCheckBox(cfg: cfg, defectid: defectid, status: initstatus)
+                       new Expanded(child: new Text(name, overflow: TextOverflow.fade , style: new TextStyle(fontSize: 14.0))),
+                      new Checkbox(
+                         value: initstatus,
+                         onChanged: (bool value) {
+                           //При клике на сам чекбокс гестур не реагирует
+                           cfg.updateDefect(cfg.curTask, defectid, newstatus).then((v){cbSetState();});
+                        }
+                       )
                      ]
                    ),
-                );
-
+                ));
 }
+
 
 
 class CGroupPage extends StatefulWidget {
@@ -793,10 +763,7 @@ class _TaskDefectsSubpageState extends State<TaskDefectsSubpage> {
   List<Widget> defectslist;
   List<Map> _defects=[]; //Странно что атом дает ворнинг. Выше, в аналогичном случае - не дает
 
-
-  @override
-  void initState() {
-    super.initState();
+  doReload() {
     cfg.getDefects(cfg.curTask).then((List<Map> list){
       setState((){
         _defects = list;
@@ -805,19 +772,20 @@ class _TaskDefectsSubpageState extends State<TaskDefectsSubpage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    doReload();
+  }
+
+  @override
   Widget build(BuildContext context) {
-
-
+    var cbfunc = doReload;
     defectslist = [];
 
-
     for (var r in _defects) {
-      defectslist.add(oneDefect(cfg,context,r["name"],r["status"],r["defect_id"]));
+      defectslist.add(oneDefect(cfg,context,r["name"],r["status"],r["defect_id"],cbfunc));
+      defectslist.add(new Divider(height: 1.0));
     }
-
-
-
-
 
     return new Scaffold(
       appBar: new AppBar(
