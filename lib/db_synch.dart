@@ -71,8 +71,16 @@ class DbSynch {
   String curCGroup;
   String curComment="";
 
+  int repaircnt=0;
+  int defectcnt=0;
+  int zipcnt=0;
+  int curServstatus=0;
+  DateTime executionmarkTs;
+
   double lastLatitude;
   double lastLongitude;
+
+  List<Map> tasks=[];
 
 
 
@@ -188,6 +196,8 @@ class DbSynch {
               mark_latitude DECIMAL,
               mark_longitude DECIMAL,
               updmarkflag INTEGER DEFAULT 0,
+              executionmark_ts DATETIME,
+              updservstatusflag INTEGER DEFAULT 0,
               ts DATETIME DEFAULT CURRENT_TIMESTAMP
             )"""
           );
@@ -465,6 +475,7 @@ Future<String> fillDB() async {
   await db.execute("DELETE FROM defects");
   await db.execute("DELETE FROM taskdefectlink");
   await db.execute("DELETE FROM taskrepairlink");
+  await db.execute("DELETE FROM terminalcomponentlink");
 
 
   for (var tasks in data["tasks"]) {
@@ -586,9 +597,8 @@ for (var taskcomponents in data["taskcomponents"]) {
 
 }
 
-Future<List<Map>> getTasks() async {
-  List<Map> list;
-  list = await db.rawQuery("""
+Future<Null> getTasks() async {
+  tasks = await db.rawQuery("""
     select
       task.id,
       task.servstatus,
@@ -603,7 +613,6 @@ Future<List<Map>> getTasks() async {
   """);
   //Еще нужна сортировка по tt.code
   //Нужна ли какая-то проверка на случай если таск есть а терминала нет?
-  return list;
 }
 
 Future<List<Map>> getTerminals() async {
@@ -756,10 +765,13 @@ Future<List<Map>> getOneTask(int taskId) async {
               from taskrepairlink
              where taskrepairlink.task_id = task.id and
                    taskrepairlink.syncstatus <> -1) repaircnt,
+           (select count(*)
+                      from terminalcomponentlink
+                     where terminalcomponentlink.task_id = task.id and
+                           terminalcomponentlink.syncstatus <> -1) zipcnt,
            task.terminalbreakname terminalbreakname,
            terminal.code code,
            task.dobefore dobefore,
-           task.servstatus servstatus,
            task.routepriority routepriority,
            terminal.latitude latitude,
            terminal.longitude longitude,
@@ -815,7 +827,6 @@ double distance;
   distance = new GreatCircleDistance.fromDegrees(
         latitude1: taskLatitude, longitude1: taskLongitude, latitude2: lastLatitude, longitude2: lastLongitude).haversineDistance();
 
-
 if (distance > 500) {
   var alert;
   alert = new AlertDialog(
@@ -824,10 +835,16 @@ if (distance > 500) {
   );
   showDialog(context: context, child: alert);
 } else {
-  await db.execute("UPDATE task SET mark_latitude = $taskLatitude, mark_longitude = $taskLongitude, updmarkflag = 1 where id = $curTask");
+  executionmarkTs = new DateTime.now();
+  await db.execute("UPDATE task SET mark_latitude = $taskLatitude, mark_longitude = $taskLongitude, updmarkflag = 1, executionmark_ts = datetime('now') where id = $curTask");
 }
 
+}
 
+Future<Null> updateServstatus() async {
+  curServstatus = 1;
+  await db.execute("UPDATE task SET servstatus = 1 where id = $curTask");
+  getTasks();
 }
 
 
@@ -839,6 +856,7 @@ Future<Null> updateComponent(int compId, int taskId, int preinstflag, int newsta
   int syncstatus;
 
   print("updateComponent. task_id=$taskId  comp_id=$compId  preinstflag = $preinstflag  newstatus = $newstatus");
+  if (newstatus==1) {zipcnt+=1;} else {zipcnt-=1;}
 
   List<Map> list = await db.rawQuery("SELECT id, syncstatus FROM terminalcomponentlink WHERE task_id = $taskId and comp_id = $compId");
     if (list.length > 0) {
@@ -877,6 +895,7 @@ int syncstatus;
 //типа поставить 1 когда уже стоит 1
 
 print("updateDefect. task_id=$taskId  defect_id=$defectId  newstatus = $status");
+if (status==true) {defectcnt+=1;} else {defectcnt-=1;}
 
 List<Map> list = await db.rawQuery("SELECT id, syncstatus FROM taskdefectlink WHERE task_id = $taskId and defect_id = $defectId");
   if (list.length > 0) {
@@ -910,6 +929,7 @@ int id;
 int syncstatus;
 
 print("updateRepair. task_id=$taskId  repair_id=$repairId  newstatus = $status");
+if (status==true) {repaircnt+=1;} else {repaircnt-=1;}
 
 List<Map> list = await db.rawQuery("SELECT id, syncstatus FROM taskrepairlink WHERE task_id = $taskId and repair_id = $repairId");
   if (list.length > 0) {
@@ -952,11 +972,11 @@ Future<String> synchDB() async {
   var response;
   var data;
 
-  taskdefectlink = await db.rawQuery("select id, task_id, defect_id, syncstatus from taskdefectlink where syncstatus <> 0");
-  //taskrepairlink = await db.rawQuery("select id, task_id, repair_id, syncstatus from taskrepairlink where syncstatus <> 0");
-  //terminalcomponentlink = await db.rawQuery("select id, task_id, comp_id, is_removed from terminalcomponentlink where syncstatus <> 0");
-  //executionmark = await db.rawQuery("select id, mark_latitude, mark_longitude from task where updmarkflag = 1");
-  //comments = await db.rawQuery("select id, comment from task where updcommentflag = 1");
+  taskdefectlink = await db.rawQuery("select task_id, defect_id, syncstatus from taskdefectlink where syncstatus <> 0");
+  taskrepairlink = await db.rawQuery("select task_id, repair_id, syncstatus from taskrepairlink where syncstatus <> 0");
+  terminalcomponentlink = await db.rawQuery("select task_id, comp_id, is_removed, syncstatus from terminalcomponentlink where syncstatus <> 0");
+  executionmark = await db.rawQuery("select id, mark_latitude, mark_longitude, executionmark_ts from task where updmarkflag = 1");
+  comments = await db.rawQuery("select id, comment from task where updcommentflag = 1");
 
 
   var httpClient = createHttpClient();
@@ -967,11 +987,11 @@ Future<String> synchDB() async {
     response = await httpClient.post(url,
       headers: {"Authorization": "RApi client_id=$clientId,token=$token",
                 "Accept": "application/json", "Content-Type": "application/json"},
-      body: JSON.encode({"taskdefectlink": taskdefectlink
-                         //"taskrepairlink": taskrepairlink,
-                         //"terminalcomponentlink": terminalcomponentlink,
-                         //"executionmark": executionmark,
-                         //"comments": comments
+      body: JSON.encode({"taskdefectlink": taskdefectlink,
+                         "taskrepairlink": taskrepairlink,
+                         "terminalcomponentlink": terminalcomponentlink,
+                         "executionmark": executionmark,
+                         "comments": comments
                        })
     );
 

@@ -42,6 +42,7 @@ return new GestureDetector(
            onTap: () async
            {
               cfg.curTask = taskId;
+              cfg.curServstatus = servstatus;
               await Navigator.of(context).pushNamed(taskSubpageRoute);
            },
            child: new Container(
@@ -398,14 +399,13 @@ class _TaskPageState extends State<TaskPage> {
   _TaskPageState({this.cfg});
   DbSynch cfg;
   List<Widget> tasklist;
-  List<Map> _tasks=[];
+
 
   @override
   void initState() {
     super.initState();
-    cfg.getTasks().then((List<Map> list){
+    cfg.getTasks().then((v){
       setState((){
-        _tasks = list;
       });
     });
   }
@@ -417,7 +417,6 @@ class _TaskPageState extends State<TaskPage> {
     String code;
     String address;
 
-
     tasklist = [
       new Container(
         height: 20.0,
@@ -428,7 +427,8 @@ class _TaskPageState extends State<TaskPage> {
 
     curservstat = 0;
 
-    for (var r in _tasks) {
+
+    for (var r in cfg.tasks) {
       if (r["servstatus"] > curservstat) {
         curservstat = r["servstatus"];
         tasklist.add(new Container(
@@ -480,7 +480,6 @@ class _TaskSubpageState extends State<TaskSubpage> {
   String terminalbreakname="";
   String terminalcode="";
   DateTime dobefore;
-  int servstatus;
   int routepriority;
   Map colors;
   Map list;
@@ -506,10 +505,9 @@ class _TaskSubpageState extends State<TaskSubpage> {
         cfg.zipcnt = r["zipcnt"];
         terminalbreakname = r["terminalbreakname"];
         terminalcode = r["code"];
-        servstatus = r["servstatus"];
         routepriority = r["routepriority"];
         dobefore = DateTime.parse(r["dobefore"]);
-        colors = taskColors(servstatus, routepriority);
+        colors = taskColors(cfg.curServstatus, routepriority);
         tcolor = colors["tcolor"];
         bcolor = colors["bcolor"];
         _latitude=r["latitude"];
@@ -527,6 +525,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
   @override
   Widget build(BuildContext context) {
     Widget addCommBtn;
+    Widget executionButton;
     print("Открыта задача: ${cfg.curTask}");
 
     if (cfg.repaircnt>0) {srepaircnt = " (${cfg.repaircnt})";} else {srepaircnt="";}
@@ -544,6 +543,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
               },
               child:
               new Container(
+                            padding: const EdgeInsets.all(4.0),
                             color: Colors.white,
                             height: 48.0,
                             child:
@@ -566,6 +566,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
                 child:
 
                       new Container(
+                                    padding: const EdgeInsets.all(4.0),
                                     color: Colors.white,
                                     height: 48.0,
                                     child:
@@ -578,6 +579,64 @@ class _TaskSubpageState extends State<TaskSubpage> {
               );
 
     }
+
+    if (cfg.curServstatus==1) {
+      executionButton = new GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () async
+                            {
+
+                            },
+                            child:
+                  new Container(
+                                color: Colors.white,
+                                height: 48.0,
+                                child:
+                     new Row(
+                     children: [new Expanded(
+                               child:
+                                     new Text("Выполнено", textAlign: TextAlign.center, style: new TextStyle(color: Colors.green, fontSize: btnfontsize))
+                             )])
+                  ));
+    } else if (cfg.executionmarkTs==null) {
+      executionButton = new GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () async
+                            {
+                               cfg.updateExecutionMark(context, _latitude,_longitude).then((v){setState((){});});
+                            },
+                            child:
+                  new Container(
+                                color: Colors.white,
+                                height: 48.0,
+                                child:
+                     new Row(
+                     children: [new Expanded(
+                               child:
+                                     new Text("Поставить геометку", textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: btnfontsize))
+                             )])
+                  ));
+    } else {
+      executionButton = new GestureDetector(
+                            behavior: HitTestBehavior.translucent,
+                            onTap: () async
+                            {
+                              cfg.updateServstatus().then((v){setState((){});});
+                            },
+                            child:
+                  new Container(
+                                color: Colors.white,
+                                height: 48.0,
+                                child:
+                     new Row(
+                     children: [new Expanded(
+                               child:
+                                     new Text("Отметить выполнение", textAlign: TextAlign.center, style: new TextStyle(color: Colors.blue, fontSize: btnfontsize))
+                             )])
+                  ));
+    }
+
+
 
     print(_latitude);
     print(_longitude);
@@ -675,23 +734,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
                        )])
             )),
             new Divider(height: 1.0),
-            new GestureDetector(
-                      behavior: HitTestBehavior.translucent,
-                      onTap: () async
-                      {
-                         cfg.updateExecutionMark(context, _latitude,_longitude);
-                      },
-                      child:
-            new Container(
-                          color: Colors.white,
-                          height: 48.0,
-                          child:
-               new Row(
-               children: [new Expanded(
-                         child:
-                               new Text("Поставить геометку", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
-                       )])
-            )),
+            executionButton,
                new Container(color: dvcolor, height: 12.0),
                addCommBtn,
                new Container(color: dvcolor, height: 12.0),
