@@ -32,7 +32,7 @@ return {"bcolor": bcolor, "tcolor": tcolor};
 
 
 
-Widget oneTask(DbSynch cfg, BuildContext context, DateTime dobefore, int servstatus, int routepriority, int taskId, String code, String address) {
+Widget oneTask(DbSynch cfg, BuildContext context, DateTime dobefore, int servstatus, int routepriority, int taskId, String code, String address, String terminalbreakname) {
 Map colors;
 
 colors = taskColors(servstatus, routepriority);
@@ -47,6 +47,7 @@ return new GestureDetector(
            child: new Container(
                 color: colors["bcolor"],
                 height: 48.0,
+                padding: const EdgeInsets.all(4.0),
                 child:
 
                 //Почему-то не работает выравнивание во вложенном Column, если вложить его в Row
@@ -62,11 +63,11 @@ return new GestureDetector(
                        new Row(
                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                          children: <Widget>[
-                           new Text(code),
+                           new Text(routepriority.toString()+"|"+code+" : "+terminalbreakname),
                            new Text(fmtSrok(dobefore), style: new TextStyle(color: Colors.blue)),
                          ]
                        ),
-                       new Text(address, style: new TextStyle(color: colors["tcolor"], fontSize: 12.0))
+                       new Text(address, style: new TextStyle(color: colors["tcolor"], fontSize: 10.0))
                      ]
                    )
                   //]
@@ -444,7 +445,7 @@ else
   {code = r["code"];
    address = r["address"];}
 
-      tasklist.add(oneTask(cfg,context,DateTime.parse(r["dobefore"]),r["servstatus"],r["routepriority"],r["id"],code,address));
+      tasklist.add(oneTask(cfg,context,DateTime.parse(r["dobefore"]),r["servstatus"],r["routepriority"],r["id"],code,address,r["terminalbreakname"]));
       tasklist.add(new Divider(height: 1.0));
     }
 
@@ -473,11 +474,9 @@ class TaskSubpage extends StatefulWidget {
 class _TaskSubpageState extends State<TaskSubpage> {
   _TaskSubpageState({this.cfg});
   DbSynch cfg;
-  int repaircnt;
-  int defectcnt;
-  int zipcnt;
-  String srepaircnt = "";
-  String sdefectcnt = "";
+  String srepaircnt;
+  String sdefectcnt;
+  String szipcnt;
   String terminalbreakname="";
   String terminalcode="";
   DateTime dobefore;
@@ -487,7 +486,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
   Map list;
   var bcolor;
   var tcolor;
-  var dvcolor = Colors.brown;
+  var dvcolor = Colors.transparent;
   var btnfontsize = 16.0;
   double _latitude = 55.754226;
   double _longitude = 37.617582;
@@ -502,10 +501,9 @@ class _TaskSubpageState extends State<TaskSubpage> {
     cfg.getOneTask(cfg.curTask).then((List<Map> list){
       setState(()  {
       for (var r in list) { //сделать без цикла
-        repaircnt = r["repaircnt"];
-        defectcnt = r["defectcnt"];
-        if (repaircnt>=0) {srepaircnt = " ($repaircnt)";}
-        if (defectcnt>=0) {sdefectcnt = " ($defectcnt)";}
+        cfg.repaircnt = r["repaircnt"];
+        cfg.defectcnt = r["defectcnt"];
+        cfg.zipcnt = r["zipcnt"];
         terminalbreakname = r["terminalbreakname"];
         terminalcode = r["code"];
         servstatus = r["servstatus"];
@@ -529,8 +527,11 @@ class _TaskSubpageState extends State<TaskSubpage> {
   @override
   Widget build(BuildContext context) {
     Widget addCommBtn;
-
     print("Открыта задача: ${cfg.curTask}");
+
+    if (cfg.repaircnt>0) {srepaircnt = " (${cfg.repaircnt})";} else {srepaircnt="";}
+    if (cfg.defectcnt>0) {sdefectcnt = " (${cfg.defectcnt})";} else {sdefectcnt="";}
+    if (cfg.zipcnt>0) {szipcnt = " (${cfg.zipcnt})";} else {szipcnt="";}
 
     if (cfg.curComment == "")
     {
@@ -670,7 +671,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
                new Row(
                children: [new Expanded(
                          child:
-                               new Text("ЗИПы (х)", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
+                               new Text("ЗИПы"+szipcnt, textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
                        )])
             )),
             new Divider(height: 1.0),
