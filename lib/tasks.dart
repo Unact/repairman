@@ -475,6 +475,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
   DbSynch cfg;
   int repaircnt;
   int defectcnt;
+  int zipcnt;
   String srepaircnt = "";
   String sdefectcnt = "";
   String terminalbreakname="";
@@ -490,6 +491,10 @@ class _TaskSubpageState extends State<TaskSubpage> {
   var btnfontsize = 16.0;
   double _latitude = 55.754226;
   double _longitude = 37.617582;
+
+  //changeRepairCnt(int diff) {setState((){repaircnt = repaircnt + diff;});}
+  //changeDefectCnt(int diff) {setState((){defectcnt = defectcnt + diff;});}
+  //changeZipCnt(int diff) {setState((){zipcnt = zipcnt + diff;});}
 
   @override
   void initState() {
@@ -524,6 +529,8 @@ class _TaskSubpageState extends State<TaskSubpage> {
   @override
   Widget build(BuildContext context) {
     Widget addCommBtn;
+
+    print("Открыта задача: ${cfg.curTask}");
 
     if (cfg.curComment == "")
     {
@@ -636,7 +643,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
               onTap: () async
               {
 
-                 await Navigator.of(context).pushNamed(taskDefectsSubpageRoute);
+                 await Navigator.of(context).pushNamed(taskRepairsSubpageRoute);
               },
             child: new Container(
                           color: Colors.white,
@@ -747,9 +754,6 @@ class _TaskSubpageState extends State<TaskSubpage> {
 }
 
 
-
-/////////////////////////
-
 class TaskDefectsSubpage extends StatefulWidget {
   TaskDefectsSubpage({Key key, this.cfg}) : super(key: key);
   final DbSynch cfg;
@@ -844,6 +848,101 @@ class _TaskCommentSubpageState extends State<TaskCommentSubpage> {
       body: new TextField(
                  controller: _ctlComment
                 ),
+    );
+
+  }
+
+
+}
+
+
+
+
+////// РЕПЕЙРЫ
+
+
+Widget oneRepair(DbSynch cfg, BuildContext context, String name, int status, int repairid, VoidCallback cbSetState) {
+bool initstatus = false;
+bool newstatus = true;
+if (status == 1) {initstatus = true; newstatus = false;}
+
+
+return new GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () async
+          {
+            //Как-то мне не нравится, что в ответ на интерактивное действие мы ждем отработки БД, но как еще?..
+            cfg.updateRepair(cfg.curTask, repairid, newstatus).then((v){cbSetState();});
+          },
+          child:
+              new Container(
+                height: 48.0,
+                padding: const EdgeInsets.all(4.0),
+                child:
+                   new Row(
+                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                     children: <Widget>[
+                       new Expanded(child: new Text(name, overflow: TextOverflow.fade , style: new TextStyle(fontSize: 14.0))),
+                      new Checkbox(
+                         value: initstatus,
+                         onChanged: (bool value) {
+                           //При клике на сам чекбокс гестур не реагирует
+                           cfg.updateRepair(cfg.curTask, repairid, newstatus).then((v){cbSetState();});
+                        }
+                       )
+                     ]
+                   ),
+                ));
+
+
+}
+
+
+class TaskRepairsSubpage extends StatefulWidget {
+  TaskRepairsSubpage({Key key, this.cfg}) : super(key: key);
+  final DbSynch cfg;
+  @override
+  _TaskRepairsSubpageState createState() => new _TaskRepairsSubpageState(cfg: cfg);
+}
+
+class _TaskRepairsSubpageState extends State<TaskRepairsSubpage> {
+  _TaskRepairsSubpageState({this.cfg});
+  DbSynch cfg;
+  List<Widget> repairslist;
+  List<Map> _repairs=[];
+
+  doReload() {
+    cfg.getRepairs(cfg.curTask).then((List<Map> list){
+      setState((){
+        _repairs = list;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    doReload();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var cbfunc = doReload;
+    repairslist = [];
+
+    for (var r in _repairs) {
+      repairslist.add(oneRepair(cfg,context,r["name"],r["status"],r["repair_id"],cbfunc));
+      repairslist.add(new Divider(height: 1.0));
+    }
+
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("Репейры")
+      ),
+      body: new ListView(
+      shrinkWrap: true,
+      children: repairslist,
+    )
     );
 
   }

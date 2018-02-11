@@ -8,7 +8,6 @@ import 'package:location/location.dart';
 import 'package:great_circle_distance/great_circle_distance.dart';
 import 'package:flutter/material.dart';
 
-//следует получше понеймить роуты
 const String taskPageRoute = "/tasks";
 const String terminalsPageRoute = "/terminals";
 const String taskSubpageRoute = "/tasks/one";
@@ -82,6 +81,7 @@ class DbSynch {
     var response;
     var data;
     bool isError = false;
+
     try {
       locations = await db.rawQuery("select latitude, longitude, accuracy, altitude, ts from location");
       if (token==null) {
@@ -708,11 +708,9 @@ Future<List<Map>> getTerminalTasks() async {
   return list;
 }
 
-//Нужно отобрать весь справочник дефектов, передав status=1 там, где была вставлена запись.. гм.. оч понятно =)
 Future<List<Map>> getDefects(int taskId) async {
   List<Map> list;
 
-  //СОРТИРОВКА?!
   list = await db.rawQuery("""
     select
            defects.id defect_id,
@@ -722,9 +720,27 @@ Future<List<Map>> getDefects(int taskId) async {
         left outer join taskdefectlink on taskdefectlink.task_id = $taskId and
                                           taskdefectlink.defect_id = defects.id and
                                           taskdefectlink.syncstatus <> -1
+  order by defects.name
   """);
 
-  //if taskdefectlink.id is not null then 1 else 0 endif status
+  return list;
+}
+
+Future<List<Map>> getRepairs(int taskId) async {
+  List<Map> list;
+
+  list = await db.rawQuery("""
+    select
+           repairs.id repair_id,
+           repairs.name,
+           CASE WHEN taskrepairlink.id IS NOT NULL THEN 1 ELSE 0 END status
+   from repairs
+        left outer join taskrepairlink on taskrepairlink.task_id = $taskId and
+                                          taskrepairlink.repair_id = repairs.id and
+                                          taskrepairlink.syncstatus <> -1
+  order by repairs.name
+  """);
+
   return list;
 }
 
@@ -889,87 +905,116 @@ List<Map> list = await db.rawQuery("SELECT id, syncstatus FROM taskdefectlink WH
   return null;
 }
 
+Future<Null> updateRepair(int taskId, int repairId, bool status) async {
+int id;
+int syncstatus;
+
+print("updateRepair. task_id=$taskId  repair_id=$repairId  newstatus = $status");
+
+List<Map> list = await db.rawQuery("SELECT id, syncstatus FROM taskrepairlink WHERE task_id = $taskId and repair_id = $repairId");
+  if (list.length > 0) {
+    id = list[0]['id'];
+    syncstatus = list[0]['syncstatus'];
+  }
+  print("Лок. запись: id = $id  syncstatus = $syncstatus");
+  if (status == true) {
+    if (syncstatus==null) {
+      print("  <1> вставляем в # с сюнкстатусом 1");
+      await db.execute("insert into taskrepairlink (task_id, repair_id, syncstatus) select $taskId, $repairId, 1");
+    } else {
+      print("  <2> апдейтим в # на сюнкстатус 0");
+      await db.execute("update taskrepairlink set syncstatus = 0 where id = $id");
+    }
+  } else {
+    if (syncstatus==0) {
+      print("  <3> апдейтим в # на сюнкстатус -1");
+      await db.execute("update taskrepairlink set syncstatus = -1 where id = $id");
+    } else {
+      print("  <4> удаляем запись из #");
+      await db.execute("delete from taskrepairlink where id = $id");
+    }
+  }
+
+
+}
+
+
+
 
 Future<String> synchDB() async {
-  //var response;
   List<Map> taskdefectlink;
-  List<Map> info;
+  List<Map> taskrepairlink;
+  List<Map> terminalcomponentlink;
+  List<Map> executionmark;
   List<Map> comments;
 
-  taskdefectlink = await db.rawQuery("select task_id, defect_id, syncstatus from taskdefectlink where syncstatus <> 0");
-  info = await db.rawQuery("select id, name from info");
-  comments = await db.rawQuery("select id, comment from task where updcommentflag = 1");
+  bool isError = false;
+  var response;
+  var data;
+
+  taskdefectlink = await db.rawQuery("select id, task_id, defect_id, syncstatus from taskdefectlink where syncstatus <> 0");
+  //taskrepairlink = await db.rawQuery("select id, task_id, repair_id, syncstatus from taskrepairlink where syncstatus <> 0");
+  //terminalcomponentlink = await db.rawQuery("select id, task_id, comp_id, is_removed from terminalcomponentlink where syncstatus <> 0");
+  //executionmark = await db.rawQuery("select id, mark_latitude, mark_longitude from task where updmarkflag = 1");
+  //comments = await db.rawQuery("select id, comment from task where updcommentflag = 1");
+
 
   var httpClient = createHttpClient();
   String url = server + "repairman/save";
   try {
     print("url = $url");
     print("RApi client_id=$clientId,token=$token");
-    /*response =*/ await httpClient.post(url,
+    response = await httpClient.post(url,
       headers: {"Authorization": "RApi client_id=$clientId,token=$token",
                 "Accept": "application/json", "Content-Type": "application/json"},
-      body: JSON.encode({"taskdefectlink": taskdefectlink, "info": info, "comments": comments})
+      body: JSON.encode({"taskdefectlink": taskdefectlink
+                         //"taskrepairlink": taskrepairlink,
+                         //"terminalcomponentlink": terminalcomponentlink,
+                         //"executionmark": executionmark,
+                         //"comments": comments
+                       })
     );
 
-    //После успешного выполнения надо удалить со статусом -1 а статус 1 перебросить на 0
-    //Либо же запросить заново всю БД, как?
+
   } catch(exception) {
-    return 'Сервер $server недоступен!\n$exception';
+    print('Сервер $server недоступен!\n$exception');
+    isError = true;
   }
 
-
-  return null;
-
-/*
-  String s;
-  int i = 0;
-  var data;
-  list = await db.rawQuery("select * from repayment r");
-
-  do {
-    if (token==null) {
-      s = (await makeConnection());
-      if (s != null) {
-        return s;
-      }
-    }
-    var httpClient = createHttpClient();
-    String url = server + "forwarder/save";
-    try {
-      print("url = $url");
-      print("RApi client_id=$clientId,token=$token");
-      response = await httpClient.post(url,
-        headers: {"Authorization": "RApi client_id=$clientId,token=$token",
-                  "Accept": "application/json", "Content-Type": "application/json"},
-        body: JSON.encode(list)
-      );
-    } catch(exception) {
-      return 'Сервер $server недоступен!\n$exception';
-    }
+  if (!isError) {
     try {
       data = JSON.decode(response.body);
       if (data["error"] != null) {
-        if (i == 1) {
-          return data["error"];
-        }
-        token = null;
-        i++;
+          print(data["error"]);
+          isError = true;
       }
     } catch(exception) {
-      return 'Ответ сервера: ${response.body}\n$exception';
+      print('Ответ сервера: ${response.body}\n$exception');
+      isError = true;
     }
-  } while (i == 1);
-
-  for (var i = 0; i < list.length; i++) {
-    list[i]["repayment_id"] = data["repayment"][i];
-    await db.execute("""
-      UPDATE repayment
-      SET repayment_id = ${list[i]["repayment_id"]}
-      WHERE debt_id=${list[i]["debt_id"]}
-    """);
   }
+  if (!isError) {
+    print("Ok Save all!");
+    await db.execute("update taskrepairlink set syncstatus = 0 where syncstatus = 1");
+    await db.execute("delete from taskrepairlink where syncstatus = -1");
+    await db.execute("update taskdefectlink set syncstatus = 0 where syncstatus = 1");
+    await db.execute("delete from taskdefectlink where syncstatus = -1");
+    await db.execute("update terminalcomponentlink set syncstatus = 0 where syncstatus = 1");
+    await db.execute("delete from terminalcomponentlink where syncstatus = -1");
+    await db.execute("update task set updcommentflag = 0, updmarkflag = 0");
+  }
+//} catch(exception) {
+//  print("Ошибка! $exception");
+//}
+//Нужно ловить эксепшн и для считывания по локальной базе
+
+//new Timer(const Duration(minutes: 2), saveGeo);
+//return;
+
+
   return null;
-*/
+
+
 }
 
 
