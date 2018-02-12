@@ -13,10 +13,10 @@
     self.locationManager = [[CLLocationManager alloc] init];
 
     // Setup location tracker accuracy
-    self.locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
+    self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
 
     // Distance filter
-    self.locationManager.distanceFilter = 50.0;
+    self.locationManager.distanceFilter = 5.0f;
 
     // Assign location tracker delegate
     self.locationManager.delegate = self;
