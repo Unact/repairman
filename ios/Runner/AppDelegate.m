@@ -4,12 +4,32 @@
 
 @interface AppDelegate()
     @property (nonatomic, strong) CLLocationManager *locationManager;
+    @property (nonatomic) FlutterBasicMessageChannel* messageChannel;
 @end
+
+static NSString* const emptyString = @"";
+static NSString* const ping = @"ping";
+static NSString* const channel = @"increment";
 
 @implementation AppDelegate
 
+- (NSString*) messageName {
+  return channel;
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
+
+    self.messageChannel = [ FlutterBasicMessageChannel messageChannelWithName:channel
+                            binaryMessenger:self.window.rootViewController
+                            codec:[FlutterStringCodec sharedInstance]];
+/*
+MainViewController*  __weak weakSelf = self;
+[self.messageChannel setMessageHandler:^(id message, FlutterReply reply) {
+  [weakSelf.nativeViewController didReceiveIncrement];
+  reply(emptyString);
+}];
+*/
     self.locationManager = [[CLLocationManager alloc] init];
 
     // Setup location tracker accuracy
@@ -50,10 +70,14 @@
     CLLocation *location = [locations lastObject];
     if (location == nil)
         return;
-
-    // Save location
+    NSNumber *latitude = [NSNumber numberWithDouble:location.coordinate.latitude];
+    NSNumber *longitude = [NSNumber numberWithDouble:location.coordinate.longitude];
+    NSNumber *horizontalAccuracy = [NSNumber numberWithDouble:location.horizontalAccuracy];
+    NSNumber *altitude = [NSNumber numberWithDouble:location.altitude];
+    NSString *my_msg = [NSString stringWithFormat:@"%@ %@ %@ %@", latitude, longitude,
+                        horizontalAccuracy, altitude];
+    [self.messageChannel sendMessage:my_msg];
     // [self addLocation:location];
-
 
 }
 

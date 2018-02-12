@@ -148,7 +148,7 @@ class DbSynch {
   }
 
   Future<Null> getGeo() async {
-    Map<String,double> myLocation;
+/*    Map<String,double> myLocation;
     try {
       myLocation = await location.getLocation;
       lastLatitude = myLocation["latitude"];
@@ -163,7 +163,7 @@ class DbSynch {
       print("Ошибка! $exception");
     }
 
-    new Timer(const Duration(seconds: 30), getGeo);
+    new Timer(const Duration(seconds: 30), getGeo);*/
     return;
   }
 

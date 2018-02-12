@@ -6,6 +6,7 @@ import 'terminal.dart';
 import 'auth.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
+import 'package:flutter/services.dart';
 
 void main() => runApp(new MyApp());
 
@@ -65,6 +66,12 @@ class _MyHomePageState extends State<MyHomePage> {
   bool loading = false;
   double _distance = 0.0;
   bool updating=false;
+  static const String _channel = 'increment';
+  static const String _emptyMessage = '';
+  static const BasicMessageChannel<String> platform =
+      const BasicMessageChannel<String>(_channel, const StringCodec());
+  int _counter = 0;
+  String lastCoord = "";
 
   void refreshDistance(){
     cfg.getDistance().then((double res) {
@@ -78,6 +85,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
+
+    platform.setMessageHandler(_handlePlatformIncrement);
 
     loading = true;
     cfg.initDB().then((Database db){
@@ -99,6 +108,24 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
   }
+
+  Future<String> _handlePlatformIncrement(String message) async {
+    var a = message.split(" ");
+    cfg.db.insert("location", {
+      "latitude":   a[0],
+      "longitude":  a[1],
+      "accuracy":   a[2],
+      "altitude":   a[3]
+    });
+    
+    setState(() {
+      _counter++;
+      lastCoord = message;
+    });
+    print("message = $message");
+    return _emptyMessage;
+  }
+
   @override
   Widget build(BuildContext context) {
     List<Widget> cntcolorboxes=[];
@@ -229,6 +256,7 @@ new GestureDetector(
         child: new Text('Обновить данные', style: new TextStyle(color: Colors.white)),
       ),
       new Divider(),
+      new Text("Platform get $_counter $lastCoord")
 /*
       new RaisedButton(
         color: Colors.red,
