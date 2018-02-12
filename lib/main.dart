@@ -160,18 +160,34 @@ class _MyHomePageState extends State<MyHomePage> {
         child: new Text("Терминалы"),
         color: Colors.grey.shade300,
       ),
-      new GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () async
-        {
-          await Navigator.of(context).pushNamed(terminalsPageRoute);
-        },
-        child: new Container(
-          child: new Text('Терминалы'),
-          height: 40.0,
+new GestureDetector(
+           behavior: HitTestBehavior.translucent,
+           onTap: () async {await Navigator.of(context).pushNamed(terminalsPageRoute);},
+           child: new Container(
+                padding: const EdgeInsets.all(4.0),
+                height: 40.0,
+                child:
+                   new Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                   new Expanded(flex: 100, child:
+                   new Column(
+                     children: <Widget>[
+                       new Row(children: [new Text("Ближайший: ", textAlign: TextAlign.start)]),
+                       new Row(children: [new Text("проспект Тестовый, 1А", textAlign: TextAlign.start, )])
+                     ],
+                   )),
 
-        ),
-      ),
+                   new Expanded(
+                   flex:5,
+                   child: new Text("${cfg.terminalcnt}", style: new TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)))
+
+                   ]),
+                )
+         ),
+
+
+
       new Container(
         height: 20.0,
         child: new Text("Управление"),
@@ -197,12 +213,21 @@ class _MyHomePageState extends State<MyHomePage> {
       new RaisedButton(
         color: Colors.blue,
         onPressed: () async {
-          await cfg.fillDB();
-          print("completed...");
+//cfg.fillDB().then((v){print("completed...");});
+
+          cfg.synchDB().then((res){
+            if (res=="ok") {
+              print("completed synchDB...");
+              cfg.fillDB().then((v){print("completed...");});
+            }
+
+          });
+
         },
         child: new Text('Обновить данные', style: new TextStyle(color: Colors.white)),
       ),
       new Divider(),
+/*
       new RaisedButton(
         color: Colors.red,
         onPressed: () async {
@@ -210,7 +235,7 @@ class _MyHomePageState extends State<MyHomePage> {
           print("completed synchDB...");
         },
         child: new Text('Тест апдейт', style: new TextStyle(color: Colors.white)),
-      )
+      ) */
     ]);
 
     return new Scaffold(

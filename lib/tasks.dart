@@ -190,9 +190,13 @@ crossAxisAlignment: CrossAxisAlignment.start,
 
 
 
-Widget oneCGroup(DbSynch cfg, BuildContext context, String name, int freeremains, int preinstcnt, String cGroupXid) {
+Widget oneCGroup(DbSynch cfg, BuildContext context, String name, int freeremains, int inscnt, int remcnt, int preinstcnt, String cGroupXid) {
+String spreinstcnt="";
 String scnt="";
-if (preinstcnt>0) {scnt = preinstcnt.toString();}
+if (preinstcnt>0) {spreinstcnt = preinstcnt.toString();}
+if (freeremains>0) {scnt+="Остаток: ${freeremains-inscnt}  ";}
+if (inscnt>0) {scnt+="Установлено: $inscnt  ";}
+if (remcnt>0) {scnt+="Неиспр.: $remcnt  ";}
 
 return new GestureDetector(
            behavior: HitTestBehavior.translucent,
@@ -202,24 +206,24 @@ return new GestureDetector(
               await Navigator.of(context).pushNamed(taskSubpageComponentRoute);
            },
            child: new Container(
+                padding: const EdgeInsets.all(4.0),
                 height: 48.0,
                 child:
                    new Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                   new Expanded(
-                     flex: 100,
-
-                   child: new Column(
+                   new Expanded(flex: 100, child:
+                   new Column(
                      children: <Widget>[
-                       new Text(name, textAlign: TextAlign.start),
-                       new Text("Остаток: $freeremains", textAlign: TextAlign.start, style: new TextStyle(color: Colors.blue))
-                     ]
+                       new Row(children: [new Text(name, textAlign: TextAlign.start)]),
+                       new Row(children: [new Text(scnt, textAlign: TextAlign.start, style: new TextStyle(color: Colors.blue))])
+                     ],
                    )),
 
                    new Expanded(
-                    flex: 10,
-                   child: new Text(scnt, style: new TextStyle(fontSize: 20.0, color: Colors.blue))
-                   )
+                   flex:5,
+                   child: new Text(spreinstcnt, style: new TextStyle(fontSize: 20.0, color: Colors.blue)))
+
                    ]),
                 )
          );
@@ -274,24 +278,22 @@ class _CGroupPageState extends State<CGroupPage> {
   _CGroupPageState({this.cfg});
   DbSynch cfg;
   List<Widget> cgrouplist;
-  List<Map> _cgroups=[];
+
 
   @override
   void initState() {
     super.initState();
-    cfg.getCGroups(cfg.curTask).then((List<Map> list){
-      setState((){
-        _cgroups = list;
-      });
+    cfg.getCGroups(cfg.curTask).then((v){
+      setState((){});
     });
   }
 
   @override
   Widget build(BuildContext context) {
     cgrouplist = [];
-    for (var r in _cgroups) {
+    for (var r in cfg.cgroups) {
 
-      cgrouplist.add(oneCGroup(cfg, context,r["name"],r["freeremains"],r["preinstcnt"],r["xid"]));
+      cgrouplist.add(oneCGroup(cfg, context,r["name"],r["freeremains"],r["inscnt"],r["remcnt"],r["preinstcnt"],r["xid"]));
       cgrouplist.add(new Divider(height: 1.0));
 
     }
@@ -299,7 +301,7 @@ class _CGroupPageState extends State<CGroupPage> {
 
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("ЗИПы тест")
+        title: new Text("ЗИПы")
       ),
       body: new ListView(
       shrinkWrap: true,
