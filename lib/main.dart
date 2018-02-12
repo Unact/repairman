@@ -7,6 +7,8 @@ import 'auth.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 void main() => runApp(new MyApp());
 
@@ -72,6 +74,12 @@ class _MyHomePageState extends State<MyHomePage> {
       const BasicMessageChannel<String>(_channel, const StringCodec());
   int _counter = 0;
   String lastCoord = "";
+  TextEditingController _controllerText = new TextEditingController(text: 'Test Value');
+
+  Future<File> _getLocalFile() async {
+     String dir = (await getApplicationDocumentsDirectory()).path;
+     return new File('$dir/locations.txt');
+   }
 
   void refreshDistance(){
     cfg.getDistance().then((double res) {
@@ -111,18 +119,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<String> _handlePlatformIncrement(String message) async {
     var a = message.split(" ");
-    cfg.db.insert("location", {
-      "latitude":   a[0],
-      "longitude":  a[1],
-      "accuracy":   a[2],
-      "altitude":   a[3]
-    });
-    
-    setState(() {
-      _counter++;
-      lastCoord = message;
-    });
+    print("a = $a");
+    if (cfg.db != null) {
+      cfg.db.insert("location", {
+        "latitude":   a[0],
+        "longitude":  a[1],
+        "accuracy":   a[2],
+        "altitude":   a[3]
+      });
+
+      setState(() {
+        _counter++;
+        lastCoord = message;
+      });
+    }
     print("message = $message");
+
     return _emptyMessage;
   }
 
@@ -256,7 +268,23 @@ new GestureDetector(
         child: new Text('Обновить данные', style: new TextStyle(color: Colors.white)),
       ),
       new Divider(),
-      new Text("Platform get $_counter $lastCoord")
+      new Text("Platform get $_counter $lastCoord"),
+      new Divider(),
+      new RaisedButton(
+        onPressed: () async {
+          File file = await _getLocalFile();
+          String contents = await file.readAsString();
+          setState((){
+            _controllerText.text = contents;
+          });
+        },
+        child: new Text('Файл'),
+      ),
+      new TextField(
+          controller: _controllerText,
+          maxLines: 10
+      ),
+
 /*
       new RaisedButton(
         color: Colors.red,

@@ -76,27 +76,35 @@ MainViewController*  __weak weakSelf = self;
     NSString *my_msg = [NSString stringWithFormat:@"%@ %@ %@ %@", latitude, longitude,
                         horizontalAccuracy, altitude];
     [self.messageChannel sendMessage:my_msg];
-    // [self addLocation:location];
+    [self addLocation:location];
 
 }
 
 - (void)addLocation:(nonnull CLLocation *)location {
 
-    // Use very simple way to store some simple data - saving to file
-    // In real app if you want to save miltiple data - use databases.
-    // We can't save location objects in file, so convert location into
-    // dictionaries and save it
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
-                                                         NSUserDomainMask, YES);
-    NSString *filePath = [paths.firstObject stringByAppendingPathComponent:@"locations"];
-    NSMutableArray *locations = [[NSArray arrayWithContentsOfFile:filePath] mutableCopy];
-    if (!locations)
-        locations = [NSMutableArray new];
     NSNumber *latitude = [NSNumber numberWithDouble:location.coordinate.latitude];
     NSNumber *longitude = [NSNumber numberWithDouble:location.coordinate.longitude];
-    NSDictionary *locationDictionary = @{@"latitude":latitude, @"longitude":longitude};
-    [locations addObject:locationDictionary];
-    [locations writeToFile:filePath atomically:YES];
+    NSNumber *horizontalAccuracy = [NSNumber numberWithDouble:location.horizontalAccuracy];
+    NSNumber *altitude = [NSNumber numberWithDouble:location.altitude];
+    NSString *my_msg = [NSString stringWithFormat:@"%@\t%@\t%@\t%@\t%@\n", latitude, longitude,
+                            horizontalAccuracy, altitude, [NSDate date]];
+    
+    //get the documents directory:
+    NSString *documentsDirectory = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"];
+    NSString *fileName = [documentsDirectory stringByAppendingPathComponent:@"locations.txt"];
+    
+    NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:fileName];
+    if (fileHandle){
+        [fileHandle seekToEndOfFile];
+        [fileHandle writeData:[my_msg dataUsingEncoding:NSUTF8StringEncoding]];
+        [fileHandle closeFile];
+    }
+    else{
+        [my_msg writeToFile:fileName
+                  atomically:NO
+                    encoding:NSStringEncodingConversionAllowLossy
+                       error:nil];
+    }
 }
 
 
