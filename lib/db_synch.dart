@@ -81,12 +81,14 @@ class DbSynch {
   double lastLongitude;
 
   List<Map> tasks=[];
+  List<Map> cgroups=[];
 
   int allcnt=0;
   int uncomplcnt=0;
   int redcnt=0;
   int yellowcnt=0;
   int greencnt=0;
+  int terminalcnt=0;
 
 
 
@@ -304,6 +306,7 @@ class DbSynch {
             CREATE TABLE terminalcomponentlink(
               id INTEGER PRIMARY KEY DEFAULT AUTO_INCREMENT,
               comp_id INT,
+              group_xid TEXT,
               task_id INT,
               is_removed INT,
               syncstatus INTEGER DEFAULT 0
@@ -663,10 +666,9 @@ order by preinstflag DESC
 
 }
 
-Future<List<Map>> getCGroups(int taskId) async {
-  List<Map> list;
+Future<Null> getCGroups(int taskId) async {
   ////not exists (select * from taskcomponent where componentxid = c.xid and coalesce(removed, '0') <> '1') and
-  list = await db.rawQuery("""
+  cgroups = await db.rawQuery("""
     select
            id,
            xid,
@@ -677,12 +679,13 @@ Future<List<Map>> getCGroups(int taskId) async {
            (select count(*)
               from terminalcomponent tc
              where tc.componentgroupxid = cg.xid and
-                   tc.terminalid = (select terminal from task where id = $taskId)) preinstcnt
+                   tc.terminalid = (select terminal from task where id = $taskId)) preinstcnt,
+           (select count(*) from terminalcomponentlink tcl where task_id=$taskId and group_xid = cg.xid and is_removed = 0) inscnt,
+           (select count(*) from terminalcomponentlink tcl where task_id=$taskId and group_xid = cg.xid and is_removed = 1) remcnt
    from componentgroup cg
   where freeremains > 0
   """);
 
-  return list;
 }
 
 Future<List<Map>> getTerminal() async {
@@ -767,7 +770,8 @@ Future<Null> getMainPageCnt() async {
            (select count(*) from task where servstatus = 0) uncomplcnt,
            (select count(*) from task where servstatus = 0 and routepriority = 3) redcnt,
            (select count(*) from task where servstatus = 0 and routepriority = 2) yellowcnt,
-           (select count(*) from task where servstatus = 0 and routepriority = 1) greencnt
+           (select count(*) from task where servstatus = 0 and routepriority = 1) greencnt,
+           (select count(*) from terminal where errortext<>'null') terminalcnt
   """);
 
   allcnt = list[0]['allcnt'];
@@ -775,6 +779,7 @@ Future<Null> getMainPageCnt() async {
   redcnt = list[0]['redcnt'];
   yellowcnt = list[0]['yellowcnt'];
   greencnt = list[0]['greencnt'];
+  terminalcnt = list[0]['terminalcnt'];
 
 }
 
@@ -893,7 +898,7 @@ Future<Null> updateComponent(int compId, int taskId, int preinstflag, int newsta
     if (newstatus == 1) {
       if (syncstatus==null) {
         print("  <1> вставляем в # с сюнкстатусом 1");
-        await db.execute("insert into terminalcomponentlink (comp_id, task_id, is_removed, syncstatus) select $compId, $taskId, $preinstflag, 1");
+        await db.execute("insert into terminalcomponentlink (comp_id, group_xid, task_id, is_removed, syncstatus) select $compId, '$curCGroup', $taskId, $preinstflag, 1");
       } else {
         print("  <2> апдейтим в # на сюнкстатус 0");
         await db.execute("update terminalcomponentlink set syncstatus = 0 where id = $id");
@@ -907,7 +912,7 @@ Future<Null> updateComponent(int compId, int taskId, int preinstflag, int newsta
         await db.execute("delete from terminalcomponentlink where id = $id");
       }
     }
-
+ getCGroups(taskId);
 }
 
 
@@ -1039,6 +1044,7 @@ Future<String> synchDB() async {
       isError = true;
     }
   }
+
   if (!isError) {
     print("Ok Save all!");
     await db.execute("update taskrepairlink set syncstatus = 0 where syncstatus = 1");
@@ -1048,7 +1054,11 @@ Future<String> synchDB() async {
     await db.execute("update terminalcomponentlink set syncstatus = 0 where syncstatus = 1");
     await db.execute("delete from terminalcomponentlink where syncstatus = -1");
     await db.execute("update task set updcommentflag = 0, updmarkflag = 0");
+    return "ok";
+  } else {
+    return "fail";
   }
+
 //} catch(exception) {
 //  print("Ошибка! $exception");
 //}
@@ -1058,7 +1068,7 @@ Future<String> synchDB() async {
 //return;
 
 
-  return null;
+
 
 
 }
