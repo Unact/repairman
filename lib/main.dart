@@ -81,9 +81,13 @@ class _MyHomePageState extends State<MyHomePage> {
     loading = true;
     cfg.initDB().then((Database db){
       print('Connected to db!');
-      cfg.getGeo();
-      cfg.saveGeo();
-      refreshDistance();
+      cfg.getMainPageCnt().then((v){
+        setState((){});
+        cfg.getGeo();
+        cfg.saveGeo();
+        refreshDistance();
+      });
+
   //Это нужно, но не в таком виде
   /*
       if (cfg.login == null || cfg.login == '' ||
@@ -96,6 +100,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   @override
   Widget build(BuildContext context) {
+    List<Widget> cntcolorboxes=[];
+
+    if (cfg.redcnt>0) {cntcolorboxes.add(new Container(height: 30.0, width: 30.0, color: Colors.red, child: new Column(mainAxisAlignment: MainAxisAlignment.center, children: [new Text(cfg.redcnt.toString(), style: new TextStyle(fontSize: 16.0))])));}
+    if (cfg.yellowcnt>0) {cntcolorboxes.add(new Container(height: 30.0, width: 30.0, color: Colors.yellow, child: new Column(mainAxisAlignment: MainAxisAlignment.center, children: [new Text(cfg.yellowcnt.toString(), style: new TextStyle(fontSize: 16.0))])));}
+    if (cfg.greencnt>0) {cntcolorboxes.add(new Container(height: 30.0, width: 30.0, color: Colors.green, child: new Column(mainAxisAlignment: MainAxisAlignment.center, children: [new Text(cfg.greencnt.toString(), style: new TextStyle(fontSize: 16.0))])));}
+
 
     final BottomNavigationBar botNavBar = new BottomNavigationBar(
       items: [new BottomNavigationBarItem(
@@ -133,9 +143,16 @@ class _MyHomePageState extends State<MyHomePage> {
           await Navigator.of(context).pushNamed(taskPageRoute);
         },
         child: new Container(
-          color: Colors.yellow,
-          child: new Text('Задачи'),
+          padding: const EdgeInsets.all(4.0),
           height: 40.0,
+          child: new Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: [
+               new Expanded(flex: 40, child: new Text('Невыполненных: ${cfg.uncomplcnt}', style: new TextStyle(fontSize: 16.0))),
+               new Expanded(flex: 25, child: new Row(children: cntcolorboxes)),
+               new Expanded(flex: 8, child: new Text("${cfg.allcnt}", textAlign: TextAlign.right,style: new TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)))
+             ]
+          ),
         ),
       ),
       new Container(
@@ -150,7 +167,6 @@ class _MyHomePageState extends State<MyHomePage> {
           await Navigator.of(context).pushNamed(terminalsPageRoute);
         },
         child: new Container(
-          color: Colors.yellow,
           child: new Text('Терминалы'),
           height: 40.0,
 

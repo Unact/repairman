@@ -82,6 +82,12 @@ class DbSynch {
 
   List<Map> tasks=[];
 
+  int allcnt=0;
+  int uncomplcnt=0;
+  int redcnt=0;
+  int yellowcnt=0;
+  int greencnt=0;
+
 
 
   Future<Null> saveGeo() async {
@@ -752,6 +758,26 @@ Future<List<Map>> getRepairs(int taskId) async {
 
   return list;
 }
+
+Future<Null> getMainPageCnt() async {
+  List<Map> list;
+
+  list = await db.rawQuery("""
+    select (select count(*) from task) allcnt,
+           (select count(*) from task where servstatus = 0) uncomplcnt,
+           (select count(*) from task where servstatus = 0 and routepriority = 3) redcnt,
+           (select count(*) from task where servstatus = 0 and routepriority = 2) yellowcnt,
+           (select count(*) from task where servstatus = 0 and routepriority = 1) greencnt
+  """);
+
+  allcnt = list[0]['allcnt'];
+  uncomplcnt = list[0]['uncomplcnt'];
+  redcnt = list[0]['redcnt'];
+  yellowcnt = list[0]['yellowcnt'];
+  greencnt = list[0]['greencnt'];
+
+}
+
 
 Future<List<Map>> getOneTask(int taskId) async {
   List<Map> list;
