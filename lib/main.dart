@@ -64,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
   bool sendingPwd = false;
   bool loading = false;
   double _distance = 0.0;
+  bool updating=false;
 
   void refreshDistance(){
     cfg.getDistance().then((double res) {
@@ -210,16 +211,17 @@ new GestureDetector(
         ]
       ),
       new Divider(),
+      updating?  new CircularProgressIndicator() :
       new RaisedButton(
         color: Colors.blue,
         onPressed: () async {
-//cfg.fillDB().then((v){print("completed...");});
+          setState((){updating = true;});
 
           cfg.synchDB().then((res){
             if (res=="ok") {
               print("completed synchDB...");
-              cfg.fillDB().then((v){print("completed...");});
-            }
+              cfg.fillDB().then((v){updating = false; print("completed...");});
+            } else {updating = false;}
 
           });
 
