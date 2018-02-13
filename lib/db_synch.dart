@@ -4,7 +4,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:location/location.dart';
+//import 'package:location/location.dart';
 import 'package:great_circle_distance/great_circle_distance.dart';
 import 'package:flutter/material.dart';
 
@@ -65,7 +65,7 @@ class DbSynch {
   int dbTerminalId=0;
   String clientName="";
   int closed=0;
-  Location location = new Location();
+  // Location location = new Location();
 
   int curTask;
   String curCGroup;
@@ -97,7 +97,7 @@ class DbSynch {
     var response;
     var data;
     bool isError = false;
-
+    print("Do save geo");
     try {
       locations = await db.rawQuery("select latitude, longitude, accuracy, altitude, ts from location");
       if (token==null) {
@@ -143,10 +143,11 @@ class DbSynch {
       print("Ошибка! $exception");
     }
 
-    new Timer(const Duration(minutes: 2), saveGeo);
+    // new Timer(const Duration(minutes: 1), saveGeo);
     return;
   }
 
+/*
   Future<Null> getGeo() async {
     Map<String,double> myLocation;
     try {
@@ -166,6 +167,7 @@ class DbSynch {
     //new Timer(const Duration(seconds: 30), getGeo);
     return;
   }
+*/
 
   Future<Database> initDB() async {
     String dir = (await getApplicationDocumentsDirectory()).path;
@@ -173,8 +175,8 @@ class DbSynch {
     print ("$path");
     bool isUpgrage;
 
-    location.onLocationChanged.listen((Map<String,double> result) {
-    });
+    //location.onLocationChanged.listen((Map<String,double> result) {
+    //});
 
     do {
       isUpgrage = false;

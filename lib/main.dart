@@ -101,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
       print('Connected to db!');
       cfg.getMainPageCnt().then((v){
         setState((){});
-        cfg.getGeo();
+        //cfg.getGeo();
         cfg.saveGeo();
         refreshDistance();
       });
@@ -121,12 +121,19 @@ class _MyHomePageState extends State<MyHomePage> {
     var a = message.split(" ");
     print("a = $a");
     if (cfg.db != null) {
+      cfg.lastLatitude = double.parse(a[0]);
+      cfg.lastLongitude = double.parse(a[1]);
       cfg.db.insert("location", {
         "latitude":   a[0],
         "longitude":  a[1],
         "accuracy":   a[2],
         "altitude":   a[3]
       });
+
+      if (_counter > 7 ) {
+        cfg.saveGeo();
+        _counter = 0;
+      }
 
       setState(() {
         _counter++;

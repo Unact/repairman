@@ -22,13 +22,7 @@ static NSString* const channel = @"increment";
     self.messageChannel = [ FlutterBasicMessageChannel messageChannelWithName:channel
                             binaryMessenger:self.window.rootViewController
                             codec:[FlutterStringCodec sharedInstance]];
-/*
-MainViewController*  __weak weakSelf = self;
-[self.messageChannel setMessageHandler:^(id message, FlutterReply reply) {
-  [weakSelf.nativeViewController didReceiveIncrement];
-  reply(emptyString);
-}];
-*/
+
     self.locationManager = [[CLLocationManager alloc] init];
 
     // Setup location tracker accuracy
@@ -40,15 +34,17 @@ MainViewController*  __weak weakSelf = self;
     // Assign location tracker delegate
     self.locationManager.delegate = self;
 
-
     [self.locationManager setPausesLocationUpdatesAutomatically:NO];
     // For iOS9 we have to call this method if we want to receive location updates in background mode
     if([self.locationManager respondsToSelector:@selector(allowsBackgroundLocationUpdates)]){
         [self.locationManager setAllowsBackgroundLocationUpdates:YES];
     }
 
-    [self.locationManager startMonitoringSignificantLocationChanges];
-
+    // [self.locationManager startMonitoringSignificantLocationChanges];
+    [self.locationManager requestAlwaysAuthorization];
+    
+    [self.locationManager startUpdatingLocation];
+    
     [GeneratedPluginRegistrant registerWithRegistry:self];
 
     return [super application:application didFinishLaunchingWithOptions:launchOptions];
@@ -57,9 +53,24 @@ MainViewController*  __weak weakSelf = self;
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     NSLog(@"Go to terminate");
-    [self.locationManager stopMonitoringSignificantLocationChanges];
+    [self.locationManager stopUpdatingLocation]; // stopMonitoringSignificantLocationChanges
 }
 
+- (void)applicationDidEnterBackground:(UIApplication *)application
+{
+    NSLog(@"Go to Background");
+    //start updating location with location manager
+    // [self.locationManager startUpdatingLocation];
+}
+
+
+- (void)applicationWillEnterForeground:(UIApplication *)application
+{
+    NSLog(@"Go to Foreground");
+    //stop updating
+    //[self.locationManager stopUpdatingLocation];
+}
+    
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
     NSLog(@"Did update location!");
 
@@ -69,6 +80,7 @@ MainViewController*  __weak weakSelf = self;
     CLLocation *location = [locations lastObject];
     if (location == nil)
         return;
+    
     NSNumber *latitude = [NSNumber numberWithDouble:location.coordinate.latitude];
     NSNumber *longitude = [NSNumber numberWithDouble:location.coordinate.longitude];
     NSNumber *horizontalAccuracy = [NSNumber numberWithDouble:location.horizontalAccuracy];
