@@ -56,7 +56,12 @@ public class MainActivity extends FlutterActivity{
     @Override
     public void onLocationChanged(Location location) {
       Log.v("tag", "get location");
-      messageChannel.send("37.33420971 -122.04784191 5.0 0.0");
+      String  s = "";
+      s += new Double(location.getLatitude()).toString() + " ";
+      s += new Double(location.getLongitude()).toString() + " ";
+      s += new Double(location.getAccuracy()).toString() + " ";
+      s += new Double(location.getAltitude()).toString();
+      messageChannel.send(s);
     }
 
     @Override
