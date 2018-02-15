@@ -7,8 +7,6 @@ import 'auth.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 
 void main() => runApp(new MyApp());
 
@@ -70,16 +68,8 @@ class _MyHomePageState extends State<MyHomePage> {
   bool updating=false;
   static const String _channel = 'increment';
   static const String _emptyMessage = '';
-  static const BasicMessageChannel<String> platform =
-      const BasicMessageChannel<String>(_channel, const StringCodec());
+  static const BasicMessageChannel<String> platform = const BasicMessageChannel<String>(_channel, const StringCodec());
   int _counter = 0;
-  String lastCoord = "";
-  TextEditingController _controllerText = new TextEditingController(text: 'Test Value');
-
-  Future<File> _getLocalFile() async {
-     String dir = (await getApplicationDocumentsDirectory()).path;
-     return new File('$dir/locations.txt');
-   }
 
   void refreshDistance(){
     cfg.getDistance().then((double res) {
@@ -101,25 +91,19 @@ class _MyHomePageState extends State<MyHomePage> {
       print('Connected to db!');
       cfg.getMainPageCnt().then((v){
         setState((){});
-        //cfg.getGeo();
         cfg.saveGeo();
         refreshDistance();
       });
 
-  //Это нужно, но не в таком виде
-  /*
       if (cfg.login == null || cfg.login == '' ||
           cfg.password == null || cfg.password == '') {
         _currentIndex = 1;
       }
-  */
     });
-
   }
 
   Future<String> _handlePlatformIncrement(String message) async {
     var a = message.split(" ");
-    print("a = $a");
     if (cfg.db != null) {
       cfg.lastLatitude = double.parse(a[0]);
       cfg.lastLongitude = double.parse(a[1]);
@@ -134,14 +118,8 @@ class _MyHomePageState extends State<MyHomePage> {
         cfg.saveGeo();
         _counter = 0;
       }
-
-      setState(() {
-        _counter++;
-        lastCoord = message;
-      });
+      _counter++;
     }
-    print("message = $message");
-
     return _emptyMessage;
   }
 
@@ -207,34 +185,30 @@ class _MyHomePageState extends State<MyHomePage> {
         child: new Text("Терминалы"),
         color: Colors.grey.shade300,
       ),
-new GestureDetector(
-           behavior: HitTestBehavior.translucent,
-           onTap: () async {await Navigator.of(context).pushNamed(terminalsPageRoute);},
-           child: new Container(
-                padding: const EdgeInsets.all(4.0),
-                height: 40.0,
-                child:
-                   new Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                   new Expanded(flex: 100, child:
-                   new Column(
-                     children: <Widget>[
-                       new Row(children: [new Text("Ближайший: ", textAlign: TextAlign.start)]),
-                       new Row(children: [new Text("проспект Тестовый, 1А", textAlign: TextAlign.start, )])
-                     ],
-                   )),
-
-                   new Expanded(
-                   flex:5,
-                   child: new Text("${cfg.terminalcnt}", style: new TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)))
-
-                   ]),
-                )
-         ),
-
-
-
+      new GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onTap: () async {await Navigator.of(context).pushNamed(terminalsPageRoute);},
+        child: new Container(
+          padding: const EdgeInsets.all(4.0),
+          height: 40.0,
+          child:
+          new Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              new Expanded(flex: 100, child:
+                new Column(
+                  children: <Widget>[
+                    new Row(children: [new Text("Ближайший: ", textAlign: TextAlign.start)]),
+                    new Row(children: [new Text("проспект Тестовый, 1А", textAlign: TextAlign.start, )])
+                  ],
+                )),
+                new Expanded(
+                  flex:5,
+                  child: new Text("${cfg.terminalcnt}", style: new TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)))
+            ]
+          ),
+        )
+      ),
       new Container(
         height: 20.0,
         child: new Text("Управление"),
@@ -252,7 +226,7 @@ new GestureDetector(
           ),
           new Expanded(
             flex: 2,
-            child: new Text(" км")
+            child: new Text(" км $_counter")
           )
         ]
       ),
@@ -273,34 +247,7 @@ new GestureDetector(
 
         },
         child: new Text('Обновить данные', style: new TextStyle(color: Colors.white)),
-      ),
-      new Divider(),
-      new Text("Platform get $_counter $lastCoord"),
-      new Divider(),
-      new RaisedButton(
-        onPressed: () async {
-          File file = await _getLocalFile();
-          String contents = await file.readAsString();
-          setState((){
-            _controllerText.text = contents;
-          });
-        },
-        child: new Text('Файл'),
-      ),
-      new TextField(
-          controller: _controllerText,
-          maxLines: 10
-      ),
-
-/*
-      new RaisedButton(
-        color: Colors.red,
-        onPressed: () async {
-          await cfg.synchDB();
-          print("completed synchDB...");
-        },
-        child: new Text('Тест апдейт', style: new TextStyle(color: Colors.white)),
-      ) */
+      )
     ]);
 
     return new Scaffold(

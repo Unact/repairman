@@ -52,36 +52,25 @@ public class MainActivity extends FlutterActivity{
   }
 
   private LocationListener locationListener = new LocationListener() {
-
     @Override
     public void onLocationChanged(Location location) {
       Log.v("tag", "get location");
-      String  s = "";
-      s += new Double(location.getLatitude()).toString() + " ";
-      s += new Double(location.getLongitude()).toString() + " ";
-      s += new Double(location.getAccuracy()).toString() + " ";
-      s += new Double(location.getAltitude()).toString();
-      messageChannel.send(s);
+      messageChannel.send(new Double(location.getLatitude()).toString() + " " +
+                          new Double(location.getLongitude()).toString() + " " +
+                          new Double(location.getAccuracy()).toString() + " " +
+                          new Double(location.getAltitude()).toString());
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-      //checkEnabled();
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-      //checkEnabled();
-      //showLocation(locationManager.getLastKnownLocation(provider));
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-/*    if (provider.equals(LocationManager.GPS_PROVIDER)) {
-        tvStatusGPS.setText("Status: " + String.valueOf(status));
-      } else if (provider.equals(LocationManager.NETWORK_PROVIDER)) {
-        tvStatusNet.setText("Status: " + String.valueOf(status));
-      }*/
     }
   };
 

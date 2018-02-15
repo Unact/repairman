@@ -18,20 +18,13 @@ static NSString* const channel = @"increment";
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
 
-
     self.messageChannel = [ FlutterBasicMessageChannel messageChannelWithName:channel
                             binaryMessenger:self.window.rootViewController
                             codec:[FlutterStringCodec sharedInstance]];
 
     self.locationManager = [[CLLocationManager alloc] init];
-
-    // Setup location tracker accuracy
     self.locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-
-    // Distance filter
     self.locationManager.distanceFilter = 5.0f;
-
-    // Assign location tracker delegate
     self.locationManager.delegate = self;
 
     [self.locationManager setPausesLocationUpdatesAutomatically:NO];
@@ -40,47 +33,27 @@ static NSString* const channel = @"increment";
         [self.locationManager setAllowsBackgroundLocationUpdates:YES];
     }
 
-    // [self.locationManager startMonitoringSignificantLocationChanges];
     [self.locationManager requestAlwaysAuthorization];
-    
+
     [self.locationManager startUpdatingLocation];
-    
+
     [GeneratedPluginRegistrant registerWithRegistry:self];
 
     return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
-    // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     NSLog(@"Go to terminate");
-    [self.locationManager stopUpdatingLocation]; // stopMonitoringSignificantLocationChanges
+    [self.locationManager stopUpdatingLocation];
 }
 
-- (void)applicationDidEnterBackground:(UIApplication *)application
-{
-    NSLog(@"Go to Background");
-    //start updating location with location manager
-    // [self.locationManager startUpdatingLocation];
-}
-
-
-- (void)applicationWillEnterForeground:(UIApplication *)application
-{
-    NSLog(@"Go to Foreground");
-    //stop updating
-    //[self.locationManager stopUpdatingLocation];
-}
-    
 - (void)locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations {
     NSLog(@"Did update location!");
 
-    // For real cases we should filter location array by accuracy
-    // And check timestamp if you need real time tracking
-    // By we don't do it here
     CLLocation *location = [locations lastObject];
     if (location == nil)
         return;
-    
+
     NSNumber *latitude = [NSNumber numberWithDouble:location.coordinate.latitude];
     NSNumber *longitude = [NSNumber numberWithDouble:location.coordinate.longitude];
     NSNumber *horizontalAccuracy = [NSNumber numberWithDouble:location.horizontalAccuracy];
@@ -88,36 +61,6 @@ static NSString* const channel = @"increment";
     NSString *my_msg = [NSString stringWithFormat:@"%@ %@ %@ %@", latitude, longitude,
                         horizontalAccuracy, altitude];
     [self.messageChannel sendMessage:my_msg];
-    [self addLocation:location];
-
 }
-
-- (void)addLocation:(nonnull CLLocation *)location {
-
-    NSNumber *latitude = [NSNumber numberWithDouble:location.coordinate.latitude];
-    NSNumber *longitude = [NSNumber numberWithDouble:location.coordinate.longitude];
-    NSNumber *horizontalAccuracy = [NSNumber numberWithDouble:location.horizontalAccuracy];
-    NSNumber *altitude = [NSNumber numberWithDouble:location.altitude];
-    NSString *my_msg = [NSString stringWithFormat:@"%@\t%@\t%@\t%@\t%@\n", latitude, longitude,
-                            horizontalAccuracy, altitude, [NSDate date]];
-    
-    //get the documents directory:
-    NSString *documentsDirectory = [NSHomeDirectory() stringByAppendingPathComponent:@"Documents"];
-    NSString *fileName = [documentsDirectory stringByAppendingPathComponent:@"locations.txt"];
-    
-    NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:fileName];
-    if (fileHandle){
-        [fileHandle seekToEndOfFile];
-        [fileHandle writeData:[my_msg dataUsingEncoding:NSUTF8StringEncoding]];
-        [fileHandle closeFile];
-    }
-    else{
-        [my_msg writeToFile:fileName
-                  atomically:NO
-                    encoding:NSStringEncodingConversionAllowLossy
-                       error:nil];
-    }
-}
-
 
 @end
