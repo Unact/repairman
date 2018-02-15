@@ -10,9 +10,15 @@ import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.Manifest;
+import io.flutter.plugin.common.BasicMessageChannel;
+import io.flutter.plugin.common.StringCodec;
+import io.flutter.view.FlutterView;
 
 public class MainActivity extends FlutterActivity{
   private LocationManager locationManager;
+  private static final String CHANNEL = "increment";
+  private BasicMessageChannel messageChannel;
+  private FlutterView flutterView;
 
   private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
 
@@ -41,14 +47,16 @@ public class MainActivity extends FlutterActivity{
     locationManager.requestLocationUpdates(
             LocationManager.NETWORK_PROVIDER, 1000 * 10, 10,
             locationListener);
+
+    messageChannel = new BasicMessageChannel<>(getFlutterView(), CHANNEL, StringCodec.INSTANCE);
   }
 
   private LocationListener locationListener = new LocationListener() {
 
     @Override
     public void onLocationChanged(Location location) {
-      //showLocation(location);
       Log.v("tag", "get location");
+      messageChannel.send("37.33420971 -122.04784191 5.0 0.0");
     }
 
     @Override
