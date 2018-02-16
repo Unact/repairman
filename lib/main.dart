@@ -31,6 +31,7 @@ class _MyAppState extends State<MyApp> {
           taskRepairsSubpageRoute: (BuildContext context) => new TaskRepairsSubpage(cfg: cfg),
           terminalPageRoute: (BuildContext context) => new TerminalPage(cfg: cfg),
           taskSubpageRouteComment: (BuildContext context) => new TaskCommentSubpage(cfg: cfg),
+          loginPageRoute: (BuildContext context) => new AuthPage(cfg: cfg),
     };
   }
 
@@ -57,7 +58,6 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   _MyHomePageState({this.cfg});
-  int _currentIndex = 0;
   DbSynch cfg;
   bool sendingClose = false;
   bool sendingInit = false;
@@ -97,7 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
       if (cfg.login == null || cfg.login == '' ||
           cfg.password == null || cfg.password == '') {
-        _currentIndex = 1;
+        Navigator.of(context).pushNamed(loginPageRoute);
       }
     });
   }
@@ -130,28 +130,6 @@ class _MyHomePageState extends State<MyHomePage> {
     if (cfg.redcnt>0) {cntcolorboxes.add(new Container(height: 30.0, width: 30.0, color: Colors.red, child: new Column(mainAxisAlignment: MainAxisAlignment.center, children: [new Text(cfg.redcnt.toString(), style: new TextStyle(fontSize: 16.0))])));}
     if (cfg.yellowcnt>0) {cntcolorboxes.add(new Container(height: 30.0, width: 30.0, color: Colors.yellow, child: new Column(mainAxisAlignment: MainAxisAlignment.center, children: [new Text(cfg.yellowcnt.toString(), style: new TextStyle(fontSize: 16.0))])));}
     if (cfg.greencnt>0) {cntcolorboxes.add(new Container(height: 30.0, width: 30.0, color: Colors.green, child: new Column(mainAxisAlignment: MainAxisAlignment.center, children: [new Text(cfg.greencnt.toString(), style: new TextStyle(fontSize: 16.0))])));}
-
-
-    final BottomNavigationBar botNavBar = new BottomNavigationBar(
-      items: [new BottomNavigationBarItem(
-                    icon: const Icon(Icons.airline_seat_recline_extra),
-                    title: const Text('Техник'),
-                    backgroundColor: Theme.of(context).primaryColor,
-              ),
-              new BottomNavigationBarItem(
-                    icon: const Icon(Icons.account_box),
-                    title: const Text('Настройки'),
-                    backgroundColor: Theme.of(context).primaryColor,
-              ),
-      ],
-      currentIndex: _currentIndex,
-      type: BottomNavigationBarType.shifting,
-      onTap: (int index) {
-        setState(() {
-          _currentIndex = index;
-        });
-      },
-    );
 
     final Widget mainPage = new ListView(
     shrinkWrap: true,
@@ -252,13 +230,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Техник")
+        title: new Text("Техник"),
+        actions: <Widget>[
+          new IconButton(
+            icon: const Icon(Icons.account_box),
+            onPressed: () { Navigator.of(context).pushNamed(loginPageRoute); }
+          )
+        ],
       ),
       body: new Container(
         padding: const EdgeInsets.all(8.0),
-        child: _currentIndex==0?(mainPage):(new AuthPage(cfg: cfg))
-      ),
-      bottomNavigationBar: botNavBar,
+        child: mainPage
+      )
     );
   }
 }

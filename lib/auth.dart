@@ -46,9 +46,14 @@ class _AuthPageState extends State<AuthPage> {
   @override
   Widget build(BuildContext context) {
 
-    return new Container(
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text("Настройки")
+      ),
+      body: new Container(
       padding: const EdgeInsets.all(8.0),
-      child: new SingleChildScrollView( child: new Column(
+      child: new Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           new GestureDetector(
             onTap: () {
@@ -70,7 +75,9 @@ class _AuthPageState extends State<AuthPage> {
               hintText: 'Введите пароль',
             ),
           ),
-          new Row(
+          new Container(
+            padding: const EdgeInsets.all(8.0),
+            child: new Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [ sendingConnect? new CircularProgressIndicator() : new RaisedButton(
                       color: Colors.blue,
@@ -86,11 +93,19 @@ class _AuthPageState extends State<AuthPage> {
                             );
                           }
                           else {
-                            //_currentIndex = 0;
                             print(cfg.token);
                             alert = new AlertDialog(
                               title: new Text("Подключение"),
                               content: new Text("Успешно"),
+                              actions: <Widget>[
+                                new FlatButton(
+                                  child: new Text('OK'),
+                                  onPressed: (){
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
+                                  }
+                                )
+                              ],
                             );
                           }
                           showDialog(context: context, child: alert);
@@ -123,14 +138,10 @@ class _AuthPageState extends State<AuthPage> {
               child: new Text('Получить пароль', style: new TextStyle(color: Colors.white)),
             )
           ]
-          ),
+        )),
           ((_srvVisible > 5)?(new TextField(controller: _ctlSrv)):(new Container())),
         ]
-      ),)
-    );
-
-
-
+      )));
   }
 
 }

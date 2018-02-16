@@ -14,6 +14,7 @@ const String taskSubpageRouteComment = "/tasks/one/comment";
 const String taskSubpageCgroupRoute = "/tasks/one/cgroup";
 const String taskSubpageComponentRoute = "/tasks/one/cgroup/component";
 const String terminalPageRoute = "/terminal";
+const String loginPageRoute = "/login";
 
 const String taskDefectsSubpageRoute = "/tasks/one/defects";
 const String taskRepairsSubpageRoute = "/tasks/one/repairs";
@@ -64,7 +65,6 @@ class DbSynch {
   int dbTerminalId=0;
   String clientName="";
   int closed=0;
-  // Location location = new Location();
 
   int curTask;
   String curCGroup;
