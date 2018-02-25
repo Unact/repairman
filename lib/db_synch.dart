@@ -638,11 +638,12 @@ Future<List<Map>> getTerminals() async {
            src_system_name,
            latitude,
            longitude,
-           mobileop
+           mobileop,
+           abs(latitude - ($lastLatitude)) + abs(longitude-($lastLongitude)) dist
       from terminal
     where errortext<>'null'
-  """); //Нулл в кавычках - АД. Но пока работает только так.
-//Нет сортировки, какая-то нужна
+    order by dist
+  """);
   return list;
 }
 

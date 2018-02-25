@@ -70,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static const String _emptyMessage = '';
   static const BasicMessageChannel<String> platform = const BasicMessageChannel<String>(_channel, const StringCodec());
   int _counter = 0;
+  String _nearTerminal = "....";
 
   void refreshDistance(){
     cfg.getDistance().then((double res) {
@@ -119,6 +120,14 @@ class _MyHomePageState extends State<MyHomePage> {
         _counter = 0;
       }
       _counter++;
+
+      cfg.getTerminals().then((List<Map> list){
+        if (list.length > 0) {
+          setState((){
+            _nearTerminal = list[0]["address"];
+          });
+        }
+      });
     }
     return _emptyMessage;
   }
@@ -177,7 +186,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 new Column(
                   children: <Widget>[
                     new Row(children: [new Text("Ближайший: ", textAlign: TextAlign.start)]),
-                    new Row(children: [new Text("проспект Тестовый, 1А", textAlign: TextAlign.start, )])
+                    new Row(children: [new Text(_nearTerminal, textAlign: TextAlign.start)])
                   ],
                 )),
                 new Expanded(
@@ -218,9 +227,13 @@ class _MyHomePageState extends State<MyHomePage> {
           cfg.synchDB().then((res){
             if (res=="ok") {
               print("completed synchDB...");
-              cfg.fillDB().then((v){updating = false; print("completed...");});
-            } else {updating = false;}
-
+              cfg.fillDB().then((v){
+                setState((){updating = false;});
+                print("completed...");
+              });
+            } else {
+              setState((){updating = false;});
+            }
           });
 
         },
