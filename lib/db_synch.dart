@@ -60,8 +60,7 @@ class DbSynch {
   String login;
   String password;
   String clientId = "repairman";
-  //String server = "https://rapi.unact.ru/api/v1/";
-  String server = "http://localhost:3000/api/v1/";
+  String server = "https://rapi.unact.ru/api/v1/";
   String token;
   int dbTerminalId=0;
   String clientName="";

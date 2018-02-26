@@ -73,7 +73,6 @@ class _MyHomePageState extends State<MyHomePage> {
   String _nearTerminal = "....";
   Widget syncstatuswidget;
 
-
   void refreshDistance(){
     cfg.getDistance().then((double res) {
       setState((){
@@ -142,6 +141,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (cfg.yellowcnt>0) {cntcolorboxes.add(new Container(height: 30.0, width: 30.0, color: Colors.yellow, child: new Column(mainAxisAlignment: MainAxisAlignment.center, children: [new Text(cfg.yellowcnt.toString(), style: new TextStyle(fontSize: 16.0))])));}
     if (cfg.greencnt>0) {cntcolorboxes.add(new Container(height: 30.0, width: 30.0, color: Colors.green, child: new Column(mainAxisAlignment: MainAxisAlignment.center, children: [new Text(cfg.greencnt.toString(), style: new TextStyle(fontSize: 16.0))])));}
 
+<<<<<<< HEAD
     if (cfg.syncing==1) {
       syncstatuswidget = new Container(
            padding: const EdgeInsets.all(4.0),
@@ -162,6 +162,8 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
 
+=======
+>>>>>>> origin/master
     final Widget mainPage = new ListView(
     shrinkWrap: true,
     children: <Widget>[
@@ -251,6 +253,7 @@ class _MyHomePageState extends State<MyHomePage> {
           cfg.synchDB().then((res){
             if (res=="ok") {
               print("completed synchDB...");
+<<<<<<< HEAD
 
               cfg.fillDB().then((v){
                 cfg.getMainPageCnt().then((v){
@@ -265,10 +268,20 @@ class _MyHomePageState extends State<MyHomePage> {
             }
 
 
+=======
+              cfg.fillDB().then((v){
+                setState((){updating = false;});
+                print("completed...");
+              });
+            } else {
+              setState((){updating = false;});
+            }
+>>>>>>> origin/master
           });
 
         },
         child: new Text('Обновить данные', style: new TextStyle(color: Colors.white)),
+<<<<<<< HEAD
       ):
       new RaisedButton(
         color: Colors.grey,
@@ -281,6 +294,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
+=======
+      )
+>>>>>>> origin/master
     ]);
 
     return new Scaffold(
