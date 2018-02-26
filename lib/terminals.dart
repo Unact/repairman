@@ -14,10 +14,7 @@ return new GestureDetector(
            },
            child: new Container(
                 height: 48.0,
-                decoration: const BoxDecoration(
-                  border: const Border(
-                        bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000))
-                )),
+                padding: const EdgeInsets.all(4.0),
                 child:
                    new Column(
                      children: <Widget>[
@@ -28,7 +25,7 @@ return new GestureDetector(
                            new Text(fmtSrok(lastactivitytime), style: new TextStyle(color: Colors.blue)),
                          ]
                        ),
-                       new Text(address, style: new TextStyle(color: Colors.green, fontSize: 12.0))
+                       new Text(address, style: new TextStyle(fontSize: 10.0))
                      ]
                    )
                 )
@@ -71,7 +68,7 @@ class _TerminalsPageState extends State<TerminalsPage> {
       print(r["errortext"]);
       print("---------");
       terminallist.add(oneTerminal(cfg, context,r["code"],DateTime.parse(r["lastactivitytime"]),r["address"], r["id"] ));
-
+      terminallist.add(new Divider(height: 1.0));
     }
 
 

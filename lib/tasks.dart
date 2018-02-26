@@ -44,6 +44,7 @@ return new GestureDetector(
               cfg.curTask = taskId;
               cfg.curServstatus = servstatus;
               await Navigator.of(context).pushNamed(taskSubpageRoute);
+              cfg.synchDB();
            },
            child: new Container(
                 color: colors["bcolor"],
@@ -143,7 +144,7 @@ if (chflag==1) {
   if (preinstflag==1) {chtext="Снят";} else {chtext="Устан.";}
 }
 
-return new GestureDetector(
+return cfg.syncing==1?  new CircularProgressIndicator() : new GestureDetector(
            behavior: HitTestBehavior.translucent,
            onTap: () async
            {
@@ -168,10 +169,6 @@ crossAxisAlignment: CrossAxisAlignment.start,
 
 
                    new Container(
-                     decoration: const BoxDecoration(
-                       border: const Border(
-                             bottom: const BorderSide(width: 1.0, color: const Color(0xFFFF000000))
-                     )),
 
                      child: new Text(shortName, textAlign: TextAlign.start)),
 
@@ -241,8 +238,7 @@ return new GestureDetector(
           behavior: HitTestBehavior.translucent,
           onTap: () async
           {
-            //Как-то мне не нравится, что в ответ на интерактивное действие мы ждем отработки БД, но как еще?..
-            cfg.updateDefect(cfg.curTask, defectid, newstatus).then((v){cbSetState();});
+            if (cfg.syncing!=1) {cfg.updateDefect(cfg.curTask, defectid, newstatus).then((v){cbSetState();});}
           },
           child:
               new Container(
@@ -253,6 +249,7 @@ return new GestureDetector(
                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                      children: <Widget>[
                        new Expanded(child: new Text(name, overflow: TextOverflow.fade , style: new TextStyle(fontSize: 14.0))),
+                      cfg.syncing==1?  new CircularProgressIndicator() :
                       new Checkbox(
                          value: initstatus,
                          onChanged: (bool value) {
@@ -328,7 +325,7 @@ class _ComponentPageState extends State<ComponentPage> {
   DbSynch cfg;
   List<Widget> complist;
   List<Map> _comps=[];
-  int preinstflag=-1;
+
 
   doReload() {
     cfg.getComponent(cfg.curTask, cfg.curCGroup).then((List<Map> list){
@@ -346,9 +343,10 @@ class _ComponentPageState extends State<ComponentPage> {
 
   @override
   Widget build(BuildContext context) {
-
+    int preinstflag;
     var cbfunc = doReload;
     complist = [];
+    preinstflag=-1;
     for (var r in _comps) {
       if ((preinstflag!=r["preinstflag"])&&(r["preinstflag"]==1)) {
         preinstflag=1;
@@ -375,7 +373,7 @@ class _ComponentPageState extends State<ComponentPage> {
 
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Компонент пейдж")
+        title: new Text("ЗИПы")
       ),
       body: new ListView(
       shrinkWrap: true,
@@ -536,7 +534,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
 
     if (cfg.curComment == "")
     {
-    addCommBtn = new GestureDetector(
+    addCommBtn = cfg.syncing==1?  new CircularProgressIndicator() : new GestureDetector(
               behavior: HitTestBehavior.translucent,
               onTap: () async
               {
@@ -558,7 +556,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
 
     } else {
 
-      addCommBtn = new GestureDetector(
+      addCommBtn = cfg.syncing==1?  new CircularProgressIndicator() : new GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onTap: () async
                 {
@@ -601,7 +599,8 @@ class _TaskSubpageState extends State<TaskSubpage> {
                              )])
                   ));
     } else if (cfg.executionmarkTs==null) {
-      executionButton = new GestureDetector(
+      executionButton =  cfg.syncing==1?  new CircularProgressIndicator() :
+                         new GestureDetector(
                             behavior: HitTestBehavior.translucent,
                             onTap: () async
                             {
@@ -619,7 +618,8 @@ class _TaskSubpageState extends State<TaskSubpage> {
                              )])
                   ));
     } else {
-      executionButton = new GestureDetector(
+      executionButton = cfg.syncing==1?  new CircularProgressIndicator() :
+                        new GestureDetector(
                             behavior: HitTestBehavior.translucent,
                             onTap: () async
                             {
@@ -740,6 +740,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
                new Container(color: dvcolor, height: 12.0),
                addCommBtn,
                new Container(color: dvcolor, height: 12.0),
+/*
                new Container(
                              color: Colors.white,
                              height: 48.0,
@@ -772,7 +773,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
                             child:
                                   new Text("[инфа терминала]", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
                           ))])
-               ),
+               ),*/
                new GestureDetector(
                           behavior: HitTestBehavior.translucent,
                           onTap: () async
@@ -918,7 +919,7 @@ return new GestureDetector(
           onTap: () async
           {
             //Как-то мне не нравится, что в ответ на интерактивное действие мы ждем отработки БД, но как еще?..
-            cfg.updateRepair(cfg.curTask, repairid, newstatus).then((v){cbSetState();});
+            if (cfg.syncing!=1) {cfg.updateRepair(cfg.curTask, repairid, newstatus).then((v){cbSetState();});}
           },
           child:
               new Container(
@@ -929,6 +930,7 @@ return new GestureDetector(
                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                      children: <Widget>[
                        new Expanded(child: new Text(name, overflow: TextOverflow.fade , style: new TextStyle(fontSize: 14.0))),
+                      cfg.syncing==1?  new CircularProgressIndicator() :
                       new Checkbox(
                          value: initstatus,
                          onChanged: (bool value) {

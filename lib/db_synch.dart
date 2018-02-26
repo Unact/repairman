@@ -4,7 +4,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:location/location.dart';
 import 'package:great_circle_distance/great_circle_distance.dart';
 import 'package:flutter/material.dart';
 
@@ -15,6 +14,7 @@ const String taskSubpageRouteComment = "/tasks/one/comment";
 const String taskSubpageCgroupRoute = "/tasks/one/cgroup";
 const String taskSubpageComponentRoute = "/tasks/one/cgroup/component";
 const String terminalPageRoute = "/terminal";
+const String loginPageRoute = "/login";
 
 const String taskDefectsSubpageRoute = "/tasks/one/defects";
 const String taskRepairsSubpageRoute = "/tasks/one/repairs";
@@ -60,12 +60,12 @@ class DbSynch {
   String login;
   String password;
   String clientId = "repairman";
-  String server = "https://rapi.unact.ru/api/v1/";
+  //String server = "https://rapi.unact.ru/api/v1/";
+  String server = "http://localhost:3000/api/v1/";
   String token;
   int dbTerminalId=0;
   String clientName="";
   int closed=0;
-  Location location = new Location();
 
   int curTask;
   String curCGroup;
@@ -90,6 +90,8 @@ class DbSynch {
   int greencnt=0;
   int terminalcnt=0;
 
+  int syncing=0; //0 - обновлено, 1 - обновляется, -1 ошибка
+
 
 
   Future<Null> saveGeo() async {
@@ -97,7 +99,7 @@ class DbSynch {
     var response;
     var data;
     bool isError = false;
-
+    print("Do save geo");
     try {
       locations = await db.rawQuery("select latitude, longitude, accuracy, altitude, ts from location");
       if (token==null) {
@@ -143,10 +145,11 @@ class DbSynch {
       print("Ошибка! $exception");
     }
 
-    new Timer(const Duration(minutes: 2), saveGeo);
+    // new Timer(const Duration(minutes: 1), saveGeo);
     return;
   }
 
+/*
   Future<Null> getGeo() async {
     Map<String,double> myLocation;
     try {
@@ -163,9 +166,10 @@ class DbSynch {
       print("Ошибка! $exception");
     }
 
-    new Timer(const Duration(seconds: 30), getGeo);
+    //new Timer(const Duration(seconds: 30), getGeo);
     return;
   }
+*/
 
   Future<Database> initDB() async {
     String dir = (await getApplicationDocumentsDirectory()).path;
@@ -173,8 +177,8 @@ class DbSynch {
     print ("$path");
     bool isUpgrage;
 
-    location.onLocationChanged.listen((Map<String,double> result) {
-    });
+    //location.onLocationChanged.listen((Map<String,double> result) {
+    //});
 
     do {
       isUpgrage = false;
@@ -637,11 +641,12 @@ Future<List<Map>> getTerminals() async {
            src_system_name,
            latitude,
            longitude,
-           mobileop
+           mobileop,
+           abs(latitude - ($lastLatitude)) + abs(longitude-($lastLongitude)) dist
       from terminal
     where errortext<>'null'
-  """); //Нулл в кавычках - АД. Но пока работает только так.
-//Нет сортировки, какая-то нужна
+    order by dist
+  """);
   return list;
 }
 
@@ -852,6 +857,7 @@ Future<double> getDistance() async {
   return distance;
 }
 
+
 //Нужно что-то прописать если нет вообще координат
 Future<Null> updateExecutionMark(BuildContext context, double taskLatitude, double taskLongitude) async {
 double distance;
@@ -1003,13 +1009,15 @@ Future<String> synchDB() async {
   var response;
   var data;
 
+  syncing = 1;
   taskdefectlink = await db.rawQuery("select task_id, defect_id, syncstatus from taskdefectlink where syncstatus <> 0");
   taskrepairlink = await db.rawQuery("select task_id, repair_id, syncstatus from taskrepairlink where syncstatus <> 0");
   terminalcomponentlink = await db.rawQuery("select task_id, comp_id, is_removed, syncstatus from terminalcomponentlink where syncstatus <> 0");
   executionmark = await db.rawQuery("select id, mark_latitude, mark_longitude, executionmark_ts from task where updmarkflag = 1");
   comments = await db.rawQuery("select id, comment from task where updcommentflag = 1");
 
-
+if (taskdefectlink.length + taskrepairlink.length + terminalcomponentlink.length + executionmark.length + comments.length > 0)
+{
   var httpClient = createHttpClient();
   String url = server + "repairman/save";
   try {
@@ -1054,21 +1062,18 @@ Future<String> synchDB() async {
     await db.execute("update terminalcomponentlink set syncstatus = 0 where syncstatus = 1");
     await db.execute("delete from terminalcomponentlink where syncstatus = -1");
     await db.execute("update task set updcommentflag = 0, updmarkflag = 0");
+    syncing = 0;
     return "ok";
   } else {
+    syncing = -1;
     return "fail";
   }
-
-//} catch(exception) {
-//  print("Ошибка! $exception");
-//}
-//Нужно ловить эксепшн и для считывания по локальной базе
-
-//new Timer(const Duration(minutes: 2), saveGeo);
-//return;
-
-
-
+} else
+{
+  syncing = 0;
+  print("Nothing to sync");
+  return "ok";
+}
 
 
 }
