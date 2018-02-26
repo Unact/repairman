@@ -205,10 +205,10 @@ class _MyHomePageState extends State<MyHomePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               new Expanded(flex: 100, child:
-                new Column(
+                new Row(
                   children: <Widget>[
-                    new Row(children: [new Text("Ближайший: ", textAlign: TextAlign.start)]),
-                    new Row(children: [new Text(_nearTerminal, textAlign: TextAlign.start)])
+                    new Text("Ближайший: ", textAlign: TextAlign.start),
+                    new Expanded(child:new Text(_nearTerminal, maxLines: 5, textAlign: TextAlign.start))
                   ],
                 )),
                 new Expanded(
