@@ -182,7 +182,7 @@ class DbSynch {
     do {
       isUpgrage = false;
       // open the database
-      db = await openDatabase(path, version: 1,
+      db = await openDatabase(path, version: 2,
         onCreate: (Database d, int version) async {
           await d.execute("""
             CREATE TABLE info(
@@ -208,6 +208,7 @@ class DbSynch {
               mark_longitude DECIMAL,
               updmarkflag INTEGER DEFAULT 0,
               executionmark_ts DATETIME,
+              inv_num TEXT,
               updservstatusflag INTEGER DEFAULT 0,
               ts DATETIME DEFAULT CURRENT_TIMESTAMP
             )"""
@@ -455,8 +456,6 @@ Future<String> fillDB() async {
 
 
     data = JSON.decode(response.body);
-//Пока без этого, но ошибку обработать будет нужно
-/*
     try {
       data = JSON.decode(response.body);
       if (data["error"] != null) {
@@ -465,13 +464,12 @@ Future<String> fillDB() async {
         }
         token = null;
         i++;
-      } if(data["closed"] == null) {
+      } if(data["tasks"] == null) {
         return 'Ответ сервера: ${response.body}';
       }
     } catch(exception) {
       return 'Ответ сервера: ${response.body}\n$exception';
     }
-  */
   } while (i == 1);
 
 
@@ -489,10 +487,9 @@ Future<String> fillDB() async {
   await db.execute("DELETE FROM taskrepairlink");
   await db.execute("DELETE FROM terminalcomponentlink");
 
-
   for (var tasks in data["tasks"]) {
     await db.execute("""
-      INSERT INTO task (id, servstatus, dobefore, terminalbreakname, routepriority, terminal, terminalxid, comment)
+      INSERT INTO task (id, servstatus, dobefore, terminalbreakname, routepriority, terminal, terminalxid, comment, inv_num)
       VALUES(${tasks["id"]},
              ${tasks["servstatus"]},
              '${tasks["dobefore"]}',
@@ -500,7 +497,9 @@ Future<String> fillDB() async {
              '${tasks["route_priority"]}',
              '${tasks["terminal"]}',
              '${tasks["terminal_xid"]}',
-             '${tasks["comm"]}')
+             '${tasks["comm"]}',
+             '${tasks["inv_num"]}'
+           )
     """);
   }
 

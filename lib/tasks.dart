@@ -740,6 +740,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
                new Container(color: dvcolor, height: 12.0),
                addCommBtn,
                new Container(color: dvcolor, height: 12.0),
+               new Text("Инв.номер: ", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize)),
 /*
                new Container(
                              color: Colors.white,
