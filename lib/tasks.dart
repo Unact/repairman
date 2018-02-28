@@ -479,6 +479,8 @@ class _TaskSubpageState extends State<TaskSubpage> {
   String szipcnt;
   String terminalbreakname="";
   String terminalcode="";
+  String invNum="";
+  int terminalId = 0;
   DateTime dobefore;
   int routepriority;
   Map colors;
@@ -489,6 +491,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
   var btnfontsize = 16.0;
   double _latitude = 55.754226;
   double _longitude = 37.617582;
+  DateTime lastactivitytime = new DateTime(1999, 1, 1);
 
   //changeRepairCnt(int diff) {setState((){repaircnt = repaircnt + diff;});}
   //changeDefectCnt(int diff) {setState((){defectcnt = defectcnt + diff;});}
@@ -506,6 +509,9 @@ class _TaskSubpageState extends State<TaskSubpage> {
         terminalbreakname = r["terminalbreakname"];
         terminalcode = r["code"];
         routepriority = r["routepriority"];
+        invNum = r["inv_num"];
+        lastactivitytime = DateTime.parse(r["lastactivitytime"]);
+        terminalId = r["terminal_id"];
         dobefore = DateTime.parse(r["dobefore"]);
         colors = taskColors(cfg.curServstatus, routepriority);
         tcolor = colors["tcolor"];
@@ -737,61 +743,40 @@ class _TaskSubpageState extends State<TaskSubpage> {
             )),
             new Divider(height: 1.0),
             executionButton,
-               new Container(color: dvcolor, height: 12.0),
-               addCommBtn,
-               new Container(color: dvcolor, height: 12.0),
-               new Text("Инв.номер: ", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize)),
-/*
-               new Container(
-                             color: Colors.white,
-                             height: 48.0,
-                             child:
-                  new Row(
-                  children: [new Expanded(child: new GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onTap: () async
-                            {
-
-                               await Navigator.of(context).pushNamed(taskDefectsSubpageRoute);
-                            },
-                            child:
-                                  new Text("[инв.номер]", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
-                          ))])
-               ),
-               new Divider(height: 1.0),
-               new Container(
-                             color: Colors.white,
-                             height: 48.0,
-                             child:
-                  new Row(
-                  children: [new Expanded(child: new GestureDetector(
-                            behavior: HitTestBehavior.translucent,
-                            onTap: () async
-                            {
-
-                               await Navigator.of(context).pushNamed(taskDefectsSubpageRoute);
-                            },
-                            child:
-                                  new Text("[инфа терминала]", textAlign: TextAlign.center, style: new TextStyle(fontSize: btnfontsize))
-                          ))])
-               ),*/
-               new GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onTap: () async
-                          {
-                            // _launchURL();
-                          },
-                          child: new Image.network('https://static-maps.yandex.ru/1.x/?ll=$_longitude,$_latitude&size=250,200&z=15&l=map&pt=$_longitude,$_latitude,pm2gnm', fit: BoxFit.cover),
-               ),
-
-
-
-
-
-
-
-
-
+            new Container(color: dvcolor, height: 12.0),
+            addCommBtn,
+            new Container(color: dvcolor, height: 12.0),
+            new Container(
+                          color: Colors.white,
+                          height: 48.0,
+                          padding: const EdgeInsets.all(4.0),
+                          child:
+               new Row(
+                 children: [new Expanded(child: new Text("Инв.номер: $invNum"))]
+               )
+            ),
+            new Divider(height: 1.0),
+            new Container(
+              color: Colors.white,
+              height: 48.0,
+              padding: const EdgeInsets.all(4.0),
+              child: new GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTap: () async
+                        {
+                          cfg.dbTerminalId = terminalId;
+                          await Navigator.of(context).pushNamed(terminalPageRoute);
+                        },
+                child: new Row(
+                    children: [
+                      new Expanded(child: new Text("$terminalcode")),
+                      new Expanded(child: new Text(fmtSrok(lastactivitytime), textAlign: TextAlign.end))
+                    ]
+                )
+              )
+            ),
+            new Container(color: dvcolor, height: 12.0),
+            new Image.network('https://static-maps.yandex.ru/1.x/?ll=$_longitude,$_latitude&size=250,200&z=15&l=map&pt=$_longitude,$_latitude,pm2gnm', fit: BoxFit.cover),
             ]
           )])
         );

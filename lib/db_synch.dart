@@ -809,7 +809,10 @@ Future<List<Map>> getOneTask(int taskId) async {
            task.routepriority routepriority,
            terminal.latitude latitude,
            terminal.longitude longitude,
-           task.comment comm
+           task.comment comm,
+           task.inv_num inv_num,
+           terminal.lastactivitytime,
+           terminal.id terminal_id
       from task
            left outer join terminal on terminal.id = task.terminal
      where task.id = $taskId
