@@ -48,11 +48,12 @@ class _TerminalsPageState extends State<TerminalsPage> {
   DbSynch cfg;
   List<Widget> terminallist;
   List<Map> _terminals=[];
+  bool isError = true;
 
   @override
   void initState() {
     super.initState();
-    cfg.getTerminals().then((List<Map> list){
+    cfg.getTerminals(isError).then((List<Map> list){
       setState((){
         _terminals = list;
       });
@@ -74,7 +75,22 @@ class _TerminalsPageState extends State<TerminalsPage> {
 
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text("Терминалы")
+        title: new Row(
+          children: [
+            new Expanded(flex: 3, child: new Text("Терминалы")),
+            new Expanded(flex: 2, child: new GestureDetector(
+                       onTap: () async {
+                         bool f = isError?false:true;
+                         cfg.getTerminals(f).then((List<Map> list){
+                           setState((){
+                             isError = f;
+                             _terminals = list;
+                           });
+                         });
+                       },
+                       child: isError?new Text("Все", textAlign: TextAlign.end):new Text("С ошибкой", textAlign: TextAlign.end))
+            )
+        ]),
       ),
       body: new ListView(
       shrinkWrap: true,

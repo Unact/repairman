@@ -44,7 +44,16 @@ return new GestureDetector(
               cfg.curTask = taskId;
               cfg.curServstatus = servstatus;
               await Navigator.of(context).pushNamed(taskSubpageRoute);
-              cfg.synchDB();
+              cfg.synchDB().then((res){
+                if (res!="ok") {
+                  showDialog(context: context,
+                    child: new AlertDialog(
+                      title: new Text("Ошибка сохранения базы"),
+                      content: new Text("$res"),
+                    )
+                  );
+                }
+              });
            },
            child: new Container(
                 color: colors["bcolor"],

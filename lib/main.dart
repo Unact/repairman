@@ -123,7 +123,7 @@ class _MyHomePageState extends State<MyHomePage> {
       }
       _counter++;
 
-      cfg.getTerminals().then((List<Map> list){
+      cfg.getTerminals(true).then((List<Map> list){
         if (list.length > 0) {
           setState((){
             _nearTerminal = list[0]["address"];
@@ -240,7 +240,6 @@ class _MyHomePageState extends State<MyHomePage> {
         ]
       ),
       new Divider(),
-
       updating?  new CircularProgressIndicator() :
       (cfg.syncing!=1)?
       new RaisedButton(
@@ -251,8 +250,15 @@ class _MyHomePageState extends State<MyHomePage> {
           cfg.synchDB().then((res){
             if (res=="ok") {
               print("completed synchDB...");
-
               cfg.fillDB().then((v){
+                if (v != null) {
+                  showDialog(context: context,
+                    child: new AlertDialog(
+                      title: new Text("Ошибка обновления базы"),
+                      content: new Text("$v"),
+                    )
+                  );
+                }
                 cfg.getMainPageCnt().then((v){
                   setState((){updating = false;});
                 });
@@ -262,9 +268,13 @@ class _MyHomePageState extends State<MyHomePage> {
               cfg.getMainPageCnt().then((v){
                 setState((){updating = false;});
               });
+              showDialog(context: context,
+                child: new AlertDialog(
+                  title: new Text("Ошибка сохранения базы"),
+                  content: new Text("$res"),
+                )
+              );
             }
-
-
           });
 
         },
@@ -277,10 +287,6 @@ class _MyHomePageState extends State<MyHomePage> {
       )
       ,
       syncstatuswidget
-
-
-
-
     ]);
 
     return new Scaffold(

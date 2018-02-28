@@ -626,8 +626,9 @@ Future<Null> getTasks() async {
   //Нужна ли какая-то проверка на случай если таск есть а терминала нет?
 }
 
-Future<List<Map>> getTerminals() async {
+Future<List<Map>> getTerminals(bool f) async {
   List<Map> list;
+  String err = f?"where errortext<>'null'":"";
   list = await db.rawQuery("""
     select
            id,
@@ -642,7 +643,7 @@ Future<List<Map>> getTerminals() async {
            mobileop,
            abs(latitude - ($lastLatitude)) + abs(longitude-($lastLongitude)) dist
       from terminal
-    where errortext<>'null'
+      $err
     order by dist
   """);
   return list;
@@ -1006,7 +1007,6 @@ Future<String> synchDB() async {
   List<Map> executionmark;
   List<Map> comments;
 
-  bool isError = false;
   var response;
   var data;
 
@@ -1034,41 +1034,30 @@ if (taskdefectlink.length + taskrepairlink.length + terminalcomponentlink.length
                          "comments": comments
                        })
     );
-
-
   } catch(exception) {
-    print('Сервер $server недоступен!\n$exception');
-    isError = true;
-  }
-
-  if (!isError) {
-    try {
-      data = JSON.decode(response.body);
-      if (data["error"] != null) {
-          print(data["error"]);
-          isError = true;
-      }
-    } catch(exception) {
-      print('Ответ сервера: ${response.body}\n$exception');
-      isError = true;
-    }
-  }
-
-  if (!isError) {
-    print("Ok Save all!");
-    await db.execute("update taskrepairlink set syncstatus = 0 where syncstatus = 1");
-    await db.execute("delete from taskrepairlink where syncstatus = -1");
-    await db.execute("update taskdefectlink set syncstatus = 0 where syncstatus = 1");
-    await db.execute("delete from taskdefectlink where syncstatus = -1");
-    await db.execute("update terminalcomponentlink set syncstatus = 0 where syncstatus = 1");
-    await db.execute("delete from terminalcomponentlink where syncstatus = -1");
-    await db.execute("update task set updcommentflag = 0, updmarkflag = 0");
-    syncing = 0;
-    return "ok";
-  } else {
     syncing = -1;
-    return "fail";
+    return 'Сервер $server недоступен!\n$exception';
   }
+  try {
+    data = JSON.decode(response.body);
+    if (data["error"] != null) {
+        syncing = -1;
+        return data["error"];
+  }
+  } catch(exception) {
+    syncing = -1;
+    return 'Ответ сервера: ${response.body}\n$exception';
+  }
+  print("Ok Save all!");
+  await db.execute("update taskrepairlink set syncstatus = 0 where syncstatus = 1");
+  await db.execute("delete from taskrepairlink where syncstatus = -1");
+  await db.execute("update taskdefectlink set syncstatus = 0 where syncstatus = 1");
+  await db.execute("delete from taskdefectlink where syncstatus = -1");
+  await db.execute("update terminalcomponentlink set syncstatus = 0 where syncstatus = 1");
+  await db.execute("delete from terminalcomponentlink where syncstatus = -1");
+  await db.execute("update task set updcommentflag = 0, updmarkflag = 0");
+  syncing = 0;
+  return "ok";
 } else
 {
   syncing = 0;
