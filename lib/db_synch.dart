@@ -370,7 +370,7 @@ class DbSynch {
     server = list[0]['server'];
     token = list[0]['token'];
     agentName = list[0]['agent_name'];
-    zoneName = list[0]['zome_name'];
+    zoneName = list[0]['zone_name'];
     await makeConnection();
     return db;
   }
