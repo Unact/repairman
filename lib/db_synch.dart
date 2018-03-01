@@ -22,6 +22,12 @@ const String taskRepairsSubpageRoute = "/tasks/one/repairs";
 final dateFormat = new DateFormat("HH:mm dd.MM.yy") ;
 final numFormat = new NumberFormat("#,##0.00", "ru_RU");
 
+DateTime safeParseDate(String d) {
+  if (d == "null" || d == null) {
+      return null;
+  }
+  return DateTime.parse(d);
+}
 
 String fmtSrok(DateTime date) {
 

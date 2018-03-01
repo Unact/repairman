@@ -65,10 +65,7 @@ class _TerminalsPageState extends State<TerminalsPage> {
 
     terminallist = [];
     for (var r in _terminals) {
-
-      print(r["errortext"]);
-      print("---------");
-      terminallist.add(oneTerminal(cfg, context,r["code"],DateTime.parse(r["lastactivitytime"]),r["address"], r["id"] ));
+      terminallist.add(oneTerminal(cfg, context,r["code"],safeParseDate(r["lastactivitytime"]),r["address"], r["id"] ));
       terminallist.add(new Divider(height: 1.0));
     }
 

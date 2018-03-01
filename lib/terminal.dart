@@ -33,8 +33,8 @@ class _TerminalPageState extends State<TerminalPage> {
           _logitude = list[0]["longitude"].toDouble();
           _code = list[0]["code"];
           _srcSystemName = list[0]["src_system_name"];
-          _lastActivityTime = DateTime.parse(list[0]["lastactivitytime"]);
-          _lastPaymentTime = DateTime.parse(list[0]["lastpaymenttime"]);
+          _lastActivityTime = safeParseDate(list[0]["lastactivitytime"]);
+          _lastPaymentTime = safeParseDate(list[0]["lastpaymenttime"]);
           _address = list[0]["address"];
           _errorText = list[0]["errortext"];
           _tasks = tt;
@@ -192,7 +192,7 @@ class _TerminalPageState extends State<TerminalPage> {
                       ),
                       new Expanded(
                         flex: 10,
-                        child: new Text(fmtSrok(DateTime.parse(a["dobefore"])),
+                        child: new Text(fmtSrok(safeParseDate(a["dobefore"])),
                           textAlign: TextAlign.end,
                           style: new TextStyle(color: Colors.blue)
                         )

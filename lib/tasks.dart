@@ -454,7 +454,7 @@ else
   {code = r["code"];
    address = r["address"];}
 
-      tasklist.add(oneTask(cfg,context,DateTime.parse(r["dobefore"]),r["servstatus"],r["routepriority"],r["id"],code,address,r["terminalbreakname"]));
+      tasklist.add(oneTask(cfg,context,safeParseDate(r["dobefore"]),r["servstatus"],r["routepriority"],r["id"],code,address,r["terminalbreakname"]));
       tasklist.add(new Divider(height: 1.0));
     }
 
@@ -519,9 +519,9 @@ class _TaskSubpageState extends State<TaskSubpage> {
         terminalcode = r["code"];
         routepriority = r["routepriority"];
         invNum = r["inv_num"];
-        lastactivitytime = DateTime.parse(r["lastactivitytime"]);
+        lastactivitytime = safeParseDate(r["lastactivitytime"]);
         terminalId = r["terminal_id"];
-        dobefore = DateTime.parse(r["dobefore"]);
+        dobefore = safeParseDate(r["dobefore"]);
         colors = taskColors(cfg.curServstatus, routepriority);
         tcolor = colors["tcolor"];
         bcolor = colors["bcolor"];
