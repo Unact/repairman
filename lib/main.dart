@@ -167,6 +167,10 @@ class _MyHomePageState extends State<MyHomePage> {
     children: <Widget>[
       new Container(
         height: 20.0,
+        child: new Text("${cfg.agentName} ${cfg.zoneName}")
+      ),
+      new Container(
+        height: 20.0,
         child: new Text("Задачи"),
         color: Colors.grey.shade300,
       ),
@@ -204,7 +208,7 @@ class _MyHomePageState extends State<MyHomePage> {
           new Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              new Expanded(flex: 100, child:
+              new Expanded(flex: 10, child:
                 new Row(
                   children: <Widget>[
                     new Text("Ближайший: ", textAlign: TextAlign.start),
@@ -212,8 +216,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 )),
                 new Expanded(
-                  flex:5,
-                  child: new Text("${cfg.terminalcnt}", style: new TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)))
+                  flex:1,
+                  child: new Text("${cfg.terminalcnt}", textAlign: TextAlign.end, style: new TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold)))
             ]
           ),
         )

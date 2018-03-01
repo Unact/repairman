@@ -97,7 +97,8 @@ class DbSynch {
 
   int syncing=0; //0 - обновлено, 1 - обновляется, -1 ошибка
 
-
+  String agentName = "";
+  String zoneName = "";
 
   Future<Null> saveGeo() async {
     List<Map> locations;
@@ -188,7 +189,7 @@ class DbSynch {
     do {
       isUpgrage = false;
       // open the database
-      db = await openDatabase(path, version: 2,
+      db = await openDatabase(path, version: 3,
         onCreate: (Database d, int version) async {
           await d.execute("""
             CREATE TABLE info(
@@ -332,6 +333,7 @@ class DbSynch {
               ts        DATETIME DEFAULT CURRENT_TIMESTAMP
             )"""
           );
+          await d.execute("CREATE UNIQUE INDEX idx_info_name ON info (name)");
 
           await d.insert("info", {"name":"server", "value": server});
           await d.insert("info", {"name":"client_id", "value":clientId});
@@ -358,13 +360,17 @@ class DbSynch {
              (select value from info where name = 'password') password,
              (select value from info where name = 'client_id') client_id,
              (select value from info where name = 'server') server,
-             (select value from info where name = 'token') token
+             (select value from info where name = 'token') token,
+             (select value from info where name = 'agent_name') agent_name,
+             (select value from info where name = 'zone_name') zone_name
     """);
     login = list[0]['login'];
     password = list[0]['password'];
     clientId = list[0]['client_id'];
     server = list[0]['server'];
     token = list[0]['token'];
+    agentName = list[0]['agent_name'];
+    zoneName = list[0]['zome_name'];
     await makeConnection();
     return db;
   }
@@ -493,7 +499,15 @@ Future<String> fillDB() async {
   await db.execute("DELETE FROM taskrepairlink");
   await db.execute("DELETE FROM terminalcomponentlink");
 
-  print("agent = ${data["agent"]["a_name"]} ${data["agent"]["z_name"]}");
+  if (data["agent"] != null && data["agent"]["a_name"] != null ) {
+    agentName = data["agent"]["a_name"];
+    zoneName = data["agent"]["z_name"];
+  } else {
+    agentName = "";
+    zoneName = "";
+  }
+  await db.execute("REPLACE INTO info (name, value) VALUES ('agent_name', '$agentName')");
+  await db.execute("REPLACE INTO info (name, value) VALUES ('zone_name', '$zoneName')");
 
   for (var tasks in data["tasks"]) {
     await db.execute("""
