@@ -493,6 +493,8 @@ Future<String> fillDB() async {
   await db.execute("DELETE FROM taskrepairlink");
   await db.execute("DELETE FROM terminalcomponentlink");
 
+  print("agent = ${data["agent"]["a_name"]} ${data["agent"]["z_name"]}");
+
   for (var tasks in data["tasks"]) {
     await db.execute("""
       INSERT INTO task (id, servstatus, dobefore, terminalbreakname, routepriority, terminal, terminalxid, comment, inv_num)
