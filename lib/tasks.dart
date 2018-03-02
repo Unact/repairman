@@ -501,6 +501,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
   double _latitude = 55.754226;
   double _longitude = 37.617582;
   DateTime lastactivitytime = new DateTime(1999, 1, 1);
+  bool _hasGeoTs = false;
 
   //changeRepairCnt(int diff) {setState((){repaircnt = repaircnt + diff;});}
   //changeDefectCnt(int diff) {setState((){defectcnt = defectcnt + diff;});}
@@ -528,6 +529,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
         _latitude=r["latitude"];
         _longitude=r["longitude"];
         cfg.curComment = r["comm"];
+        _hasGeoTs = (r["has_geo_ts"]==1);
       } });
    }
 
@@ -613,13 +615,13 @@ class _TaskSubpageState extends State<TaskSubpage> {
                                      new Text("Выполнено", textAlign: TextAlign.center, style: new TextStyle(color: Colors.green, fontSize: btnfontsize))
                              )])
                   ));
-    } else if (cfg.executionmarkTs==null) {
+    } else if (!_hasGeoTs) {
       executionButton =  cfg.syncing==1?  new CircularProgressIndicator() :
                          new GestureDetector(
                             behavior: HitTestBehavior.translucent,
                             onTap: () async
                             {
-                               cfg.updateExecutionMark(context, _latitude,_longitude).then((v){setState((){});});
+                               cfg.updateExecutionMark(context, _latitude,_longitude).then((v){setState((){_hasGeoTs=true;});});
                             },
                             child:
                   new Container(

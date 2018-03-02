@@ -80,10 +80,9 @@ class DbSynch {
   int defectcnt=0;
   int zipcnt=0;
   int curServstatus=0;
-  DateTime executionmarkTs;
 
-  double lastLatitude;
-  double lastLongitude;
+  double lastLatitude = 0.0;
+  double lastLongitude = 0.0;
 
   List<Map> tasks=[];
   List<Map> cgroups=[];
@@ -835,7 +834,8 @@ Future<List<Map>> getOneTask(int taskId) async {
            task.comment comm,
            task.inv_num inv_num,
            terminal.lastactivitytime,
-           terminal.id terminal_id
+           terminal.id terminal_id,
+           (executionmark_ts is not null) has_geo_ts
       from task
            left outer join terminal on terminal.id = task.terminal
      where task.id = $taskId
@@ -896,7 +896,6 @@ if (distance > 500) {
   );
   showDialog(context: context, child: alert);
 } else {
-  executionmarkTs = new DateTime.now();
   await db.execute("UPDATE task SET mark_latitude = $taskLatitude, mark_longitude = $taskLongitude, updmarkflag = 1, executionmark_ts = datetime('now') where id = $curTask");
 }
 
