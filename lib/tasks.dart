@@ -47,10 +47,12 @@ return new GestureDetector(
               cfg.synchDB().then((res){
                 if (res!="ok") {
                   showDialog(context: context,
-                    child: new AlertDialog(
-                      title: new Text("Ошибка сохранения базы"),
-                      content: new Text("$res"),
-                    )
+                    builder: (BuildContext context) {
+                      return new AlertDialog(
+                        title: new Text("Ошибка сохранения базы"),
+                        content: new Text("$res"),
+                      );
+                    }
                   );
                 }
               });
@@ -60,15 +62,6 @@ return new GestureDetector(
                 height: 48.0,
                 padding: const EdgeInsets.all(4.0),
                 child:
-
-                //Почему-то не работает выравнивание во вложенном Column, если вложить его в Row
-
-                //child: new Row(
-                //  children: <Widget>[
-                   /*new Container(
-                     width: 40.0,   //это работает!
-                     child: const FlutterLogo(),
-                   ),*/
                    new Column(
                      children: <Widget>[
                        new Row(
@@ -81,17 +74,9 @@ return new GestureDetector(
                        new Text(address, style: new TextStyle(color: colors["tcolor"], fontSize: 10.0))
                      ]
                    )
-                  //]
                 )
-              //)
          );
-
 }
-
-
-
-
-
 Future<bool> confirmChangeComponent(BuildContext context, int chflag, int preinstflag, String shortName, String serial) async {
 String caption;
 
@@ -113,35 +98,36 @@ if (chflag==0)
   return showDialog<bool>(
     context: context,
     barrierDismissible: false,
-    child: new AlertDialog(
-      title: new Text(caption),
-      content: new SingleChildScrollView(
-        child: new ListBody(
-          children: <Widget>[
-            new Text(shortName),
-            new Text('Серийный номер:'),
-            new Text(serial)
-          ],
+    builder: (BuildContext context) {
+      return new AlertDialog(
+        title: new Text(caption),
+        content: new SingleChildScrollView(
+          child: new ListBody(
+            children: <Widget>[
+              new Text(shortName),
+              new Text('Серийный номер:'),
+              new Text(serial)
+            ],
+          ),
         ),
-      ),
-      actions: <Widget>[
-        new FlatButton(
-          child: new Text('OK'),
-          onPressed: () {
-            Navigator.of(context).pop(true);
-          },
-        ),
-        new FlatButton(
-          child: new Text('Отмена'),
-          onPressed: () {
-            Navigator.of(context).pop(false);
-          },
-        ),
-      ],
-    ),
+        actions: <Widget>[
+          new FlatButton(
+            child: new Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop(true);
+            },
+          ),
+          new FlatButton(
+            child: new Text('Отмена'),
+            onPressed: () {
+              Navigator.of(context).pop(false);
+            },
+          ),
+        ],
+      );
+    },
   );
 }
-//////////////
 
 Widget oneComponent(DbSynch cfg, BuildContext context, String shortName, String serial, int chflag, int preinstflag, int compId, VoidCallback cbSetState) {
 String chtext="";

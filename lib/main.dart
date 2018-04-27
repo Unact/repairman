@@ -257,10 +257,12 @@ class _MyHomePageState extends State<MyHomePage> {
               cfg.fillDB().then((v){
                 if (v != null) {
                   showDialog(context: context,
-                    child: new AlertDialog(
-                      title: new Text("Ошибка обновления базы"),
-                      content: new Text("$v"),
-                    )
+                    builder: (BuildContext context) {
+                      return new AlertDialog(
+                        title: new Text("Ошибка обновления базы"),
+                        content: new Text("$v"),
+                      );
+                    }
                   );
                 }
                 cfg.getMainPageCnt().then((v){
@@ -273,10 +275,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 setState((){updating = false;});
               });
               showDialog(context: context,
-                child: new AlertDialog(
-                  title: new Text("Ошибка сохранения базы"),
-                  content: new Text("$res"),
-                )
+                builder: (BuildContext context) {
+                  return new AlertDialog(
+                    title: new Text("Ошибка сохранения базы"),
+                    content: new Text("$res"),
+                  );
+                }
               );
             }
           });

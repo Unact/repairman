@@ -108,7 +108,11 @@ class _AuthPageState extends State<AuthPage> {
                               ],
                             );
                           }
-                          showDialog(context: context, child: alert);
+                          showDialog(context: context,
+                            builder: (BuildContext context) {
+                              return alert;
+                            }
+                          );
                         });
                       },
                       child: new Text('Подключиться', style: new TextStyle(color: Colors.white)),
@@ -132,7 +136,11 @@ class _AuthPageState extends State<AuthPage> {
                       content: new Text("Успешно"),
                     );
                   }
-                  showDialog(context: context, child: alert);
+                  showDialog(context: context,
+                    builder: (BuildContext context) {
+                      return alert;
+                    }
+                  );
                 });
               },
               child: new Text('Получить пароль', style: new TextStyle(color: Colors.white)),
