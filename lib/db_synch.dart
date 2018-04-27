@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:great_circle_distance/great_circle_distance.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 const String taskPageRoute = "/tasks";
 const String terminalsPageRoute = "/terminals";
@@ -115,13 +115,13 @@ class DbSynch {
         }
       }
       if (!isError) {
-        var httpClient = createHttpClient();
+        var httpClient = new http.Client();
         String url = server + "repairman/locations";
         try {
           response = await httpClient.post(url,
             headers: {"Authorization": "RApi client_id=$clientId,token=$token",
                       "Accept": "application/json", "Content-Type": "application/json"},
-            body: JSON.encode({"locations": locations})
+            body: json.encode({"locations": locations})
           );
         } catch(exception) {
           print('Сервер $server недоступен!\n$exception');
@@ -130,7 +130,7 @@ class DbSynch {
       }
       if (!isError) {
         try {
-          data = JSON.decode(response.body);
+          data = json.decode(response.body);
           if (data["error"] != null) {
               print(data["error"]);
               isError = true;
@@ -397,7 +397,7 @@ class DbSynch {
 
 
   Future<String> makeConnection() async {
-    var httpClient = createHttpClient();
+    var httpClient = new http.Client();
     String url = server + "authenticate";
     var response;
 
@@ -410,7 +410,7 @@ class DbSynch {
     }
     Map data;
     try {
-      data = JSON.decode(response.body);
+      data = json.decode(response.body);
     } catch(exception) {
       return 'Ответ сервера: ${response.body}\n$exception';
     }
@@ -420,7 +420,7 @@ class DbSynch {
   }
 
   Future<String> resetPassword() async {
-    var httpClient = createHttpClient();
+    var httpClient = new http.Client();
     String url = server + "reset_password";
     var response;
     try {
@@ -432,7 +432,7 @@ class DbSynch {
     }
     Map data;
     try {
-      data = JSON.decode(response.body);
+      data = json.decode(response.body);
     } catch(exception) {
       return 'Ответ сервера: ${response.body}\n$exception';
     }
@@ -453,7 +453,7 @@ Future<String> fillDB() async {
         return s;
       }
     }
-    var httpClient = createHttpClient();
+    var httpClient = new http.Client();
     String url = server + "repairman";
     try {
       print("url = $url i = $i");
@@ -465,10 +465,8 @@ Future<String> fillDB() async {
       return 'Сервер $server недоступен!\n$exception';
     }
 
-
-    data = JSON.decode(response.body);
     try {
-      data = JSON.decode(response.body);
+      data = json.decode(response.body);
       if (data["error"] != null) {
         if (i == 1) {
           return data["error"];
@@ -889,12 +887,14 @@ double distance;
         latitude1: taskLatitude, longitude1: taskLongitude, latitude2: lastLatitude, longitude2: lastLongitude).haversineDistance();
 
 if (distance > 500) {
-  var alert;
-  alert = new AlertDialog(
-    title: new Text("Ошибка отметки"),
-    content: new Text("До терминала ${distance.floor()} м (больше чем 500м)"),
+  showDialog(context: context,
+             builder: (BuildContext context) {
+               return new AlertDialog(
+                 title: new Text("Ошибка отметки"),
+                 content: new Text("До терминала ${distance.floor()} м (больше чем 500м)"),
+               );
+             }
   );
-  showDialog(context: context, child: alert);
 } else {
   await db.execute("UPDATE task SET mark_latitude = $taskLatitude, mark_longitude = $taskLongitude, updmarkflag = 1, executionmark_ts = datetime('now') where id = $curTask");
 }
@@ -1040,7 +1040,7 @@ Future<String> synchDB() async {
 
 if (taskdefectlink.length + taskrepairlink.length + terminalcomponentlink.length + executionmark.length + comments.length > 0)
 {
-  var httpClient = createHttpClient();
+  var httpClient = new http.Client();
   String url = server + "repairman/save";
   try {
     print("url = $url");
@@ -1048,7 +1048,7 @@ if (taskdefectlink.length + taskrepairlink.length + terminalcomponentlink.length
     response = await httpClient.post(url,
       headers: {"Authorization": "RApi client_id=$clientId,token=$token",
                 "Accept": "application/json", "Content-Type": "application/json"},
-      body: JSON.encode({"taskdefectlink": taskdefectlink,
+      body: json.encode({"taskdefectlink": taskdefectlink,
                          "taskrepairlink": taskrepairlink,
                          "terminalcomponentlink": terminalcomponentlink,
                          "executionmark": executionmark,
@@ -1060,7 +1060,7 @@ if (taskdefectlink.length + taskrepairlink.length + terminalcomponentlink.length
     return 'Сервер $server недоступен!\n$exception';
   }
   try {
-    data = JSON.decode(response.body);
+    data = json.decode(response.body);
     if (data["error"] != null) {
         syncing = -1;
         return data["error"];
@@ -1088,9 +1088,5 @@ if (taskdefectlink.length + taskrepairlink.length + terminalcomponentlink.length
 
 
 }
-
-
-
-
 
 }
