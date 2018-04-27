@@ -10,7 +10,7 @@ dependencies:
   intl: any
   cupertino_icons: any
   url_launcher: any
-  location: any
+  location: "^1.2.0"
   great_circle_distance: any
 
 dev_dependencies:

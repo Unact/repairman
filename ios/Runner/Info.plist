@@ -8,6 +8,10 @@
 		<string>fetch</string>
 		<string>remote-notification</string>
   </array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Reason why app needs location</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Reason why app needs location</string>
 	<key>NSLocationAlwaysUsageDescription</key>
   <string>Allow GPS track</string>
 	<key>CFBundleDevelopmentRegion</key>
