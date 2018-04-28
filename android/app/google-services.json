@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "48144966478",
+    "firebase_url": "https://repairman-470ff.firebaseio.com",
+    "project_id": "repairman-470ff",
+    "storage_bucket": "repairman-470ff.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:48144966478:android:ef69d246e89837d9",
+        "android_client_info": {
+          "package_name": "com.yourcompany.repairman"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "48144966478-okj9umgf6enmi1rqro7emntdg68b99ds.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKR0GUhLKdBbuZUzjKQ6-Bzx4Fmp3xqP0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
