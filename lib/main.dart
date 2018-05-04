@@ -7,6 +7,7 @@ import 'auth.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() => runApp(new MyApp());
 
@@ -18,6 +19,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final DbSynch cfg = new DbSynch();
   var routes;
+
+  final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +37,31 @@ class _MyAppState extends State<MyApp> {
           taskSubpageRouteComment: (BuildContext context) => new TaskCommentSubpage(cfg: cfg),
           loginPageRoute: (BuildContext context) => new AuthPage(cfg: cfg),
     };
+
+    _firebaseMessaging.configure(
+        onMessage: (Map<String, dynamic> message) {
+          print("onMessage: $message");
+        },
+        onLaunch: (Map<String, dynamic> message) {
+          print("onLaunch: $message");
+        },
+        onResume: (Map<String, dynamic> message) {
+          print("onResume: $message");
+        },
+    );
+
+    _firebaseMessaging.requestNotificationPermissions(
+        const IosNotificationSettings(sound: true, badge: true, alert: true)
+    );
+
+    _firebaseMessaging.onIosSettingsRegistered
+          .listen((IosNotificationSettings settings) {
+        print("Settings registered: $settings");
+    });
+    _firebaseMessaging.getToken().then((String token) {
+      assert(token != null);
+      print("Push Messaging token: $token");
+    });
   }
 
   @override
