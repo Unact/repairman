@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
         print("Settings registered: $settings");
     });
     _firebaseMessaging.getToken().then((String token) {
-      assert(token != null);
+      cfg.firebaseToken = token;
       print("Push Messaging token: $token");
     });
   }
