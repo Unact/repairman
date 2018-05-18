@@ -868,23 +868,24 @@ class DbSynch {
     return distance;
   }
 
-  Future<Null> updateExecutionMark(BuildContext context, double taskLatitude, double taskLongitude) async {
-  double distance;
+  Future<bool> updateExecutionMark(BuildContext context, double taskLatitude, double taskLongitude) async {
+    double distance;
     distance = new GreatCircleDistance.fromDegrees(
           latitude1: taskLatitude, longitude1: taskLongitude, latitude2: lastLatitude, longitude2: lastLongitude).haversineDistance();
-
-  if (distance > 500) {
-    showDialog(context: context,
-               builder: (BuildContext context) {
-                 return new AlertDialog(
-                   title: new Text("Ошибка отметки"),
-                   content: new Text("До терминала ${distance.floor()} м (больше чем 500м)"),
-                 );
-               }
-    );
-  } else {
-    await db.execute("UPDATE task SET mark_latitude = $taskLatitude, mark_longitude = $taskLongitude, updmarkflag = 1, executionmark_ts = datetime('now') where id = $curTask");
-  }
+    if (distance > 500) {
+      showDialog(context: context,
+                 builder: (BuildContext context) {
+                   return new AlertDialog(
+                     title: new Text("Ошибка отметки"),
+                     content: new Text("До терминала ${distance.floor()} м (больше чем 500м)"),
+                   );
+                 }
+      );
+      return false;
+    } else {
+      await db.execute("UPDATE task SET mark_latitude = $taskLatitude, mark_longitude = $taskLongitude, updmarkflag = 1, executionmark_ts = datetime('now') where id = $curTask");
+      return true;
+    }
 
   }
 

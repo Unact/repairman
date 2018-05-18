@@ -607,7 +607,7 @@ class _TaskSubpageState extends State<TaskSubpage> {
                             behavior: HitTestBehavior.translucent,
                             onTap: () async
                             {
-                               cfg.updateExecutionMark(context, _latitude,_longitude).then((v){setState((){_hasGeoTs=true;});});
+                               cfg.updateExecutionMark(context, _latitude,_longitude).then((v){setState((){_hasGeoTs=v;});});
                             },
                             child:
                   new Container(
