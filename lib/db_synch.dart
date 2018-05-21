@@ -72,7 +72,7 @@ class DbSynch {
   String clientName="";
   int closed=0;
   String firebaseToken;
-  String logMessage = "!";
+  DateTime lastSync;
 
   int curTask;
   String curCGroup;
@@ -383,6 +383,16 @@ class DbSynch {
     await db.execute("UPDATE info SET value = '$login' WHERE name = 'login'");
   }
 
+  Future<bool> needSync() async {
+    DateTime t = DateTime.now();
+    List<Map> list = await db.rawQuery("select (select value from info where name = 'last_sync') last_sync");
+    lastSync = safeParseDate(list[0]['last_sync']);
+    if (lastSync == null || t.difference(lastSync).inMinutes >= 10  ) {
+      return true;
+    }
+    return false;
+  }
+
   Future<Null> updatePwd(String s) async {
     password = s.trim();
     await db.execute("UPDATE info SET value = '$password' WHERE name = 'password'");
@@ -482,6 +492,7 @@ class DbSynch {
       }
     } while (i == 1);
 
+    lastSync = DateTime.now();
     await db.execute("DELETE FROM task");
     await db.execute("DELETE FROM terminal");
     await db.execute("DELETE FROM componentgroup");
@@ -616,6 +627,8 @@ class DbSynch {
                ${taskcomponents["id"]})
       """);
     }
+
+    await db.execute("REPLACE INTO info (name, value) VALUES ('last_sync', '$lastSync')");
 
     return null;
 

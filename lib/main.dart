@@ -8,6 +8,7 @@ import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:intl/intl.dart';
 
 void main() => runApp(new MyApp());
 
@@ -16,15 +17,15 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => new _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   final DbSynch cfg = new DbSynch();
   var routes;
-
-
+  AppLifecycleState _lastLifecyleState;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     routes = <String, WidgetBuilder>{
           taskPageRoute: (BuildContext context) => new TaskPage(cfg: cfg),
           terminalsPageRoute: (BuildContext context) => new TerminalsPage(cfg: cfg),
@@ -37,6 +38,26 @@ class _MyAppState extends State<MyApp> {
           taskSubpageRouteComment: (BuildContext context) => new TaskCommentSubpage(cfg: cfg),
           loginPageRoute: (BuildContext context) => new AuthPage(cfg: cfg),
     };
+  }
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print("LifecycleWatcherState#didChangeAppLifecycleState state=${state.toString()}");
+    setState(() {
+      _lastLifecyleState = state;
+    });
+    if (_lastLifecyleState == AppLifecycleState.paused) {
+      print("paused!!!");
+    }
+    if (_lastLifecyleState == AppLifecycleState.resumed) {
+      print("resumed!!!");
+    }
+
   }
 
   @override
@@ -61,7 +82,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  _MyHomePageState({this.cfg});
   final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
   DbSynch cfg;
   bool sendingClose = false;
@@ -77,7 +97,20 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   String _nearTerminal = "....";
   Widget syncstatuswidget;
+  Timer _timer;
 
+  _MyHomePageState({this.cfg}) {
+      print("_MyHomePageState#constructor, creating new Timer.periodic");
+      _timer = new Timer.periodic(
+          new Duration(minutes: 1), _doTimer);
+  }
+
+  void _doTimer(Timer t) {
+    print("_timer!");
+    cfg.needSync().then( (bool isSync) {
+      if (isSync) _refreshDB();
+    });
+  }
 
   void refreshDistance(){
     cfg.getDistance().then((double res) {
@@ -103,6 +136,10 @@ class _MyHomePageState extends State<MyHomePage> {
         refreshDistance();
       });
 
+      cfg.needSync().then( (bool isSync) {
+        if (isSync) _refreshDB();
+      });
+
       if (cfg.login == null || cfg.login == '' ||
           cfg.password == null || cfg.password == '') {
         Navigator.of(context).pushNamed(loginPageRoute);
@@ -110,18 +147,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
       _firebaseMessaging.configure(
           onMessage: (Map<String, dynamic> message) {
-            setState((){cfg.logMessage = "onMessage: $message";});
-            print(cfg.logMessage);
+            print("onMessage: $message");
             _refreshDB();
           },
           onLaunch: (Map<String, dynamic> message) {
-            setState((){cfg.logMessage = "onLaunch: $message";});
-            print(cfg.logMessage);
+            print("onLaunch: $message");
             _refreshDB();
           },
           onResume: (Map<String, dynamic> message) {
-            setState((){cfg.logMessage = "onResume: $message";});
-            print(cfg.logMessage);
+            print("onResume: $message");
             _refreshDB();
           },
       );
@@ -241,7 +275,7 @@ class _MyHomePageState extends State<MyHomePage> {
     children: <Widget>[
       new Container(
         height: 20.0,
-        child: new Text("2 ${cfg.agentName} ${cfg.zoneName} ${cfg.logMessage}")
+        child: new Text("${cfg.agentName} ${cfg.zoneName} синх:${new DateFormat("HH:mm:ss").format(cfg.lastSync)}")
       ),
       new Container(
         height: 20.0,
