@@ -20,7 +20,7 @@ class _MyAppState extends State<MyApp> {
   final DbSynch cfg = new DbSynch();
   var routes;
 
-  final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
+
 
   @override
   void initState() {
@@ -37,31 +37,6 @@ class _MyAppState extends State<MyApp> {
           taskSubpageRouteComment: (BuildContext context) => new TaskCommentSubpage(cfg: cfg),
           loginPageRoute: (BuildContext context) => new AuthPage(cfg: cfg),
     };
-
-    _firebaseMessaging.configure(
-        onMessage: (Map<String, dynamic> message) {
-          print("onMessage: $message");
-        },
-        onLaunch: (Map<String, dynamic> message) {
-          print("onLaunch: $message");
-        },
-        onResume: (Map<String, dynamic> message) {
-          print("onResume: $message");
-        },
-    );
-
-    _firebaseMessaging.requestNotificationPermissions(
-        const IosNotificationSettings(sound: true, badge: true, alert: true)
-    );
-
-    _firebaseMessaging.onIosSettingsRegistered
-          .listen((IosNotificationSettings settings) {
-        print("Settings registered: $settings");
-    });
-    _firebaseMessaging.getToken().then((String token) {
-      cfg.firebaseToken = token;
-      print("Push Messaging token: $token");
-    });
   }
 
   @override
@@ -87,6 +62,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   _MyHomePageState({this.cfg});
+  final FirebaseMessaging _firebaseMessaging = new FirebaseMessaging();
   DbSynch cfg;
   bool sendingClose = false;
   bool sendingInit = false;
@@ -131,6 +107,38 @@ class _MyHomePageState extends State<MyHomePage> {
           cfg.password == null || cfg.password == '') {
         Navigator.of(context).pushNamed(loginPageRoute);
       }
+
+      _firebaseMessaging.configure(
+          onMessage: (Map<String, dynamic> message) {
+            setState((){cfg.logMessage = "onMessage: $message";});
+            print(cfg.logMessage);
+            _refreshDB();
+          },
+          onLaunch: (Map<String, dynamic> message) {
+            setState((){cfg.logMessage = "onLaunch: $message";});
+            print(cfg.logMessage);
+            _refreshDB();
+          },
+          onResume: (Map<String, dynamic> message) {
+            setState((){cfg.logMessage = "onResume: $message";});
+            print(cfg.logMessage);
+            _refreshDB();
+          },
+      );
+
+      _firebaseMessaging.requestNotificationPermissions(
+          const IosNotificationSettings(sound: true, badge: true, alert: true)
+      );
+
+      _firebaseMessaging.onIosSettingsRegistered
+            .listen((IosNotificationSettings settings) {
+          print("Settings registered: $settings");
+      });
+      _firebaseMessaging.getToken().then((String token) {
+        cfg.firebaseToken = token;
+        print("Push Messaging token: $token");
+      });
+
     });
   }
 
@@ -161,6 +169,43 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     }
     return _emptyMessage;
+  }
+
+  Future<Null> _refreshDB() async {
+    setState((){updating = true;});
+    cfg.synchDB().then((res){
+      if (res=="ok") {
+        print("completed synchDB...");
+        cfg.fillDB().then((v){
+          if (v != null) {
+            showDialog(context: context,
+              builder: (BuildContext context) {
+                return new AlertDialog(
+                  title: new Text("Ошибка обновления базы"),
+                  content: new Text("$v"),
+                );
+              }
+            );
+          }
+          cfg.getMainPageCnt().then((v){
+            setState((){updating = false;});
+          });
+          print("completed...");
+        });
+      } else {
+        cfg.getMainPageCnt().then((v){
+          setState((){updating = false;});
+        });
+        showDialog(context: context,
+          builder: (BuildContext context) {
+            return new AlertDialog(
+              title: new Text("Ошибка сохранения базы"),
+              content: new Text("$res"),
+            );
+          }
+        );
+      }
+    });
   }
 
   @override
@@ -196,7 +241,7 @@ class _MyHomePageState extends State<MyHomePage> {
     children: <Widget>[
       new Container(
         height: 20.0,
-        child: new Text("${cfg.agentName} ${cfg.zoneName}")
+        child: new Text("2 ${cfg.agentName} ${cfg.zoneName} ${cfg.logMessage}")
       ),
       new Container(
         height: 20.0,
@@ -278,42 +323,7 @@ class _MyHomePageState extends State<MyHomePage> {
       new RaisedButton(
         color: Colors.blue,
         onPressed: () async {
-          setState((){updating = true;});
-
-          cfg.synchDB().then((res){
-            if (res=="ok") {
-              print("completed synchDB...");
-              cfg.fillDB().then((v){
-                if (v != null) {
-                  showDialog(context: context,
-                    builder: (BuildContext context) {
-                      return new AlertDialog(
-                        title: new Text("Ошибка обновления базы"),
-                        content: new Text("$v"),
-                      );
-                    }
-                  );
-                }
-                cfg.getMainPageCnt().then((v){
-                  setState((){updating = false;});
-                });
-                print("completed...");
-              });
-            } else {
-              cfg.getMainPageCnt().then((v){
-                setState((){updating = false;});
-              });
-              showDialog(context: context,
-                builder: (BuildContext context) {
-                  return new AlertDialog(
-                    title: new Text("Ошибка сохранения базы"),
-                    content: new Text("$res"),
-                  );
-                }
-              );
-            }
-          });
-
+          _refreshDB();
         },
         child: new Text('Обновить данные', style: new TextStyle(color: Colors.white)),
       ):
@@ -321,8 +331,7 @@ class _MyHomePageState extends State<MyHomePage> {
         color: Colors.grey,
         onPressed: ()  {},
         child: new Text('Обновить данные', style: new TextStyle(color: Colors.white)),
-      )
-      ,
+      ),
       syncstatuswidget
     ]);
 

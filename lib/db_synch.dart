@@ -72,6 +72,7 @@ class DbSynch {
   String clientName="";
   int closed=0;
   String firebaseToken;
+  String logMessage = "!";
 
   int curTask;
   String curCGroup;
