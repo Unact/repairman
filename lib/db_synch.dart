@@ -186,7 +186,7 @@ class DbSynch {
     do {
       isUpgrage = false;
       // open the database
-      db = await openDatabase(path, version: 3,
+      db = await openDatabase(path, version: 4,
         onCreate: (Database d, int version) async {
           await d.execute("""
             CREATE TABLE info(
@@ -213,6 +213,7 @@ class DbSynch {
               updmarkflag INTEGER DEFAULT 0,
               executionmark_ts DATETIME,
               inv_num TEXT,
+              updinv_num INTEGER DEFAULT 0,
               updservstatusflag INTEGER DEFAULT 0,
               ts DATETIME DEFAULT CURRENT_TIMESTAMP
             )"""
@@ -395,6 +396,10 @@ class DbSynch {
   Future<Null> updateComment(String s) async {
     await db.execute("UPDATE task SET updcommentflag = 1, comment = '$s' WHERE id = $curTask");
     curComment = s;
+  }
+
+  Future<Null> updateInvNum(String s) async {
+    await db.execute("UPDATE task SET updinv_num = 1, inv_num = '$s' WHERE id = $curTask");
   }
 
   Future<String> makeConnection() async {
@@ -1007,6 +1012,7 @@ class DbSynch {
     List<Map> terminalcomponentlink;
     List<Map> executionmark;
     List<Map> comments;
+    List<Map> invNums;
 
     var response;
     var data;
@@ -1017,8 +1023,9 @@ class DbSynch {
     terminalcomponentlink = await db.rawQuery("select task_id, comp_id, is_removed, syncstatus from terminalcomponentlink where syncstatus <> 0");
     executionmark = await db.rawQuery("select id, mark_latitude, mark_longitude, executionmark_ts from task where updmarkflag = 1");
     comments = await db.rawQuery("select id, comment from task where updcommentflag = 1");
+    invNums = await db.rawQuery("select id, inv_num from task where updinv_num = 1");
 
-    if (taskdefectlink.length + taskrepairlink.length + terminalcomponentlink.length + executionmark.length + comments.length > 0)
+    if (taskdefectlink.length + taskrepairlink.length + terminalcomponentlink.length + executionmark.length + comments.length + invNums.length > 0)
     {
       var httpClient = new http.Client();
       String url = server + "repairman/save";
@@ -1026,14 +1033,19 @@ class DbSynch {
         print("url = $url");
         print("RApi client_id=$clientId,token=$token");
         response = await httpClient.post(url,
-          headers: {"Authorization": "RApi client_id=$clientId,token=$token",
-                    "Accept": "application/json", "Content-Type": "application/json"},
-          body: json.encode({"taskdefectlink": taskdefectlink,
-                             "taskrepairlink": taskrepairlink,
-                             "terminalcomponentlink": terminalcomponentlink,
-                             "executionmark": executionmark,
-                             "comments": comments
-                           })
+          headers: {
+            "Authorization": "RApi client_id=$clientId,token=$token",
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          },
+          body: json.encode({
+            "taskdefectlink": taskdefectlink,
+            "taskrepairlink": taskrepairlink,
+            "terminalcomponentlink": terminalcomponentlink,
+            "executionmark": executionmark,
+            "comments": comments,
+            "inv_nums": invNums
+          })
         );
       } catch(exception) {
         syncing = -1;
@@ -1057,6 +1069,7 @@ class DbSynch {
       await db.execute("update terminalcomponentlink set syncstatus = 0 where syncstatus = 1");
       await db.execute("delete from terminalcomponentlink where syncstatus = -1");
       await db.execute("update task set updcommentflag = 0, updmarkflag = 0");
+      await db.execute("update task set updinv_num = 0");
       syncing = 0;
       return "ok";
     } else

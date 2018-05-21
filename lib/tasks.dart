@@ -1,6 +1,10 @@
-import 'package:flutter/material.dart';
-import 'db_synch.dart';
 import 'dart:async';
+
+import 'package:barcode_scan/barcode_scan.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'db_synch.dart';
 
 Map taskColors(int servstatus, int routepriority) {
 var bcolor;
@@ -743,14 +747,50 @@ class _TaskSubpageState extends State<TaskSubpage> {
             new Container(color: dvcolor, height: 12.0),
             addCommBtn,
             new Container(color: dvcolor, height: 12.0),
-            new Container(
-                          color: Colors.white,
-                          height: 48.0,
-                          padding: const EdgeInsets.all(4.0),
-                          child:
-               new Row(
-                 children: [new Expanded(child: new Text("Инв.номер: $invNum"))]
-               )
+            new GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: () async {
+                try {
+                  String barcode = await BarcodeScanner.scan();
+                  await cfg.updateInvNum(barcode);
+                  setState(() => this.invNum = barcode);
+                } on PlatformException catch (e) {
+                  String errorMsg = 'Не известная ошибка: $e';
+
+                  if (e.code == BarcodeScanner.CameraAccessDenied) {
+                    errorMsg = 'Необходимо дать доступ к использованию камеры';
+                  }
+
+                  showDialog(context: context,
+                    builder: (BuildContext context) {
+                      return new AlertDialog(
+                        title: new Text('Ошибка инв. номера'),
+                        content: new Text(errorMsg),
+                      );
+                    }
+                  );
+                } catch (e) {
+                  showDialog(context: context,
+                    builder: (BuildContext context) {
+                      return new AlertDialog(
+                        title: new Text('Ошибка инв. номера'),
+                        content: new Text('Не известная ошибка: $e'),
+                      );
+                    }
+                  );
+                }
+              },
+              child:
+              new Container(
+                  color: Colors.white,
+                  height: 48.0,
+                  padding: const EdgeInsets.all(4.0),
+                  child: new Row(
+                    children: [
+                      new Expanded(child: new Text("Инв.номер: $invNum"))
+                    ],
+                  )
+              ),
             ),
             new Divider(height: 1.0),
             new Container(

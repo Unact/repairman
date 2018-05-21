@@ -12,7 +12,7 @@ dependencies:
   url_launcher: any
   location: "^1.2.0"
   great_circle_distance: any
-
+  barcode_scan: any
   firebase_messaging: "0.2.2"
 
 dev_dependencies:
