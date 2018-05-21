@@ -44,7 +44,7 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - firebase_messaging (from `/Users/vsudakov/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_messaging-0.2.5/ios`)
+  - firebase_messaging (from `/Users/vsudakov/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_messaging-0.2.2/ios`)
   - Flutter (from `/Users/vsudakov/flutter/bin/cache/artifacts/engine/ios-release`)
   - location (from `/Users/vsudakov/flutter/.pub-cache/hosted/pub.dartlang.org/location-1.2.0/ios`)
   - path_provider (from `/Users/vsudakov/flutter/.pub-cache/hosted/pub.dartlang.org/path_provider-0.4.0/ios`)
@@ -53,7 +53,7 @@ DEPENDENCIES:
 
 EXTERNAL SOURCES:
   firebase_messaging:
-    :path: /Users/vsudakov/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_messaging-0.2.5/ios
+    :path: /Users/vsudakov/flutter/.pub-cache/hosted/pub.dartlang.org/firebase_messaging-0.2.2/ios
   Flutter:
     :path: /Users/vsudakov/flutter/bin/cache/artifacts/engine/ios-release
   location:
