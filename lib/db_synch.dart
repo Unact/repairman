@@ -28,7 +28,13 @@ DateTime safeParseDate(String d) {
   }
   return DateTime.parse(d);
 }
-
+String fmtTime(DateTime t) {
+  if (t == null) {
+    return "";
+  } else {
+    return new DateFormat("HH:mm:ss").format(t);
+  }
+}
 String fmtSrok(DateTime date) {
 
   String _twoDigits(int n) {

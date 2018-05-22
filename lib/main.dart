@@ -8,7 +8,6 @@ import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:intl/intl.dart';
 
 void main() => runApp(new MyApp());
 
@@ -108,7 +107,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _doTimer(Timer t) {
     print("_timer!");
     cfg.needSync().then( (bool isSync) {
-      if (isSync) _refreshDB();
+      if (isSync && cfg.login != null && cfg.password != null) _refreshDB();
     });
   }
 
@@ -136,13 +135,13 @@ class _MyHomePageState extends State<MyHomePage> {
         refreshDistance();
       });
 
-      cfg.needSync().then( (bool isSync) {
-        if (isSync) _refreshDB();
-      });
-
       if (cfg.login == null || cfg.login == '' ||
           cfg.password == null || cfg.password == '') {
         Navigator.of(context).pushNamed(loginPageRoute);
+      } else {
+        cfg.needSync().then( (bool isSync) {
+          if (isSync) _refreshDB();
+        });
       }
 
       _firebaseMessaging.configure(
@@ -275,7 +274,7 @@ class _MyHomePageState extends State<MyHomePage> {
     children: <Widget>[
       new Container(
         height: 20.0,
-        child: new Text("${cfg.agentName} ${cfg.zoneName} синх:${new DateFormat("HH:mm:ss").format(cfg.lastSync)}")
+        child: new Text("${cfg.agentName} ${cfg.zoneName} синх:${fmtTime(cfg.lastSync)}")
       ),
       new Container(
         height: 20.0,
