@@ -916,7 +916,7 @@ class DbSynch {
 
   Future<Null> updateServstatus() async {
     curServstatus = 1;
-    await db.execute("UPDATE task SET servstatus = 1 where id = $curTask");
+    await db.execute("UPDATE task SET servstatus = 1, updservstatusflag = 1 where id = $curTask");
     getTasks();
   }
 
@@ -1033,6 +1033,7 @@ class DbSynch {
     List<Map> terminalcomponentlink;
     List<Map> executionmark;
     List<Map> comments;
+    List<Map> servstatus;
     List<Map> invNums;
 
     var response;
@@ -1044,6 +1045,7 @@ class DbSynch {
     terminalcomponentlink = await db.rawQuery("select task_id, comp_id, is_removed, syncstatus from terminalcomponentlink where syncstatus <> 0");
     executionmark = await db.rawQuery("select id, mark_latitude, mark_longitude, executionmark_ts from task where updmarkflag = 1");
     comments = await db.rawQuery("select id, comment from task where updcommentflag = 1");
+    servstatus = await db.rawQuery("select id, servstatus from task where updservstatusflag = 1");
     invNums = await db.rawQuery("select id, inv_num from task where updinv_num = 1");
 
     if (taskdefectlink.length + taskrepairlink.length + terminalcomponentlink.length + executionmark.length + comments.length + invNums.length > 0)
@@ -1065,6 +1067,7 @@ class DbSynch {
             "terminalcomponentlink": terminalcomponentlink,
             "executionmark": executionmark,
             "comments": comments,
+            "servstatus": servstatus,
             "inv_nums": invNums
           })
         );
