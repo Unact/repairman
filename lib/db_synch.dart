@@ -321,7 +321,6 @@ class DbSynch {
             CREATE TABLE terminalcomponentlink(
               id INTEGER PRIMARY KEY DEFAULT AUTO_INCREMENT,
               comp_id INT,
-              group_xid TEXT,
               task_id INT,
               is_removed INT,
               syncstatus INTEGER DEFAULT 0
@@ -616,7 +615,7 @@ class DbSynch {
       """);
     }
 
-      for (var taskrepairlink in data["taskrepairlink"]) {
+    for (var taskrepairlink in data["taskrepairlink"]) {
         await db.execute("""
           INSERT INTO taskrepairlink (task_id,repair_id)
           VALUES(${taskrepairlink["task_id"]},
@@ -637,6 +636,15 @@ class DbSynch {
                ${taskcomponents["isBroken"]},
                ${taskcomponents["id"]})
       """);
+    }
+
+    for (var terminalcomponentlink in data["terminalcomponentlink"]) {
+        await db.execute("""
+          INSERT INTO terminalcomponentlink (task_id, comp_id, is_removed)
+          VALUES(${terminalcomponentlink["task_id"]},
+                 ${terminalcomponentlink["comp_id"]},
+                 ${terminalcomponentlink["is_removed"]})
+        """);
     }
 
     await db.execute("REPLACE INTO info (name, value) VALUES ('last_sync', '$lastSync')");
@@ -689,15 +697,17 @@ class DbSynch {
 
     list = await db.rawQuery("""
      select componentid comp_id, short_name, serial, 1 preinstflag,
-            (select count(1) from terminalcomponentlink tcl where tcl.comp_id = terminalcomponent.componentid and tcl.task_id = $taskId) chflag
+            (select count(*) from terminalcomponentlink tcl where tcl.comp_id = terminalcomponent.componentid and tcl.task_id = $taskId) chflag
        from terminalcomponent
       where componentgroupxid = '$cgroupXid' and
-            terminalid = (select terminal from task where id = $taskId)
+            terminalid = (select terminal from task where id = $taskId) and
+            not exists(select 1 from terminalcomponentlink tcl where tcl.comp_id = terminalcomponent.componentid and tcl.task_id = $taskId and tcl.is_removed = 0)
   union all
-      select id, short_name, serial, 0,
-             (select count(1) from terminalcomponentlink tcl where tcl.comp_id = component.id and tcl.task_id = $taskId)
+      select id, short_name, serial, 0 preinstflag,
+             (select count(*) from terminalcomponentlink tcl where tcl.comp_id = component.id and tcl.task_id = $taskId) chflag
         from component
-       where componentgroupxid = '$cgroupXid'
+       where componentgroupxid = '$cgroupXid' and
+       not exists(select 1 from terminalcomponentlink l where l.comp_id = component.id and l.task_id <> $taskId and l.is_removed = 0)
   order by preinstflag DESC
     """);
 
@@ -713,13 +723,17 @@ class DbSynch {
              name,
              isManualReplacement,
              (select count(*) from component c
-              where c.componentgroupxid = cg.xid) freeremains,
+              where c.componentgroupxid = cg.xid and
+              not exists(select 1 from terminalcomponentlink l where l.comp_id = c.id and l.is_removed = 0)
+            ) freeremains,
              (select count(*)
                 from terminalcomponent tc
                where tc.componentgroupxid = cg.xid and
                      tc.terminalid = (select terminal from task where id = $taskId)) preinstcnt,
-             (select count(*) from terminalcomponentlink tcl where task_id=$taskId and group_xid = cg.xid and is_removed = 0) inscnt,
-             (select count(*) from terminalcomponentlink tcl where task_id=$taskId and group_xid = cg.xid and is_removed = 1) remcnt
+             (select count(*) from terminalcomponentlink tcl join component c on c.id = tcl.comp_id
+              where tcl.task_id=$taskId and c.componentgroupxid = cg.xid and tcl.is_removed = 0) inscnt,
+             (select count(*) from terminalcomponentlink tcl join component c on c.id = tcl.comp_id
+              where tcl.task_id=$taskId and c.componentgroupxid = cg.xid and tcl.is_removed = 1) remcnt
      from componentgroup cg
     where freeremains > 0
     """);
@@ -940,7 +954,7 @@ class DbSynch {
       if (newstatus == 1) {
         if (syncstatus==null) {
           print("  <1> вставляем в # с сюнкстатусом 1");
-          await db.execute("insert into terminalcomponentlink (comp_id, group_xid, task_id, is_removed, syncstatus) select $compId, '$curCGroup', $taskId, $preinstflag, 1");
+          await db.execute("insert into terminalcomponentlink (comp_id, task_id, is_removed, syncstatus) select $compId, $taskId, $preinstflag, 1");
         } else {
           print("  <2> апдейтим в # на сюнкстатус 0");
           await db.execute("update terminalcomponentlink set syncstatus = 0 where id = $id");
