@@ -4,16 +4,24 @@ description: the fixik
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   path_provider: any
   sqflite: any
-  http: "^0.11.3+16"
+  http: any
   intl: any
   cupertino_icons: any
   url_launcher: any
   location: "^1.2.0"
-  great_circle_distance: any
+  great_circle_distance:
+    git:
+      url: git://github.com/swipesight/great_circle_distance.dart
   barcode_scan: any
-  firebase_messaging: "0.2.2"
+  firebase_messaging: any
+  sentry: any
+  dotenv: any
+  shared_preferences: any
+  device_info: any
 
 dev_dependencies:
   flutter_test:
@@ -25,7 +33,9 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-
+  assets:
+    - lib/data/schemas/v1.sql
+    - .app_env
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
