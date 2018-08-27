@@ -12,7 +12,7 @@ dependencies:
   intl: any
   cupertino_icons: any
   url_launcher: any
-  location: "^1.2.0"
+  location: any
   great_circle_distance:
     git:
       url: git://github.com/swipesight/great_circle_distance.dart
