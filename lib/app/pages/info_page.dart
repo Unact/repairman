@@ -76,7 +76,7 @@ class _InfoPageState extends State<InfoPage> {
       key: _refreshIndicatorKey,
       onRefresh: _refresh,
       child: ListView.builder(
-        padding: const EdgeInsets.only(top: 20.0, left: 8.0, right: 8.0),
+        padding: const EdgeInsets.only(top: 24.0, left: 8.0, right: 8.0),
         itemCount: 1,
         itemBuilder: (BuildContext context, int index) {
           return Column(

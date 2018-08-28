@@ -75,7 +75,7 @@ class _LoginPageState extends State<LoginPage> {
     return ListView(
       children: <Widget>[
         Container(
-          padding: EdgeInsets.only(top: 180.0, left: 8.0, right: 8.0),
+          padding: EdgeInsets.only(top: 176.0, left: 8.0, right: 8.0),
           child: Form(
             key: _formKey,
             child: Column(

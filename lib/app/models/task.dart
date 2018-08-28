@@ -128,7 +128,7 @@ class Task extends DatabaseModel {
         tasks.*,
         terminals.code,
         terminals.address
-      from tasks
+      from $_tableName tasks
       left join terminals on terminals.id = tasks.pps_terminal_id
       order by tasks.servstatus, tasks.route_priority desc, tasks.dobefore
     """)).map((rec) {
@@ -138,5 +138,15 @@ class Task extends DatabaseModel {
 
       return task;
     }).toList();
+  }
+
+  static Future<List<Task>> byPpsTerminalId(int ppsTerminalId) async {
+    return (await App.application.data.db.rawQuery("""
+      select
+        tasks.*
+      from $_tableName tasks
+      where pps_terminal_id = $ppsTerminalId
+      order by tasks.servstatus, tasks.route_priority desc, tasks.dobefore
+    """)).map((rec) => Task(rec)).toList();
   }
 }

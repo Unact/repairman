@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:repairman/app/models/terminal.dart';
+import 'package:repairman/app/pages/terminal_page.dart';
 import 'package:repairman/app/utils/format.dart';
 
 class TerminalsPage extends StatefulWidget {
@@ -28,6 +29,9 @@ class _TerminalsPageState extends State<TerminalsPage> {
     return ListTile(
       isThreeLine: true,
       title: Text(terminal.terminalId.toString() + ' | ' + terminal.code),
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(builder: (context) => TerminalPage(ppsTerminal: terminal)));
+      },
       subtitle: RichText(
         text: TextSpan(
           children: <TextSpan>[

@@ -32,7 +32,7 @@ class _PersonPageState extends State<PersonPage> {
 
   Widget _buildBody(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(top: 60.0, left: 8.0, right: 8.0),
+      padding: EdgeInsets.only(top: 64.0, left: 8.0, right: 8.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
