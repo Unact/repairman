@@ -4,9 +4,7 @@ import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/user.dart';
 
 class PersonPage extends StatefulWidget {
-  PersonPage({
-    Key key
-  }) : super(key: key);
+  PersonPage({Key key}) : super(key: key);
 
   @override
   _PersonPageState createState() => _PersonPageState();

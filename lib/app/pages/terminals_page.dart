@@ -6,9 +6,7 @@ import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/utils/format.dart';
 
 class TerminalsPage extends StatefulWidget {
-  TerminalsPage({
-    Key key
-  }) : super(key: key);
+  TerminalsPage({Key key}) : super(key: key);
 
   @override
   _TerminalsPageState createState() => _TerminalsPageState();

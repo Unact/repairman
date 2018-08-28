@@ -48,15 +48,11 @@ class ComponentGroup extends DatabaseModel {
   }
 
   static Future<List<ComponentGroup>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) {
-      return ComponentGroup(rec);
-    }).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => ComponentGroup(rec)).toList();
   }
 
   static Future<List<ComponentGroup>> import(List<dynamic> recs) async {
     await ComponentGroup.deleteAll();
-    return await Future.wait(recs.map((rec) {
-      return ComponentGroup.create(rec);
-    }));
+    return await Future.wait(recs.map((rec) => ComponentGroup.create(rec)));
   }
 }

@@ -6,9 +6,7 @@ import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/utils/format.dart';
 
 class TasksPage extends StatefulWidget {
-  TasksPage({
-    Key key
-  }) : super(key: key);
+  TasksPage({Key key}) : super(key: key);
 
   @override
   _TasksPageState createState() => _TasksPageState();

@@ -54,15 +54,11 @@ class TaskComponent extends DatabaseModel {
   }
 
   static Future<List<TaskComponent>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) {
-      return TaskComponent(rec);
-    }).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => TaskComponent(rec)).toList();
   }
 
   static Future<List<TaskComponent>> import(List<dynamic> recs) async {
     await TaskComponent.deleteAll();
-    return await Future.wait(recs.map((rec) {
-      return TaskComponent.create(rec);
-    }));
+    return await Future.wait(recs.map((rec) => TaskComponent.create(rec)));
   }
 }

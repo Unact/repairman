@@ -114,16 +114,12 @@ class Task extends DatabaseModel {
   }
 
   static Future<List<Task>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) {
-      return Task(rec);
-    }).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => Task(rec)).toList();
   }
 
   static Future<void> import(List<dynamic> recs) async {
     await Task.deleteAll();
-    await Future.wait(recs.map((rec) {
-      return Task.create(rec);
-    }));
+    await Future.wait(recs.map((rec) => Task.create(rec)));
   }
 
   static Future<List<Task>> allWithTerminalInfo() async {

@@ -5,9 +5,7 @@ import 'package:repairman/app/pages/tasks_page.dart';
 import 'package:repairman/app/pages/terminals_page.dart';
 
 class HomePage extends StatefulWidget {
-  HomePage({
-    Key key
-  }) : super(key: key);
+  HomePage({Key key}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();

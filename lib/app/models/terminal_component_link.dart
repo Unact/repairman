@@ -60,15 +60,11 @@ class TerminalComponentLink extends DatabaseModel {
   }
 
   static Future<List<TerminalComponentLink>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) {
-      return TerminalComponentLink(rec);
-    }).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => TerminalComponentLink(rec)).toList();
   }
 
   static Future<void> import(List<dynamic> recs) async {
     await TerminalComponentLink.deleteAll();
-    await Future.wait(recs.map((rec) {
-      return TerminalComponentLink.create(rec);
-    }));
+    await Future.wait(recs.map((rec) => TerminalComponentLink.create(rec)));
   }
 }

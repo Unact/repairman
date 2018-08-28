@@ -45,15 +45,11 @@ class Defect extends DatabaseModel {
   }
 
   static Future<List<Defect>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) {
-      return Defect(rec);
-    }).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => Defect(rec)).toList();
   }
 
   static Future<void> import(List<dynamic> recs) async {
     await Defect.deleteAll();
-    await Future.wait(recs.map((rec) {
-      return Defect.create(rec);
-    }));
+    await Future.wait(recs.map((rec) => Defect.create(rec)));
   }
 }

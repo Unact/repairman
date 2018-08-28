@@ -91,14 +91,10 @@ class Location extends DatabaseModel {
   }
 
   static Future<List<Location>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) {
-      return Location(rec);
-    }).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => Location(rec)).toList();
   }
 
   static Future<List<Location>> allNew() async {
-    return (await App.application.data.db.query(_tableName, where: 'is_new = 1')).map((rec) {
-      return Location(rec);
-    }).toList();
+    return (await App.application.data.db.query(_tableName, where: 'is_new = 1')).map((rec) => Location(rec)).toList();
   }
 }

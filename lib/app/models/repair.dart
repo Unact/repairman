@@ -45,15 +45,11 @@ class Repair extends DatabaseModel {
   }
 
   static Future<List<Repair>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) {
-      return Repair(rec);
-    }).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => Repair(rec)).toList();
   }
 
   static Future<void> import(List<dynamic> recs) async {
     await Repair.deleteAll();
-    await Future.wait(recs.map((rec) {
-      return Repair.create(rec);
-    }));
+    await Future.wait(recs.map((rec) => Repair.create(rec)));
   }
 }

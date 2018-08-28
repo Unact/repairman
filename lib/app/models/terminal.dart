@@ -72,15 +72,11 @@ class Terminal extends DatabaseModel {
   }
 
   static Future<List<Terminal>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) {
-      return Terminal(rec);
-    }).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => Terminal(rec)).toList();
   }
 
   static Future<void> import(List<dynamic> recs) async {
     await Terminal.deleteAll();
-    await Future.wait(recs.map((rec) {
-      return Terminal.create(rec);
-    }));
+    await Future.wait(recs.map((rec) => Terminal.create(rec)));
   }
 }

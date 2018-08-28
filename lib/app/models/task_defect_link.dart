@@ -45,15 +45,11 @@ class TaskDefectLink extends DatabaseModel {
   }
 
   static Future<List<TaskDefectLink>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) {
-      return TaskDefectLink(rec);
-    }).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => TaskDefectLink(rec)).toList();
   }
 
   static Future<void> import(List<dynamic> recs) async {
     await TaskDefectLink.deleteAll();
-    await Future.wait(recs.map((rec) {
-      return TaskDefectLink.create(rec);
-    }));
+    await Future.wait(recs.map((rec) => TaskDefectLink.create(rec)));
   }
 }

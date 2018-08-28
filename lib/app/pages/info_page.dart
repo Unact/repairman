@@ -10,9 +10,7 @@ import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/modules/api.dart';
 
 class InfoPage extends StatefulWidget {
-  InfoPage({
-    Key key,
-  }) : super(key: key);
+  InfoPage({Key key}) : super(key: key);
 
   @override
   _InfoPageState createState() => _InfoPageState();
