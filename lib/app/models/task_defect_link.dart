@@ -26,7 +26,7 @@ class TaskDefectLink extends DatabaseModel {
   }
 
   Map<String, dynamic> toMap() {
-    var map = new Map<String, dynamic>();
+    Map<String, dynamic> map = Map<String, dynamic>();
     map['task_id'] = taskId;
     map['defect_id'] = defectId;
 

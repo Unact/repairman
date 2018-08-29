@@ -101,7 +101,7 @@ class User extends BaseModel {
   }
 
   Map<String, dynamic> toMap() {
-    var map = new Map<String, dynamic>();
+    Map<String, dynamic> map = Map<String, dynamic>();
     map['username'] = username;
     map['password'] = password;
     map['agent_name'] = agentName;

@@ -44,7 +44,7 @@ class Terminal extends DatabaseModel {
   }
 
   Map<String, dynamic> toMap() {
-    var map = new Map<String, dynamic>();
+    Map<String, dynamic> map = Map<String, dynamic>();
     map['id'] = id;
     map['terminalId'] = terminalId;
     map['latitude'] = latitude?.toString();

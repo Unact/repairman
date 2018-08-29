@@ -34,7 +34,7 @@ class Api {
         return parseResponse(await _get(method));
       }
     } on SocketException {
-      throw new ApiConnException();
+      throw ApiConnException();
     }
   }
 
@@ -47,7 +47,7 @@ class Api {
         return parseResponse(await _post(method, body));
       }
     } on SocketException {
-      throw new ApiConnException();
+      throw ApiConnException();
     }
   }
 
@@ -87,7 +87,7 @@ class Api {
 
       parseResponse(response);
     } on SocketException {
-      throw new ApiConnException();
+      throw ApiConnException();
     }
   }
 
@@ -117,7 +117,7 @@ class Api {
 
       _token = parseResponse(response)['token'];
     } on SocketException {
-      throw new ApiConnException();
+      throw ApiConnException();
     }
   }
 
@@ -127,16 +127,16 @@ class Api {
       dynamic parsedResp;
 
       if (statusCode < 200) {
-        throw new ApiException('Ошибка при получении данных', statusCode);
+        throw ApiException('Ошибка при получении данных', statusCode);
       } else {
         parsedResp = _decoder.convert(body);
       }
 
       if (statusCode == 401) {
-        throw new AuthException(parsedResp['error']);
+        throw AuthException(parsedResp['error']);
       }
       if (statusCode >= 400) {
-        throw new ApiException(parsedResp['error'], statusCode);
+        throw ApiException(parsedResp['error'], statusCode);
       }
 
       return _decoder.convert(body);

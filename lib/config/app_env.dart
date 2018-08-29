@@ -3,18 +3,18 @@ import 'dart:async' show Future;
 import 'package:dotenv/dotenv.dart' as dotenv show Parser;
 import 'package:flutter/services.dart' show rootBundle;
 
-const AppEnv appEnv = const AppEnv._();
+const AppEnv appEnv = AppEnv._();
 
 // Позаимстововал часть имплементации dotenv,
 // к сожалению его целиком использовать не получается, так как он не читает ассеты флаттера
 class AppEnv {
-  static final Map _env = new Map();
+  static final Map _env = Map();
 
   const AppEnv._();
 
   String operator [](String name) => _env[name];
 
-  Map toMap() => new Map.unmodifiable(_env);
+  Map toMap() => Map.unmodifiable(_env);
 
   Future<void> load([filePath = '.app_env']) {
     return rootBundle.loadStructuredData(filePath, (fileStr) async {

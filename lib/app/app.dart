@@ -6,13 +6,15 @@ import 'package:sentry/sentry.dart' as sentryLib;
 
 import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
+import 'package:repairman/app/pages/home_page.dart';
+import 'package:repairman/app/pages/login_page.dart';
 import 'package:repairman/config/app_config.dart';
 import 'package:repairman/data/app_data.dart';
 
 class App {
   App.setup(this.config) :
-    data = new AppData(config),
-    api = new Api(config)
+    data = AppData(config),
+    api = Api(config)
   {
     _setupEnv();
     _application = this;
@@ -39,10 +41,10 @@ class App {
 
   void _setupEnv() {
     if (config.env != 'development') {
-      sentry = new sentryLib.SentryClient(dsn: config.sentryDsn);
+      sentry = sentryLib.SentryClient(dsn: config.sentryDsn);
 
       FlutterError.onError = (errorDetails) async {
-        final sentryLib.Event event = new sentryLib.Event(
+        final sentryLib.Event event = sentryLib.Event(
           exception: errorDetails.exception,
           stackTrace: errorDetails.stack,
           userContext: sentryLib.User(
@@ -58,22 +60,25 @@ class App {
   }
 
   Widget _buildWidget() {
-    return new MaterialApp(
+    return MaterialApp(
       title: title,
-      theme: new ThemeData(
+      theme: ThemeData(
         primarySwatch: Colors.blue
       ),
+      routes: {
+        '/': (BuildContext context) => HomePage(),
+        '/login': (BuildContext context) => LoginPage()
+      },
       initialRoute: api.isLogged() ? '/' : '/login',
-      routes: config.routes,
-      locale: const Locale('ru', 'RU'),
+      locale: Locale('ru', 'RU'),
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: [
-        const Locale('en', 'US'),
-        const Locale('ru', 'RU'),
-      ],
+        Locale('en', 'US'),
+        Locale('ru', 'RU'),
+      ]
     );
   }
 }

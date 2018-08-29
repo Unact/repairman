@@ -4,9 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
 import 'package:repairman/app/app.dart';
-import 'package:repairman/app/pages/home_page.dart';
-import 'package:repairman/app/pages/login_page.dart';
-import 'package:repairman/app/pages/person_page.dart';
 
 class AppConfig {
   AppConfig({
@@ -23,11 +20,6 @@ class AppConfig {
   final String clientId = 'repairman';
   final String secretKeyWord = '5005';
   final int databaseVersion;
-  final routes = {
-    '/': (BuildContext context) => new HomePage(),
-    '/login': (BuildContext context) => new LoginPage(),
-    '/person': (BuildContext context) => new PersonPage()
-  };
 
   String apiBaseUrl;
   bool autoRefresh = true;

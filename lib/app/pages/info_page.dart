@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'package:repairman/app/app.dart';
+import 'package:repairman/app/pages/person_page.dart';
 import 'package:repairman/app/models/location.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
@@ -159,7 +160,10 @@ class _InfoPageState extends State<InfoPage> {
             color: Colors.white,
             icon: Icon(Icons.person),
             onPressed: () {
-              Navigator.pushNamed(context, '/person');
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (BuildContext context) => PersonPage(), fullscreenDialog: true)
+              );
             }
           ),
           Builder(builder: _buildInfoButton)

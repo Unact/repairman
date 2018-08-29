@@ -28,7 +28,7 @@ class ComponentGroup extends DatabaseModel {
   }
 
   Map<String, dynamic> toMap() {
-    var map = new Map<String, dynamic>();
+    Map<String, dynamic> map = Map<String, dynamic>();
     map['id'] = id;
     map['name'] = name;
     map['is_manual_replacement'] = isManualReplacement;

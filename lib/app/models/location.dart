@@ -39,7 +39,7 @@ class Location extends DatabaseModel {
   }
 
   Map<String, dynamic> toMap() {
-    var map = new Map<String, dynamic>();
+    Map<String, dynamic> map = Map<String, dynamic>();
     map['latitude'] = latitude;
     map['longitude'] = longitude;
     map['accuracy'] = accuracy;

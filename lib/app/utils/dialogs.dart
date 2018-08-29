@@ -5,7 +5,7 @@ class Dialogs {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return new Padding(padding: EdgeInsets.all(5.0), child: Center(child: CircularProgressIndicator()));
+        return Padding(padding: EdgeInsets.all(5.0), child: Center(child: CircularProgressIndicator()));
       }
     );
   }
