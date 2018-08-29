@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:repairman/app/models/task.dart';
+import 'package:repairman/app/models/terminal.dart';
+import 'package:repairman/app/pages/task_page.dart';
 import 'package:repairman/app/utils/format.dart';
 
 class TasksPage extends StatefulWidget {
@@ -25,8 +27,14 @@ class _TasksPageState extends State<TasksPage> {
 
   Widget _taskTile(BuildContext context, Task task) {
     Map<String, Color> colors = task.colors();
-      return Container(
-        color: colors['bcolor'],
+
+    return Container(
+      color: colors['bcolor'],
+      child: GestureDetector(
+        onTap: () async {
+          Terminal terminal = await Terminal.byPpsTerminalId(task.ppsTerminalId);
+          Navigator.push(context, MaterialPageRoute(builder: (context) => TaskPage(terminal: terminal, task: task)));
+        },
         child: ListTile(
           isThreeLine: true,
           title: Text(task.routePriority.toString() + '|' + task.code + ' : ' + task.terminalBreakName),
@@ -39,6 +47,7 @@ class _TasksPageState extends State<TasksPage> {
             )
           )
         )
+      )
     );
   }
 

@@ -30,7 +30,7 @@ class _TerminalsPageState extends State<TerminalsPage> {
       isThreeLine: true,
       title: Text(terminal.terminalId.toString() + ' | ' + terminal.code),
       onTap: () {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => TerminalPage(ppsTerminal: terminal)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => TerminalPage(terminal: terminal)));
       },
       subtitle: RichText(
         text: TextSpan(

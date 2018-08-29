@@ -75,6 +75,10 @@ class Terminal extends DatabaseModel {
     return (await App.application.data.db.query(_tableName)).map((rec) => Terminal(rec)).toList();
   }
 
+  static Future<Terminal> byPpsTerminalId(int ppsTerminalId) async {
+    return Terminal((await App.application.data.db.query(_tableName, where: 'id = $ppsTerminalId')).first);
+  }
+
   static Future<void> import(List<dynamic> recs) async {
     await Terminal.deleteAll();
     await Future.wait(recs.map((rec) => Terminal.create(rec)));

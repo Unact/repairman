@@ -5,25 +5,26 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
+import 'package:repairman/app/pages/task_page.dart';
 import 'package:repairman/app/utils/format.dart';
 
 class TerminalPage extends StatefulWidget {
-  final Terminal ppsTerminal;
+  final Terminal terminal;
 
-  TerminalPage({Key key, @required this.ppsTerminal}) : super(key: key);
+  TerminalPage({Key key, @required this.terminal}) : super(key: key);
 
   @override
   _TerminalPageState createState() => _TerminalPageState();
 }
 
 class _TerminalPageState extends State<TerminalPage> {
-  final EdgeInsets mainPadding = EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0);
+  final EdgeInsets listViewItemsPadding = EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0);
+  final EdgeInsets headingPadding = EdgeInsets.only(top: 12.0);
   final TextStyle headingStyle = TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
-  final TextStyle defaultStyle = TextStyle(fontSize: 8.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
   List<Task> _tasks = [];
 
   Future<void> _loadData() async {
-    _tasks = await Task.byPpsTerminalId(widget.ppsTerminal.id);
+    _tasks = await Task.byPpsTerminalId(widget.terminal.id);
 
     if (mounted) {
       setState((){});
@@ -42,7 +43,12 @@ class _TerminalPageState extends State<TerminalPage> {
 
   Widget _buildTaskRow(Task task) {
     return GestureDetector(
-      onTap: () => print('asd'),
+      onTap: () async {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TaskPage(terminal: widget.terminal, task: task))
+        );
+      },
       child: Row(
         children: <Widget>[
           Container(
@@ -82,43 +88,43 @@ class _TerminalPageState extends State<TerminalPage> {
   Table _buildTable() {
     return Table(
       columnWidths: <int, TableColumnWidth>{
-        0: FixedColumnWidth(80.0)
+        0: FixedColumnWidth(88.0)
       },
       children: <TableRow>[
         TableRow(
           children: <Widget>[
             Padding(
-              padding: EdgeInsets.only(top: 12.0, bottom: 4.0),
+              padding: headingPadding,
               child: Text('Терминал', style: headingStyle)
             ),
             SizedBox(),
           ]
         ),
-        _buildTableRow('ID', widget.ppsTerminal.terminalId.toString()),
-        _buildTableRow('Код', widget.ppsTerminal.code),
-        _buildTableRow('Система', widget.ppsTerminal.srcSystemName),
-        _buildTableRow('Сигнал', Format.untilStr(widget.ppsTerminal.lastActivityTime)),
-        _buildTableRow('Платеж', Format.untilStr(widget.ppsTerminal.lastPaymentTime)),
-        _buildTableRow('Ошибка', widget.ppsTerminal.errorText ?? ''),
-        _buildTableRow('Адрес', widget.ppsTerminal.address),
+        _buildTableRow('ID', widget.terminal.terminalId.toString()),
+        _buildTableRow('Код', widget.terminal.code),
+        _buildTableRow('Система', widget.terminal.srcSystemName),
+        _buildTableRow('Сигнал', Format.untilStr(widget.terminal.lastActivityTime)),
+        _buildTableRow('Платеж', Format.untilStr(widget.terminal.lastPaymentTime)),
+        _buildTableRow('Ошибка', widget.terminal.errorText ?? ''),
+        _buildTableRow('Адрес', widget.terminal.address),
       ]
     );
   }
 
   Widget _buildBody(BuildContext context) {
     List<Task> tasks = _tasks ?? [];
-    double longitude = widget.ppsTerminal.longitude;
-    double latitude = widget.ppsTerminal.latitude;
+    double longitude = widget.terminal.longitude;
+    double latitude = widget.terminal.latitude;
 
     return ListView(
       padding: EdgeInsets.only(left: 8.0, right: 8.0),
       children: <Widget>[
         Container(
-          padding: mainPadding,
+          padding: listViewItemsPadding,
           child: _buildTable(),
         ),
         Container(
-          padding: mainPadding,
+          padding: listViewItemsPadding,
           child: GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () => _showPlacemarkOnMap(longitude, latitude),
@@ -128,12 +134,12 @@ class _TerminalPageState extends State<TerminalPage> {
           ),
         ),
         Container(
-          padding: mainPadding,
+          padding: listViewItemsPadding,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.only(top: 12.0, bottom: 4.0),
+                padding: headingPadding,
                 child: Text('Задачи', style: headingStyle)
               )
             ]..addAll(tasks.map((Task task) => _buildTaskRow(task)))
@@ -154,7 +160,7 @@ class _TerminalPageState extends State<TerminalPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Терминал ${widget.ppsTerminal.code}')
+        title: Text('Терминал ${widget.terminal.code}')
       ),
       body: _buildBody(context)
     );
