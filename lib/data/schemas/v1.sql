@@ -12,7 +12,8 @@ CREATE TABLE tasks(
     inv_num TEXT,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    local_id INTEGER PRIMARY KEY
+    local_id INTEGER PRIMARY KEY,
+    is_new INTEGER DEFAULT 1
 );
 CREATE TABLE terminals(
     id INTEGER UNIQUE,

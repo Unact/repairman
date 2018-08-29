@@ -6,7 +6,7 @@ class Nullify {
   }
 
   static double parseDouble(value) {
-    return value != null ? (value is double ? value : double.parse(value)) : null;
+    return value != null ? (value is double ? value : (value is int ? value.toDouble() : double.parse(value))) : null;
   }
 
   static bool parseBool(value) {

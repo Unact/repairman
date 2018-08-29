@@ -10,6 +10,7 @@ class Task extends DatabaseModel {
   static final String _tableName = 'tasks';
   int localId;
   DateTime localTs;
+  bool isNew;
 
   int id;
   bool servstatus;
@@ -48,8 +49,10 @@ class Task extends DatabaseModel {
     info = values['info'];
     dobefore = Nullify.parseDate(values['dobefore']);
     executionmarkTs = Nullify.parseDate(values['executionmark_ts']);
+
     localId = values['local_id'];
     localTs = Nullify.parseDate(values['local_ts']);
+    isNew = Nullify.parseBool(values['is_new']) ?? false;
   }
 
   Map<String, dynamic> toMap() {
@@ -65,6 +68,7 @@ class Task extends DatabaseModel {
     map['info'] = info;
     map['dobefore'] = dobefore?.toIso8601String();
     map['executionmark_ts'] = executionmarkTs?.toIso8601String();
+    map['is_new'] = isNew;
 
     return map;
   }
