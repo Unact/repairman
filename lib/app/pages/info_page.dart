@@ -146,7 +146,10 @@ class _InfoPageState extends State<InfoPage> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+
+    if (App.application.config.autoRefresh) {
+      _loadData();
+    }
   }
 
   @override
@@ -154,7 +157,7 @@ class _InfoPageState extends State<InfoPage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Text('Техник'),
+        title: Text(App.application.config.packageInfo.appName),
         actions: <Widget>[
           IconButton(
             color: Colors.white,

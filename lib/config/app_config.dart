@@ -1,19 +1,21 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
+import 'package:package_info/package_info.dart';
 
 import 'package:repairman/app/app.dart';
 
 class AppConfig {
   AppConfig({
     @required this.isPhysicalDevice,
+    @required this.packageInfo,
     @required this.env,
     @required this.databaseVersion,
     @required this.apiBaseUrl,
     @required this.sentryDsn
   });
 
+  final PackageInfo packageInfo;
   final bool isPhysicalDevice;
   final String env;
   final String sentryDsn;

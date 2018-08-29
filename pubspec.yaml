@@ -22,6 +22,7 @@ dependencies:
   dotenv: any
   shared_preferences: any
   device_info: any
+  package_info: any
 
 dev_dependencies:
   flutter_test:

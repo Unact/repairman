@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/user.dart';
+import 'package:repairman/app/pages/settings_page.dart';
 
 class PersonPage extends StatefulWidget {
   PersonPage({Key key}) : super(key: key);
@@ -31,54 +32,87 @@ class _PersonPageState extends State<PersonPage> {
   }
 
   Widget _buildBody(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.only(top: 64.0, left: 8.0, right: 8.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          ListTile(
-            title: Text(_zoneName ?? '',
-              style: TextStyle(fontWeight: FontWeight.w500)
-            ),
-            leading: Icon(
-              Icons.dns,
-              color: Colors.blue[500],
-            ),
-          ),
-          ListTile(
-            title: Text(_agentName ?? '',
-              style: TextStyle(fontWeight: FontWeight.w500)
-            ),
-            leading: Icon(
-              Icons.contacts,
-              color: Colors.blue[500],
-            ),
-          ),
-          ListTile(
-            title: Text(_email ?? '',
-              style: TextStyle(fontWeight: FontWeight.w500)
-            ),
-            leading: Icon(
-              Icons.contact_mail,
-              color: Colors.blue[500],
-            ),
-          )
-        ]
-      )
+    return ListView(
+      padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0),
+      children: [
+        _buildInfo(),
+        Divider(height: 1.0, color: Colors.grey),
+        _buildHelp()
+      ]
     );
   }
 
-  Widget _buildActionButton(BuildContext context) {
-    return FloatingActionButton(
-      child: Icon(
-        Icons.exit_to_app,
-        semanticLabel: 'Выйти',
-      ),
-      backgroundColor: Colors.red,
-      onPressed: _logout,
+  Widget _buildHelp() {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(
+            'Настройки',
+            style: TextStyle(fontWeight: FontWeight.w500)
+          ),
+          leading: Icon(
+            Icons.settings,
+            color: Colors.grey,
+          ),
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (BuildContext context) => SettingsPage(), fullscreenDialog: true)
+            );
+            Navigator.pop(context);
+          },
+        ),
+        ListTile(
+          title: Text(
+            'Выйти',
+            style: TextStyle(fontWeight: FontWeight.w500)
+          ),
+          leading: Icon(
+            Icons.exit_to_app,
+            color: Colors.red,
+          ),
+          onTap: _logout
+        ),
+      ]
     );
   }
 
+  Widget _buildInfo() {
+    return Column(
+      children: [
+        ListTile(
+          title: Text(
+            _zoneName ?? '',
+            style: TextStyle(fontWeight: FontWeight.w500)
+          ),
+          leading: Icon(
+            Icons.dns,
+            color: Colors.blue[500],
+          ),
+        ),
+        ListTile(
+          title: Text(
+            _agentName ?? '',
+            style: TextStyle(fontWeight: FontWeight.w500)
+          ),
+          leading: Icon(
+            Icons.contacts,
+            color: Colors.blue[500],
+          ),
+        ),
+        ListTile(
+          title: Text(
+            _email ?? '',
+            style: TextStyle(fontWeight: FontWeight.w500)
+          ),
+          leading: Icon(
+            Icons.contact_mail,
+            color: Colors.blue[500],
+          ),
+        )
+      ]
+    );
+  }
 
   @override
   void initState() {
@@ -92,7 +126,6 @@ class _PersonPageState extends State<PersonPage> {
       appBar: AppBar(
         title: Text('Пользователь'),
       ),
-      floatingActionButton: Builder(builder: _buildActionButton),
       body: _buildBody(context)
     );
   }

@@ -69,6 +69,8 @@ PODS:
     - nanopb/encode (= 0.3.8)
   - nanopb/decode (0.3.8)
   - nanopb/encode (0.3.8)
+  - package_info (0.0.1):
+    - Flutter
   - path_provider (0.0.1):
     - Flutter
   - Protobuf (3.6.1)
@@ -86,6 +88,7 @@ DEPENDENCIES:
   - firebase_messaging (from `Pods/.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Pods/.symlinks/flutter/ios`)
   - location (from `Pods/.symlinks/plugins/location/ios`)
+  - package_info (from `Pods/.symlinks/plugins/package_info/ios`)
   - path_provider (from `Pods/.symlinks/plugins/path_provider/ios`)
   - shared_preferences (from `Pods/.symlinks/plugins/shared_preferences/ios`)
   - sqflite (from `Pods/.symlinks/plugins/sqflite/ios`)
@@ -116,6 +119,8 @@ EXTERNAL SOURCES:
     :path: Pods/.symlinks/flutter/ios
   location:
     :path: Pods/.symlinks/plugins/location/ios
+  package_info:
+    :path: Pods/.symlinks/plugins/package_info/ios
   path_provider:
     :path: Pods/.symlinks/plugins/path_provider/ios
   shared_preferences:
@@ -141,6 +146,7 @@ SPEC CHECKSUMS:
   location: 26c90953ad5916331d0d1d913898779910416487
   MTBBarcodeScanner: bb0bb62e18b57f8a571a482248adc20722b70a91
   nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
+  package_info: d7c98b64f60add4c2908b9d94d82a45d3c8827ad
   path_provider: 09407919825bfe3c2deae39453b7a5b44f467873
   Protobuf: 1eb9700044745f00181c136ef21b8ff3ad5a0fd5
   shared_preferences: 5a1d487c427ee18fcd3ea1f2a131569481834b53

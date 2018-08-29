@@ -5,6 +5,7 @@ import 'package:device_info/device_info.dart';
 import 'package:repairman/app/app.dart';
 import 'package:repairman/config/app_config.dart';
 import 'package:repairman/config/app_env.dart' show appEnv;
+import 'package:package_info/package_info.dart';
 
 void main() async {
   String developmentUrl;
@@ -22,6 +23,7 @@ void main() async {
 
   await appEnv.load();
   App.setup(AppConfig(
+    packageInfo: await PackageInfo.fromPlatform(),
     isPhysicalDevice: isPhysicalDevice,
     env: development ? 'development' : 'production',
     databaseVersion: 1,
