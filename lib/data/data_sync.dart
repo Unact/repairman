@@ -52,7 +52,7 @@ class DataSync {
     });
 
     await Future.wait(locations.map((location) {
-      location.isNew = false;
+      location.localInserted = false;
       return location.update();
     }));
   }

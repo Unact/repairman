@@ -6,8 +6,6 @@ import 'package:repairman/app/utils/nullify.dart';
 
 class TaskComponent extends DatabaseModel {
   static String _tableName = 'task_components';
-  int localId;
-  DateTime localTs;
 
   int id;
   int taskId;
@@ -21,14 +19,15 @@ class TaskComponent extends DatabaseModel {
     build(values);
   }
 
+  @override
   void build(Map<String, dynamic> values) {
+    super.build(values);
+
     id = values['id'];
     taskId = values['task_id'];
     compId = values['comp_id'];
     ppsTerminalId = values['pps_terminal_id'];
     isRemoved = Nullify.parseBool(values['is_removed']);
-    localId = values['local_id'];
-    localTs = Nullify.parseDate(values['local_ts']);
   }
 
   Map<String, dynamic> toMap() {

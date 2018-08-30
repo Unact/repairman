@@ -8,9 +8,6 @@ import 'package:repairman/app/utils/nullify.dart';
 
 class Location extends DatabaseModel {
   static final String _tableName = 'locations';
-  int localId;
-  DateTime localTs;
-  bool isNew;
 
   double latitude;
   double longitude;
@@ -26,16 +23,15 @@ class Location extends DatabaseModel {
     build(values);
   }
 
+  @override
   void build(Map<String, dynamic> values) {
+    super.build(values);
+
     latitude = Nullify.parseDouble(values['latitude']);
     longitude = Nullify.parseDouble(values['longitude']);
     accuracy = Nullify.parseDouble(values['accuracy']);
     altitude = Nullify.parseDouble(values['altitude']);
     ts = Nullify.parseDate(values['ts']);
-
-    localId = values['local_id'];
-    localTs = Nullify.parseDate(values['local_ts']);
-    isNew = Nullify.parseBool(values['is_new']);
   }
 
   Map<String, dynamic> toMap() {
@@ -45,7 +41,6 @@ class Location extends DatabaseModel {
     map['accuracy'] = accuracy;
     map['altitude'] = altitude;
     map['ts'] = ts;
-    map['is_new'] = isNew;
 
     return map;
   }
@@ -95,6 +90,7 @@ class Location extends DatabaseModel {
   }
 
   static Future<List<Location>> allNew() async {
-    return (await App.application.data.db.query(_tableName, where: 'is_new = 1')).map((rec) => Location(rec)).toList();
+    return (await App.application.data.db.query(_tableName, where: 'local_inserted = 1')).
+      map((rec) => Location(rec)).toList();
   }
 }

@@ -27,7 +27,7 @@ class _TerminalPageState extends State<TerminalPage> {
     _tasks = await Task.byPpsTerminalId(widget.terminal.id);
 
     if (mounted) {
-      setState((){});
+      setState(() {});
     }
   }
 

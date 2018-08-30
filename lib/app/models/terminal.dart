@@ -6,8 +6,6 @@ import 'package:repairman/app/utils/nullify.dart';
 
 class Terminal extends DatabaseModel {
   static final String _tableName = 'terminals';
-  int localId;
-  DateTime localTs;
 
   int id;
   int terminalId;
@@ -27,7 +25,10 @@ class Terminal extends DatabaseModel {
     build(values);
   }
 
+  @override
   void build(Map<String, dynamic> values) {
+    super.build(values);
+
     id = values['id'];
     terminalId = values['terminalId'];
     latitude = Nullify.parseDouble(values['latitude']);
@@ -39,8 +40,6 @@ class Terminal extends DatabaseModel {
     mobileop = values['mobileop'];
     lastActivityTime = Nullify.parseDate(values['lastactivitytime']);
     lastPaymentTime = Nullify.parseDate(values['lastpaymenttime']);
-    localId = values['local_id'];
-    localTs = Nullify.parseDate(values['local_ts']);
   }
 
   Map<String, dynamic> toMap() {

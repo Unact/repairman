@@ -6,8 +6,6 @@ import 'package:repairman/app/utils/nullify.dart';
 
 class ComponentGroup extends DatabaseModel {
   static String _tableName = 'component_groups';
-  int localId;
-  DateTime localTs;
 
   int id;
   String name;
@@ -19,12 +17,13 @@ class ComponentGroup extends DatabaseModel {
     build(values);
   }
 
+  @override
   void build(Map<String, dynamic> values) {
+    super.build(values);
+
     id = values['id'];
     name = values['name'];
     isManualReplacement = Nullify.parseBool(values['is_manual_replacement']);
-    localId = values['local_id'];
-    localTs = Nullify.parseDate(values['local_ts']);
   }
 
   Map<String, dynamic> toMap() {

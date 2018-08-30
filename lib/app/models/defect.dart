@@ -2,12 +2,9 @@ import 'dart:async';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
-import 'package:repairman/app/utils/nullify.dart';
 
 class Defect extends DatabaseModel {
   static final String _tableName = 'defects';
-  int localId;
-  DateTime localTs;
 
   int id;
   String name;
@@ -18,11 +15,12 @@ class Defect extends DatabaseModel {
     build(values);
   }
 
+  @override
   void build(Map<String, dynamic> values) {
+    super.build(values);
+
     id = values['id'];
     name = values['name'];
-    localId = values['local_id'];
-    localTs = Nullify.parseDate(values['local_ts']);
   }
 
   Map<String, dynamic> toMap() {

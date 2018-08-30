@@ -8,9 +8,6 @@ import 'package:repairman/app/utils/nullify.dart';
 
 class Task extends DatabaseModel {
   static final String _tableName = 'tasks';
-  int localId;
-  DateTime localTs;
-  bool isNew;
 
   int id;
   bool servstatus;
@@ -26,6 +23,7 @@ class Task extends DatabaseModel {
 
   String address;
   String code;
+  bool isSeen;
 
   static const int redRoute = 3;
   static const int yellowRoute = 2;
@@ -37,7 +35,10 @@ class Task extends DatabaseModel {
     build(values);
   }
 
+  @override
   void build(Map<String, dynamic> values) {
+    super.build(values);
+
     id = values['id'];
     servstatus = Nullify.parseBool(values['servstatus']);
     ppsTerminalId = values['pps_terminal_id'];
@@ -50,9 +51,7 @@ class Task extends DatabaseModel {
     dobefore = Nullify.parseDate(values['dobefore']);
     executionmarkTs = Nullify.parseDate(values['executionmark_ts']);
 
-    localId = values['local_id'];
-    localTs = Nullify.parseDate(values['local_ts']);
-    isNew = Nullify.parseBool(values['is_new']) ?? false;
+    isSeen = Nullify.parseBool(values['is_seen']) ?? false;
   }
 
   Map<String, dynamic> toMap() {
@@ -68,7 +67,7 @@ class Task extends DatabaseModel {
     map['info'] = info;
     map['dobefore'] = dobefore?.toIso8601String();
     map['executionmark_ts'] = executionmarkTs?.toIso8601String();
-    map['is_new'] = isNew;
+    map['is_seen'] = isSeen;
 
     return map;
   }

@@ -6,8 +6,6 @@ import 'package:repairman/app/utils/nullify.dart';
 
 class TaskRepairLink extends DatabaseModel {
   static final String _tableName = 'task_repair_link';
-  int localId;
-  DateTime localTs;
 
   int taskId;
   int repairId;
@@ -18,11 +16,12 @@ class TaskRepairLink extends DatabaseModel {
     build(values);
   }
 
+  @override
   void build(Map<String, dynamic> values) {
+    super.build(values);
+
     taskId = values['task_id'];
     repairId = values['repair_id'];
-    localId = values['local_id'];
-    localTs = Nullify.parseDate(values['local_ts']);
   }
 
   Map<String, dynamic> toMap() {
@@ -46,6 +45,12 @@ class TaskRepairLink extends DatabaseModel {
 
   static Future<List<TaskRepairLink>> all() async {
     return (await App.application.data.db.query(_tableName)).map((rec) => TaskRepairLink(rec)).toList();
+  }
+
+  static Future<List<TaskRepairLink>> byTaskId(int taskId) async {
+    return (await App.application.data.db.query(_tableName, where: 'task_id = $taskId')).map((rec) {
+      return TaskRepairLink(rec);
+    }).toList();
   }
 
   static Future<void> import(List<dynamic> recs) async {

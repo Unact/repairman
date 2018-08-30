@@ -13,7 +13,11 @@ CREATE TABLE tasks(
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,
-    is_new INTEGER DEFAULT 1
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0,
+
+    is_seen INTEGER DEFAULT 0
 );
 CREATE TABLE terminals(
     id INTEGER UNIQUE,
@@ -29,7 +33,10 @@ CREATE TABLE terminals(
     terminalId INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    local_id INTEGER PRIMARY KEY
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
 );
 CREATE TABLE components(
     id INTEGER UNIQUE,
@@ -38,7 +45,10 @@ CREATE TABLE components(
     component_group_id INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    local_id INTEGER PRIMARY KEY
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
 );
 CREATE TABLE task_components(
     task_id INTEGER,
@@ -48,7 +58,10 @@ CREATE TABLE task_components(
     id INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    local_id INTEGER PRIMARY KEY
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
 );
 CREATE TABLE component_groups(
     id INTEGER UNIQUE,
@@ -56,35 +69,50 @@ CREATE TABLE component_groups(
     is_manual_replacement INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    local_id INTEGER PRIMARY KEY
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
 );
 CREATE TABLE repairs(
     id INTEGER UNIQUE,
     name TEXT,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    local_id INTEGER PRIMARY KEY
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
 );
 CREATE TABLE defects(
     id INTEGER UNIQUE,
     name TEXT,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    local_id INTEGER PRIMARY KEY
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
 );
 CREATE TABLE task_defect_link(
     task_id INTEGER,
     defect_id INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    local_id INTEGER PRIMARY KEY
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
 );
 CREATE TABLE task_repair_link(
     task_id INTEGER,
     repair_id INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    local_id INTEGER PRIMARY KEY
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
 );
 CREATE TABLE terminal_component_link(
     task_id INTEGER,
@@ -96,7 +124,10 @@ CREATE TABLE terminal_component_link(
     is_removed INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    local_id INTEGER PRIMARY KEY
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
 );
 CREATE TABLE locations(
     latitude  DECIMAL(18,10),
@@ -107,5 +138,7 @@ CREATE TABLE locations(
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,
-    is_new    INTEGER DEFAULT 1
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
 );

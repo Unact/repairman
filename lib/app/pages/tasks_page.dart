@@ -19,11 +19,11 @@ class _TasksPageState extends State<TasksPage> {
   bool _showOnlyNew = false;
 
   Future<void> _loadData() async {
-    _tasks = (await Task.allWithTerminalInfo()).where((term) => !_showOnlyNew || term.isNew).toList();
+    _tasks = (await Task.allWithTerminalInfo()).where((term) => !_showOnlyNew || term.isSeen).toList();
 
 
     if (mounted) {
-      setState((){});
+      setState(() {});
     }
   }
 
@@ -31,7 +31,7 @@ class _TasksPageState extends State<TasksPage> {
     return Container(
       child: GestureDetector(
         onTap: () async {
-          task.isNew = false;
+          task.isSeen = false;
           await task.update();
           Terminal terminal = await Terminal.byPpsTerminalId(task.ppsTerminalId);
 
@@ -40,9 +40,9 @@ class _TasksPageState extends State<TasksPage> {
         child: ListTile(
           isThreeLine: true,
           trailing: Checkbox(
-            value: task.isNew,
+            value: task.isSeen,
             onChanged: (bool value) async {
-              task.isNew = value;
+              task.isSeen = value;
               await task.update();
               await _loadData();
             },

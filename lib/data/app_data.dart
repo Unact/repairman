@@ -75,17 +75,18 @@ class AppData {
     List<String> messageParts = message.split(' ');
     User user = User.currentUser();
 
-    if (App.application.config.geocode) {
+    if (App.application.config.geocode && user != null) {
       user.curLatitude = double.parse(messageParts[0]);
       user.curLongitude = double.parse(messageParts[1]);
       user.save();
 
-      Location.create({
+      Location location = Location({
         'latitude': messageParts[0],
         'longitude': messageParts[1],
         'accuracy': messageParts[2],
         'altitude': messageParts[3]
       });
+      location.markAndInsert();
 
       if ((await Location.allNew()).length > Location.newLimit) {
         dataSync.exportLocations();

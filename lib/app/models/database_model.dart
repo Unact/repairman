@@ -2,13 +2,23 @@ import 'dart:async';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/base_model.dart';
+import 'package:repairman/app/utils/nullify.dart';
 
-abstract class DatabaseModel<T> extends BaseModel  {
+abstract class DatabaseModel<T> extends BaseModel {
   int localId;
   DateTime localTs;
+  bool localInserted;
+  bool localUpdated;
+  bool localDeleted;
   get tableName;
 
-  void build(Map<String, dynamic> values);
+  void build(Map<String, dynamic> values) {
+    localId = values['local_id'];
+    localTs = Nullify.parseDate(values['local_ts']);
+    localInserted = Nullify.parseBool(values['local_inserted']);
+    localUpdated = Nullify.parseBool(values['local_updated']);
+    localDeleted = Nullify.parseBool(values['local_deleted']);
+  }
 
   Future<void> reload() async {
     build((await App.application.data.db.query(tableName, where: 'local_id = $localId')).first);
@@ -19,8 +29,34 @@ abstract class DatabaseModel<T> extends BaseModel  {
     return this;
   }
 
+  Future<DatabaseModel<T>> markInserted(bool inserted) async {
+    await updateField('local_inserted', inserted);
+    localInserted = inserted;
+    return this;
+  }
+
+  Future<DatabaseModel<T>> markAndInsert() async {
+    await insert();
+    await markInserted(true);
+    await reload();
+    return this;
+  }
+
   Future<DatabaseModel<T>> update() async {
     await App.application.data.db.update(tableName, toMap(), where: 'local_id = $localId');
+    return this;
+  }
+
+  Future<DatabaseModel<T>> markUpdated(bool updated) async {
+    await updateField('local_updated', updated);
+    localUpdated = updated;
+    return this;
+  }
+
+  Future<DatabaseModel<T>> markAndUpdate() async {
+    await update();
+    await markUpdated(true);
+    await reload();
     return this;
   }
 
@@ -28,7 +64,44 @@ abstract class DatabaseModel<T> extends BaseModel  {
     await App.application.data.db.delete(tableName, where: 'local_id = $localId');
   }
 
-  Future<void> save() async {
-    throw('Not implemented');
+  Future<DatabaseModel<T>> markDeleted(bool deleted) async {
+    await updateField('local_deleted', deleted);
+    localDeleted = deleted;
+    return this;
+  }
+
+  Future<DatabaseModel<T>> updateField(String field, dynamic value) async {
+    await App.application.data.db.update(tableName, {field: value}, where: 'local_id = $localId');
+    return this;
+  }
+
+  static Future<List<DatabaseModel>> createOrDeleteFromList(
+    List<DatabaseModel> searchList,
+    Function searchFn,
+    DatabaseModel newRec,
+    bool toCreate
+  ) async {
+    Function searchDeletedFn = (rec) => searchFn(rec) && rec.localDeleted;
+    Function searchInsertedFn = (rec) => searchFn(rec) && rec.localInserted;
+
+    if (toCreate) {
+      if (searchList.any(searchDeletedFn)) {
+        await searchList.firstWhere(searchDeletedFn).markDeleted(false);
+      } else {
+        await newRec.markAndInsert();
+        searchList.add(newRec);
+      }
+    } else {
+      if (searchList.any(searchInsertedFn)) {
+        DatabaseModel insertedRec = searchList.firstWhere(searchInsertedFn);
+
+        await insertedRec.delete();
+        searchList.remove(insertedRec);
+      } else {
+        await searchList.firstWhere(searchFn).markDeleted(true);
+      }
+    }
+
+    return searchList;
   }
 }

@@ -2,12 +2,9 @@ import 'dart:async';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
-import 'package:repairman/app/utils/nullify.dart';
 
 class Component extends DatabaseModel {
   static String _tableName = 'components';
-  int localId;
-  DateTime localTs;
 
   int id;
   String name;
@@ -20,13 +17,14 @@ class Component extends DatabaseModel {
     build(values);
   }
 
+  @override
   void build(Map<String, dynamic> values) {
+    super.build(values);
+
     id = values['id'];
     name = values['name'];
     serial = values['serial'];
     componentGroupId = values['component_group_id'];
-    localId = values['local_id'];
-    localTs = Nullify.parseDate(values['local_ts']);
   }
 
   Map<String, dynamic> toMap() {

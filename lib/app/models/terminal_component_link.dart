@@ -6,8 +6,6 @@ import 'package:repairman/app/utils/nullify.dart';
 
 class TerminalComponentLink extends DatabaseModel {
   static final String _tableName = 'terminal_component_link';
-  int localId;
-  DateTime localTs;
 
   int taskId;
   int compId;
@@ -23,7 +21,10 @@ class TerminalComponentLink extends DatabaseModel {
     build(values);
   }
 
+  @override
   void build(Map<String, dynamic> values) {
+    super.build(values);
+
     taskId = values['task_id'];
     compId = values['comp_id'];
     isRemoved = Nullify.parseBool(values['is_removed']);
@@ -31,8 +32,6 @@ class TerminalComponentLink extends DatabaseModel {
     serial = values['serial'];
     componentGroupId = values['component_group_id'];
     ppsTerminalId = values['pps_terminal_id'];
-    localId = values['local_id'];
-    localTs = Nullify.parseDate(values['local_ts']);
   }
 
   Map<String, dynamic> toMap() {

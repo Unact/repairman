@@ -47,7 +47,7 @@ class _InfoPageState extends State<InfoPage> {
         _uncompletedTasksCnt = tasks.where((task) => !task.servstatus).length;
 
         if (mounted) {
-          setState((){});
+          setState(() {});
         }
       } on ApiException catch(e) {
         _showErrorSnackBar(e.errorMsg);

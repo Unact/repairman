@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/pages/terminal_page.dart';
+import 'package:repairman/app/pages/repairs_page.dart';
+import 'package:repairman/app/pages/defects_page.dart';
 import 'package:repairman/app/utils/format.dart';
 
 class TaskPage extends StatefulWidget {
@@ -31,7 +33,7 @@ class _TaskPageState extends State<TaskPage> {
     try {
       String barcode = await BarcodeScanner.scan();
       widget.task.invNum = barcode;
-      await widget.task.update();
+      await widget.task.markAndUpdate();
       setState(() {});
     } on PlatformException catch (e) {
       String errorMsg = 'Не известная ошибка: $e';
@@ -104,8 +106,8 @@ class _TaskPageState extends State<TaskPage> {
                 ),
                 onFieldSubmitted: (String value) async {
                   widget.task.info = value;
-                  await widget.task.update();
-                  setState((){});
+                  await widget.task.markAndUpdate();
+                  setState(() {});
                 }
               ),
             ),
@@ -143,7 +145,10 @@ class _TaskPageState extends State<TaskPage> {
           title: Text('Неисправности', style: defaultTextStyle),
           contentPadding: listPanelPadding,
           onTap: () {
-
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => DefectsPage(task: widget.task), fullscreenDialog: true)
+            );
           }
         ),
         ListTile(
@@ -151,7 +156,10 @@ class _TaskPageState extends State<TaskPage> {
           title: Text('Ремонты', style: defaultTextStyle),
           contentPadding: listPanelPadding,
           onTap: () {
-
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => RepairsPage(task: widget.task), fullscreenDialog: true)
+            );
           }
         ),
         ListTile(

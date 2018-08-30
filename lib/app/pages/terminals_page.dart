@@ -24,7 +24,7 @@ class _TerminalsPageState extends State<TerminalsPage> {
     _terminals.sort((terminal1, terminal2) => terminal1.terminalId.compareTo(terminal2.terminalId));
 
     if (mounted) {
-      setState((){});
+      setState(() {});
     }
   }
 
