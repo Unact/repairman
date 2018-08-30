@@ -8,6 +8,7 @@ import 'package:sqflite/sqflite.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/location.dart';
+import 'package:repairman/app/models/user.dart';
 import 'package:repairman/config/app_config.dart';
 import 'package:repairman/data/data_sync.dart';
 
@@ -72,10 +73,13 @@ class AppData {
 
   Future<String> _handlePlatformIncrement(String message) async {
     List<String> messageParts = message.split(' ');
+    User user = User.currentUser();
 
     if (App.application.config.geocode) {
-      //cfg.lastLatitude = double.parse(messageParts[0]);
-      //cfg.lastLongitude = double.parse(messageParts[1]);
+      user.curLatitude = double.parse(messageParts[0]);
+      user.curLongitude = double.parse(messageParts[1]);
+      user.save();
+
       Location.create({
         'latitude': messageParts[0],
         'longitude': messageParts[1],
