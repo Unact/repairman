@@ -7,7 +7,6 @@ import 'package:repairman/app/models/defect.dart';
 import 'package:repairman/app/models/location.dart';
 import 'package:repairman/app/models/repair.dart';
 import 'package:repairman/app/models/task.dart';
-import 'package:repairman/app/models/task_component.dart';
 import 'package:repairman/app/models/task_defect_link.dart';
 import 'package:repairman/app/models/task_repair_link.dart';
 import 'package:repairman/app/models/terminal.dart';
@@ -31,7 +30,6 @@ class DataSync {
     await Defect.import(importData['defects']);
     await Repair.import(importData['repairs']);
     await Task.import(importData['tasks']);
-    await TaskComponent.import(importData['task_components']);
     await TaskDefectLink.import(importData['task_defect_link']);
     await TaskRepairLink.import(importData['task_repair_link']);
     await Terminal.import(importData['terminals']);

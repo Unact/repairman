@@ -50,19 +50,6 @@ CREATE TABLE components(
     local_updated INTEGER DEFAULT 0,
     local_deleted INTEGER DEFAULT 0
 );
-CREATE TABLE task_components(
-    task_id INTEGER,
-    comp_id INTEGER,
-    pps_terminal_id INTEGER,
-    is_removed INTEGER,
-    id INTEGER,
-
-    local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
-    local_id INTEGER PRIMARY KEY,
-    local_inserted INTEGER DEFAULT 0,
-    local_updated INTEGER DEFAULT 0,
-    local_deleted INTEGER DEFAULT 0
-);
 CREATE TABLE component_groups(
     id INTEGER UNIQUE,
     name TEXT,
