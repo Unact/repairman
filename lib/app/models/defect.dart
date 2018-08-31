@@ -11,8 +11,8 @@ class Defect extends DatabaseModel {
 
   get tableName => _tableName;
 
-  Defect(Map<String, dynamic> values) {
-    build(values);
+  Defect({Map<String, dynamic> values, this.id, this.name}) {
+    if (values != null) build(values);
   }
 
   @override
@@ -32,7 +32,7 @@ class Defect extends DatabaseModel {
   }
 
   static Future<Defect> create(Map<String, dynamic> values) async {
-    Defect rec = Defect(values);
+    Defect rec = Defect(values: values);
     await rec.insert();
     await rec.reload();
     return rec;
@@ -43,7 +43,7 @@ class Defect extends DatabaseModel {
   }
 
   static Future<List<Defect>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) => Defect(rec)).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => Defect(values: rec)).toList();
   }
 
   static Future<void> import(List<dynamic> recs) async {

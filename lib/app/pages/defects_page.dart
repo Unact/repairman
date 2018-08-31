@@ -48,7 +48,7 @@ class _DefectsPageState extends State<DefectsPage> {
                 await DatabaseModel.createOrDeleteFromList(
                   _taskDefects,
                   taskDefLinkSearch,
-                  TaskDefectLink({'task_id': widget.task.id, 'defect_id': defect.id}),
+                  TaskDefectLink(taskId: widget.task.id, defectId: defect.id),
                   value
                 );
 

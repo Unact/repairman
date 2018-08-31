@@ -13,8 +13,8 @@ class Component extends DatabaseModel {
 
   get tableName => _tableName;
 
-  Component(Map<String, dynamic> values) {
-    build(values);
+  Component({Map<String, dynamic> values, this.id, this.name, this.serial}) {
+    if (values != null) build(values);
   }
 
   @override
@@ -38,7 +38,7 @@ class Component extends DatabaseModel {
   }
 
   static Future<Component> create(Map<String, dynamic> values) async {
-    Component rec = Component(values);
+    Component rec = Component(values: values);
     await rec.insert();
     await rec.reload();
     return rec;
@@ -49,7 +49,7 @@ class Component extends DatabaseModel {
   }
 
   static Future<List<Component>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) => Component(rec)).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => Component(values: rec)).toList();
   }
 
   static Future<List<Component>> import(List<dynamic> recs) async {

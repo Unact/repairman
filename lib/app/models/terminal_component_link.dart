@@ -17,8 +17,17 @@ class TerminalComponentLink extends DatabaseModel {
 
   get tableName => _tableName;
 
-  TerminalComponentLink(Map<String, dynamic> values) {
-    build(values);
+  TerminalComponentLink({
+    Map<String, dynamic> values,
+    this.taskId,
+    this.compId,
+    this.isRemoved,
+    this.name,
+    this.serial,
+    this.componentGroupId,
+    this.ppsTerminalId
+  }) {
+    if (values != null) build(values);
   }
 
   @override
@@ -48,7 +57,7 @@ class TerminalComponentLink extends DatabaseModel {
   }
 
   static Future<TerminalComponentLink> create(Map<String, dynamic> values) async {
-    TerminalComponentLink rec = TerminalComponentLink(values);
+    TerminalComponentLink rec = TerminalComponentLink(values: values);
     await rec.insert();
     await rec.reload();
     return rec;
@@ -59,7 +68,7 @@ class TerminalComponentLink extends DatabaseModel {
   }
 
   static Future<List<TerminalComponentLink>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) => TerminalComponentLink(rec)).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => TerminalComponentLink(values: rec)).toList();
   }
 
   static Future<void> import(List<dynamic> recs) async {

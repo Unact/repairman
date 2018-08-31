@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
-import 'package:repairman/app/utils/nullify.dart';
 
 class TaskDefectLink extends DatabaseModel {
   static final String _tableName = 'task_defect_link';
@@ -12,8 +11,8 @@ class TaskDefectLink extends DatabaseModel {
 
   get tableName => _tableName;
 
-  TaskDefectLink(Map<String, dynamic> values) {
-    build(values);
+  TaskDefectLink({Map<String, dynamic> values, this.taskId, this.defectId}) {
+    if (values != null) build(values);
   }
 
   @override
@@ -32,7 +31,7 @@ class TaskDefectLink extends DatabaseModel {
   }
 
   static Future<TaskDefectLink> create(Map<String, dynamic> values) async {
-    TaskDefectLink rec = TaskDefectLink(values);
+    TaskDefectLink rec = TaskDefectLink(values: values);
     await rec.insert();
     await rec.reload();
     return rec;
@@ -43,12 +42,12 @@ class TaskDefectLink extends DatabaseModel {
   }
 
   static Future<List<TaskDefectLink>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) => TaskDefectLink(rec)).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => TaskDefectLink(values: rec)).toList();
   }
 
   static Future<List<TaskDefectLink>> byTaskId(int taskId) async {
     return (await App.application.data.db.query(_tableName, where: 'task_id = $taskId')).map((rec) {
-      return TaskDefectLink(rec);
+      return TaskDefectLink(values: rec);
     }).toList();
   }
 

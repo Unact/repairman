@@ -13,8 +13,8 @@ class ComponentGroup extends DatabaseModel {
 
   get tableName => _tableName;
 
-  ComponentGroup(Map<String, dynamic> values) {
-    build(values);
+  ComponentGroup({Map<String, dynamic> values, this.id, this.name, this.isManualReplacement}) {
+    if (values != null) build(values);
   }
 
   @override
@@ -36,7 +36,7 @@ class ComponentGroup extends DatabaseModel {
   }
 
   static Future<ComponentGroup> create(Map<String, dynamic> values) async {
-    ComponentGroup rec = ComponentGroup(values);
+    ComponentGroup rec = ComponentGroup(values: values);
     await rec.insert();
     await rec.reload();
     return rec;
@@ -47,7 +47,7 @@ class ComponentGroup extends DatabaseModel {
   }
 
   static Future<List<ComponentGroup>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) => ComponentGroup(rec)).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => ComponentGroup(values: rec)).toList();
   }
 
   static Future<List<ComponentGroup>> import(List<dynamic> recs) async {

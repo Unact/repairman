@@ -13,14 +13,13 @@ class Location extends DatabaseModel {
   double longitude;
   double accuracy;
   double altitude;
-  DateTime ts;
 
   static const int newLimit = 7;
 
   get tableName => _tableName;
 
-  Location(Map<String, dynamic> values) {
-    build(values);
+  Location({Map<String, dynamic> values, this.latitude, this.longitude, this.accuracy, this.altitude}) {
+    if (values != null) build(values);
   }
 
   @override
@@ -31,7 +30,6 @@ class Location extends DatabaseModel {
     longitude = Nullify.parseDouble(values['longitude']);
     accuracy = Nullify.parseDouble(values['accuracy']);
     altitude = Nullify.parseDouble(values['altitude']);
-    ts = Nullify.parseDate(values['ts']);
   }
 
   Map<String, dynamic> toMap() {
@@ -40,13 +38,13 @@ class Location extends DatabaseModel {
     map['longitude'] = longitude;
     map['accuracy'] = accuracy;
     map['altitude'] = altitude;
-    map['ts'] = ts;
+    map['ts'] = localTs;
 
     return map;
   }
 
   static Future<Location> create(Map<String, dynamic> values) async {
-    Location rec = Location(values);
+    Location rec = Location(values: values);
     await rec.insert();
     await rec.reload();
     return rec;
@@ -54,7 +52,7 @@ class Location extends DatabaseModel {
 
   static Future<List<Location>> todayLocations() async {
     return (await App.application.data.db.query(_tableName, where: "ts >= date('now')", orderBy: 'ts')).map((rec) {
-      return Location(rec);
+      return Location(values: rec);
     }).toList();
   }
 
@@ -86,11 +84,11 @@ class Location extends DatabaseModel {
   }
 
   static Future<List<Location>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) => Location(rec)).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => Location(values: rec)).toList();
   }
 
   static Future<List<Location>> allNew() async {
     return (await App.application.data.db.query(_tableName, where: 'local_inserted = 1')).
-      map((rec) => Location(rec)).toList();
+      map((rec) => Location(values: rec)).toList();
   }
 }

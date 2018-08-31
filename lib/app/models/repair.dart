@@ -11,8 +11,8 @@ class Repair extends DatabaseModel {
 
   get tableName => _tableName;
 
-  Repair(Map<String, dynamic> values) {
-    build(values);
+  Repair({Map<String, dynamic> values, this.id, this.name}) {
+    if (values != null) build(values);
   }
 
   @override
@@ -32,7 +32,7 @@ class Repair extends DatabaseModel {
   }
 
   static Future<Repair> create(Map<String, dynamic> values) async {
-    Repair rec = Repair(values);
+    Repair rec = Repair(values: values);
     await rec.insert();
     await rec.reload();
     return rec;
@@ -43,7 +43,7 @@ class Repair extends DatabaseModel {
   }
 
   static Future<List<Repair>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) => Repair(rec)).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => Repair(values: rec)).toList();
   }
 
   static Future<void> import(List<dynamic> recs) async {

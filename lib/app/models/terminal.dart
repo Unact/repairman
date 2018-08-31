@@ -21,8 +21,21 @@ class Terminal extends DatabaseModel {
 
   get tableName => _tableName;
 
-  Terminal(Map<String, dynamic> values) {
-    build(values);
+  Terminal({
+    Map<String, dynamic> values,
+    this.id,
+    this.terminalId,
+    this.latitude,
+    this.longitude,
+    this.code,
+    this.address,
+    this.errorText,
+    this.srcSystemName,
+    this.mobileop,
+    this.lastActivityTime,
+    this.lastPaymentTime
+  }) {
+    if (values != null) build(values);
   }
 
   @override
@@ -60,7 +73,7 @@ class Terminal extends DatabaseModel {
   }
 
   static Future<Terminal> create(Map<String, dynamic> values) async {
-    Terminal rec = Terminal(values);
+    Terminal rec = Terminal(values: values);
     await rec.insert();
     await rec.reload();
     return rec;
@@ -71,11 +84,11 @@ class Terminal extends DatabaseModel {
   }
 
   static Future<List<Terminal>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) => Terminal(rec)).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => Terminal(values: rec)).toList();
   }
 
   static Future<Terminal> byPpsTerminalId(int ppsTerminalId) async {
-    return Terminal((await App.application.data.db.query(_tableName, where: 'id = $ppsTerminalId')).first);
+    return Terminal(values: (await App.application.data.db.query(_tableName, where: 'id = $ppsTerminalId')).first);
   }
 
   static Future<void> import(List<dynamic> recs) async {

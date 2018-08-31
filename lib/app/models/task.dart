@@ -31,8 +31,21 @@ class Task extends DatabaseModel {
 
   get tableName => _tableName;
 
-  Task(Map<String, dynamic> values) {
-    build(values);
+  Task({
+    Map<String, dynamic> values,
+    this.id,
+    this.servstatus,
+    this.ppsTerminalId,
+    this.routePriority,
+    this.markLatitude,
+    this.markLongitude,
+    this.invNum,
+    this.terminalBreakName,
+    this.info,
+    this.dobefore,
+    this.executionmarkTs
+  }) {
+    if (values != null) build(values);
   }
 
   @override
@@ -106,7 +119,7 @@ class Task extends DatabaseModel {
   }
 
   static Future<Task> create(Map<String, dynamic> values) async {
-    Task rec = Task(values);
+    Task rec = Task(values: values);
     await rec.insert();
     await rec.reload();
     return rec;
@@ -117,7 +130,7 @@ class Task extends DatabaseModel {
   }
 
   static Future<List<Task>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) => Task(rec)).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => Task(values: rec)).toList();
   }
 
   static Future<void> import(List<dynamic> recs) async {
@@ -135,7 +148,7 @@ class Task extends DatabaseModel {
       left join terminals on terminals.id = tasks.pps_terminal_id
       order by tasks.servstatus, tasks.route_priority desc, tasks.dobefore
     """)).map((rec) {
-      Task task = Task(rec);
+      Task task = Task(values: rec);
       task.address = rec['address'] ?? '';
       task.code = rec['code'] ?? '';
 
@@ -150,6 +163,6 @@ class Task extends DatabaseModel {
       from $_tableName tasks
       where pps_terminal_id = $ppsTerminalId
       order by tasks.servstatus, tasks.route_priority desc, tasks.dobefore
-    """)).map((rec) => Task(rec)).toList();
+    """)).map((rec) => Task(values: rec)).toList();
   }
 }

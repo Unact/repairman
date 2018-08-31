@@ -80,12 +80,12 @@ class AppData {
       user.curLongitude = double.parse(messageParts[1]);
       user.save();
 
-      Location location = Location({
-        'latitude': messageParts[0],
-        'longitude': messageParts[1],
-        'accuracy': messageParts[2],
-        'altitude': messageParts[3]
-      });
+      Location location = Location(
+        latitude: double.parse(messageParts[0]),
+        longitude: double.parse(messageParts[1]),
+        accuracy: double.parse(messageParts[2]),
+        altitude: double.parse(messageParts[3])
+      );
       location.markAndInsert();
 
       if ((await Location.allNew()).length > Location.newLimit) {

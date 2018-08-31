@@ -15,8 +15,8 @@ class TaskComponent extends DatabaseModel {
 
   get tableName => _tableName;
 
-  TaskComponent(Map<String, dynamic> values) {
-    build(values);
+  TaskComponent({Map<String, dynamic> values, this.taskId, this.compId, this.ppsTerminalId, this.isRemoved}) {
+    if (values != null) build(values);
   }
 
   @override
@@ -42,7 +42,7 @@ class TaskComponent extends DatabaseModel {
   }
 
   static Future<TaskComponent> create(Map<String, dynamic> values) async {
-    TaskComponent rec = TaskComponent(values);
+    TaskComponent rec = TaskComponent(values: values);
     await rec.insert();
     await rec.reload();
     return rec;
@@ -53,7 +53,7 @@ class TaskComponent extends DatabaseModel {
   }
 
   static Future<List<TaskComponent>> all() async {
-    return (await App.application.data.db.query(_tableName)).map((rec) => TaskComponent(rec)).toList();
+    return (await App.application.data.db.query(_tableName)).map((rec) => TaskComponent(values: rec)).toList();
   }
 
   static Future<List<TaskComponent>> import(List<dynamic> recs) async {

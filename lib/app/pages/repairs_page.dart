@@ -48,7 +48,7 @@ class _RepairsPageState extends State<RepairsPage> {
                 await DatabaseModel.createOrDeleteFromList(
                   _taskRepairs,
                   taskRepLinkSearch,
-                  TaskRepairLink({'task_id': widget.task.id, 'repair_id': repair.id}),
+                  TaskRepairLink(taskId: widget.task.id, repairId: repair.id),
                   value
                 );
 
