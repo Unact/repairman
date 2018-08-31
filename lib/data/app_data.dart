@@ -15,11 +15,11 @@ import 'package:repairman/data/data_sync.dart';
 class AppData {
   AppData(AppConfig config) : env = config.env, version = config.databaseVersion;
 
+  final String schemaPath = 'lib/data/schema.sql';
   final String env;
   final int version;
   Database db;
   String dbPath;
-  String schemaPath;
   SharedPreferences prefs;
   DataSync dataSync;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
@@ -29,9 +29,8 @@ class AppData {
     String currentPath = (await getApplicationDocumentsDirectory()).path;
 
     dbPath = '$currentPath/$env.db';
-    schemaPath = 'lib/data/schemas/v$version.sql';
 
-    await recreateDatabase();
+    await _setupDatabase();
     _setupFirebase();
     _setupPlatform();
     prefs = await SharedPreferences.getInstance();
@@ -41,11 +40,12 @@ class AppData {
   }
 
   Future<void> recreateDatabase() async {
-    await deleteDatabase(schemaPath);
+    await deleteDatabase(dbPath);
     await _setupDatabase();
   }
 
   Future<void> _setupDatabase() async {
+    int prevVersion = version;
     List<String> schemaExps = (await rootBundle.loadString(schemaPath)).split(';');
     schemaExps.removeLast(); // Уберем перенос строки
 
@@ -53,11 +53,16 @@ class AppData {
       onCreate: (Database db, int version) async {
         await Future.wait(schemaExps.map((exp) => db.execute(exp)));
       },
-      onOpen: (Database db) async {
-        print('Started database');
-        print('Database version: $version');
-      }
+      onUpgrade: (Database db, int oldVersion, int newVersion) => prevVersion = oldVersion,
+      onDowngrade: (Database db, int oldVersion, int newVersion) => prevVersion = oldVersion
     );
+
+    if (prevVersion != version) {
+      await db.close();
+      await recreateDatabase();
+    } else {
+      print('Started database');
+    }
   }
 
   void _setupFirebase() {
