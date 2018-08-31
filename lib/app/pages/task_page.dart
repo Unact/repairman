@@ -1,12 +1,20 @@
+import 'dart:async';
+
 import 'package:barcode_scan/barcode_scan.dart';
+import 'package:great_circle_distance/great_circle_distance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:repairman/app/models/task.dart';
+import 'package:repairman/app/models/task_defect_link.dart';
+import 'package:repairman/app/models/task_repair_link.dart';
 import 'package:repairman/app/models/terminal.dart';
-import 'package:repairman/app/pages/terminal_page.dart';
-import 'package:repairman/app/pages/repairs_page.dart';
+import 'package:repairman/app/models/terminal_component_link.dart';
+import 'package:repairman/app/models/user.dart';
+import 'package:repairman/app/pages/component_groups_page.dart';
 import 'package:repairman/app/pages/defects_page.dart';
+import 'package:repairman/app/pages/repairs_page.dart';
+import 'package:repairman/app/pages/terminal_page.dart';
 import 'package:repairman/app/utils/format.dart';
 
 class TaskPage extends StatefulWidget {
@@ -20,6 +28,7 @@ class TaskPage extends StatefulWidget {
 }
 
 class _TaskPageState extends State<TaskPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final EdgeInsets listViewItemsPadding = EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0);
   final EdgeInsets listPanelPadding = EdgeInsets.only(left: 16.0);
   final EdgeInsets headingPadding = EdgeInsets.only(top: 12.0);
@@ -28,6 +37,20 @@ class _TaskPageState extends State<TaskPage> {
   final TextStyle headingStyle = TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
   final TextStyle defaultTextStyle = TextStyle(fontSize: 14.0, color: Colors.black);
   final TextStyle firstColumnTextStyle = TextStyle(color: Colors.blue);
+  int _taskRepairCnt = 0;
+  int _taskDefectCnt = 0;
+  int _taskComponentCnt = 0;
+
+  Future<void> _loadData() async {
+    Function searchFn = (rec) => !rec.localDeleted;
+    _taskRepairCnt = (await TaskRepairLink.byTaskId(widget.task.id)).where(searchFn).length;
+    _taskDefectCnt = (await TaskDefectLink.byTaskId(widget.task.id)).where(searchFn).length;
+    _taskComponentCnt = (await TerminalComponentLink.byTaskId(widget.task.id)).where(searchFn).length;
+
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
   void _scanBarcode() async {
     try {
@@ -93,11 +116,27 @@ class _TaskPageState extends State<TaskPage> {
           children: <Widget>[
             Padding(
               padding: firstColumnPadding,
+              child: Text('Инв. номер', style: firstColumnTextStyle, textAlign: TextAlign.end)
+            ),
+            Padding(
+              padding: baseColumnPadding,
+              child: GestureDetector(
+                onTap: _scanBarcode,
+                child: Text(widget.task.invNum ?? '')
+              )
+            ),
+          ]
+        ),
+        TableRow(
+          children: <Widget>[
+            Padding(
+              padding: firstColumnPadding,
               child: Text('Коммент.', style: firstColumnTextStyle, textAlign: TextAlign.end)
             ),
             Padding(
               padding: baseColumnPadding,
               child: TextFormField(
+                maxLines: 2,
                 initialValue: widget.task.info,
                 style: defaultTextStyle,
                 decoration: InputDecoration(
@@ -110,21 +149,6 @@ class _TaskPageState extends State<TaskPage> {
                   setState(() {});
                 }
               ),
-            ),
-          ]
-        ),
-        TableRow(
-          children: <Widget>[
-            Padding(
-              padding: firstColumnPadding,
-              child: Text('Инв. номер', style: firstColumnTextStyle, textAlign: TextAlign.end)
-            ),
-            Padding(
-              padding: baseColumnPadding,
-              child: GestureDetector(
-                onTap: _scanBarcode,
-                child: Text(widget.task.invNum ?? '')
-              )
             ),
           ]
         )
@@ -142,32 +166,38 @@ class _TaskPageState extends State<TaskPage> {
         ),
         ListTile(
           dense: true,
-          title: Text('Неисправности', style: defaultTextStyle),
+          title: Text('Неисправности ($_taskDefectCnt)', style: defaultTextStyle),
           contentPadding: listPanelPadding,
-          onTap: () {
-            Navigator.push(
+          onTap: () async {
+            await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => DefectsPage(task: widget.task), fullscreenDialog: true)
             );
+            await _loadData();
           }
         ),
         ListTile(
           dense: true,
-          title: Text('Ремонты', style: defaultTextStyle),
+          title: Text('Ремонты ($_taskRepairCnt)', style: defaultTextStyle),
           contentPadding: listPanelPadding,
-          onTap: () {
-            Navigator.push(
+          onTap: () async {
+            await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => RepairsPage(task: widget.task), fullscreenDialog: true)
             );
+            await _loadData();
           }
         ),
         ListTile(
           dense: true,
-          title: Text('ЗИПы', style: defaultTextStyle),
+          title: Text('ЗИПы ($_taskComponentCnt)', style: defaultTextStyle),
           contentPadding: listPanelPadding,
-          onTap: () {
-
+          onTap: () async {
+            await Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ComponentGroupsPage(task: widget.task), fullscreenDialog: true)
+            );
+            await _loadData();
           }
         ),
         ListTile(
@@ -187,7 +217,7 @@ class _TaskPageState extends State<TaskPage> {
   }
 
   Widget _buildGeoTile() {
-    if (!widget.task.servstatus) {
+    if (widget.task.servstatus) {
       return Container();
     } else {
       if (widget.task.executionmarkTs != null) {
@@ -195,8 +225,10 @@ class _TaskPageState extends State<TaskPage> {
           dense: true,
           title: Text('Отметить выполнение', style: defaultTextStyle),
           contentPadding: listPanelPadding,
-          onTap: () {
-
+          onTap: () async {
+            widget.task.servstatus = true;
+            widget.task.markAndUpdate();
+            await _loadData();
           }
         );
       } else {
@@ -204,11 +236,33 @@ class _TaskPageState extends State<TaskPage> {
           dense: true,
           title: Text('Поставить геометку', style: defaultTextStyle),
           contentPadding: listPanelPadding,
-          onTap: () {
-
+          onTap: () async {
+            _setExecutionMark();
+            await _loadData();
           }
         );
       }
+    }
+  }
+
+  Future<bool> _setExecutionMark() async {
+    User user = User.currentUser();
+    double distance = GreatCircleDistance.fromDegrees(
+      latitude1: widget.terminal.latitude,
+      longitude1: widget.terminal.longitude,
+      latitude2: user.curLatitude,
+      longitude2: user.curLongitude
+    ).haversineDistance();
+
+    if (distance > 500) {
+      _scaffoldKey.currentState?.showSnackBar(SnackBar(
+        content: Text('До терминала ${distance.floor()} м (больше чем 500м)')
+      ));
+    } else {
+      widget.task.executionmarkTs = DateTime.now();
+      widget.task.markLatitude = user.curLatitude;
+      widget.task.markLongitude = user.curLongitude;
+      widget.task.markAndUpdate();
     }
   }
 
@@ -229,8 +283,17 @@ class _TaskPageState extends State<TaskPage> {
   }
 
   @override
+  void initState() {
+
+    super.initState();
+    _loadData();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Задача')
       ),

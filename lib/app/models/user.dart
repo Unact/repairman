@@ -14,8 +14,8 @@ class User extends BaseModel {
   String zoneName;
   String agentName;
   String firebaseToken;
-  double curLatitude;
-  double curLongitude;
+  double curLatitude = 0.0;
+  double curLongitude = 0.0;
 
   User(Map<String, dynamic> values) {
     build(values);

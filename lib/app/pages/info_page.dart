@@ -31,34 +31,27 @@ class _InfoPageState extends State<InfoPage> {
   int _allTasksCnt = 0;
 
   Future<void> _loadData() async {
-    if (App.application.api.isLogged()) {
-      try {
-        await App.application.data.dataSync.importData();
-        List<Terminal> terminals = await Terminal.all();
-        List<Task> tasks = await Task.all();
+    List<Terminal> terminals = await Terminal.all();
+    List<Task> tasks = await Task.all();
 
-        _distance = (await Location.currentDistance()) ?? 0.0;
-        _nearTerminalName = terminals.first?.address ?? 'Не найден';
-        _terminalCnt = terminals.length;
-        _allTasksCnt = tasks.length;
-        _redCnt = tasks.where((task) => !task.servstatus && task.routePriority == Task.redRoute).length;
-        _yellowCnt = tasks.where((task) => !task.servstatus && task.routePriority == Task.yellowRoute).length;
-        _greenCnt = tasks.where((task) => !task.servstatus && task.routePriority == Task.greenRoute).length;
-        _uncompletedTasksCnt = tasks.where((task) => !task.servstatus).length;
+    _distance = (await Location.currentDistance()) ?? 0.0;
+    _nearTerminalName =  terminals.isNotEmpty ? terminals.first.address : 'Не найден';
+    _terminalCnt = terminals.length;
+    _allTasksCnt = tasks.length;
+    _redCnt = tasks.where((task) => !task.servstatus && task.routePriority == Task.redRoute).length;
+    _yellowCnt = tasks.where((task) => !task.servstatus && task.routePriority == Task.yellowRoute).length;
+    _greenCnt = tasks.where((task) => !task.servstatus && task.routePriority == Task.greenRoute).length;
+    _uncompletedTasksCnt = tasks.where((task) => !task.servstatus).length;
 
-        if (mounted) {
-          setState(() {});
-        }
-      } on ApiException catch(e) {
-        _showErrorSnackBar(e.errorMsg);
-      }
+    if (mounted) {
+      setState(() {});
     }
   }
 
   Future<Null> _refresh() async {
     _refreshIndicatorKey.currentState.show();
     return Future(() async {
-      await _loadData();
+      await _importData();
     });
   }
 
@@ -148,7 +141,21 @@ class _InfoPageState extends State<InfoPage> {
     super.initState();
 
     if (App.application.config.autoRefresh) {
-      _loadData();
+      _importData();
+    }
+
+    _loadData();
+  }
+
+  Future<void> _importData() async {
+    if (App.application.api.isLogged()) {
+
+      try {
+        await App.application.data.dataSync.importData();
+        await _loadData();
+      } on ApiException catch(e) {
+        _showErrorSnackBar(e.errorMsg);
+      }
     }
   }
 

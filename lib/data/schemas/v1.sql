@@ -117,11 +117,7 @@ CREATE TABLE task_repair_link(
 CREATE TABLE terminal_component_link(
     task_id INTEGER,
     comp_id INTEGER,
-    pps_terminal_id INTEGER,
     component_group_id INTEGER,
-    name TEXT,
-    serial TEXT,
-    is_removed INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,

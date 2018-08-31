@@ -79,10 +79,11 @@ abstract class DatabaseModel<T> extends BaseModel {
     List<DatabaseModel> searchList,
     Function searchFn,
     DatabaseModel newRec,
-    bool toCreate
+    [bool toCreate]
   ) async {
     Function searchDeletedFn = (rec) => searchFn(rec) && rec.localDeleted;
     Function searchInsertedFn = (rec) => searchFn(rec) && rec.localInserted;
+    toCreate = toCreate ?? !searchList.any((rec) => searchFn(rec) && !rec.localDeleted);
 
     if (toCreate) {
       if (searchList.any(searchDeletedFn)) {

@@ -52,6 +52,15 @@ class Component extends DatabaseModel {
     return (await App.application.data.db.query(_tableName)).map((rec) => Component(values: rec)).toList();
   }
 
+  static Future<List<Component>> byComponentGroup(int componentGroupId) async {
+    return (await App.application.data.db.query(
+      _tableName,
+      where: 'component_group_id = $componentGroupId'
+    )).map((rec) {
+      return Component(values: rec);
+    }).toList();
+  }
+
   static Future<List<Component>> import(List<dynamic> recs) async {
     await Component.deleteAll();
     return await Future.wait(recs.map((rec) => Component.create(rec)));
