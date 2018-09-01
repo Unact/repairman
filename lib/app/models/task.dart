@@ -134,8 +134,21 @@ class Task extends DatabaseModel {
   }
 
   static Future<void> import(List<dynamic> recs) async {
+    List<Task> allTasks = await Task.all();
+    List<dynamic> recsWithInfo = recs.map((rec) {
+      rec['is_seen'] = allTasks.any((task) => task.id == rec['id'] && task.isSeen) ? 1 : 0;
+
+      return rec;
+    }).toList();
     await Task.deleteAll();
-    await Future.wait(recs.map((rec) => Task.create(rec)));
+    await Future.wait(recsWithInfo.map((rec) => Task.create(rec)));
+  }
+
+  static Future<List<Map<String, dynamic>>> export() async {
+    List<Task> recs = await Task.all();
+    return recs.
+      where((Task rec) => rec.localInserted || rec.localUpdated || rec.localDeleted).
+      map((req) => req.toExportMap()).toList();
   }
 
   static Future<List<Task>> allWithTerminalInfo() async {

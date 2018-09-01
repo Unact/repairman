@@ -8,17 +8,21 @@ import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/base_model.dart';
 
 class User extends BaseModel {
-  String username;
+  String username = defaultUsername;
   String password;
   String email;
   String zoneName;
   String agentName;
-  String firebaseToken;
-  double curLatitude = 0.0;
-  double curLongitude = 0.0;
+  String firebaseToken = '';
+  double curLatitude = defaultCurLatitude;
+  double curLongitude = defaultCurLongitude;
 
-  User(Map<String, dynamic> values) {
-    build(values);
+  static const String defaultUsername = 'guest';
+  static const double defaultCurLatitude = 0.0;
+  static const double defaultCurLongitude = 0.0;
+
+  User({Map<String, dynamic> values}) {
+    if (values != null) build(values);
   }
 
   void build(Map<String, dynamic> values) {
@@ -45,13 +49,13 @@ class User extends BaseModel {
   }
 
   static User currentUser() {
-    User user;
-    String username = App.application.data.prefs.getString('username');
+    User user = User();
+    String password = App.application.data.prefs.getString('password');
 
-    if (username != null) {
-      user = User({
-        'username': username,
-        'password': App.application.data.prefs.getString('password'),
+    if (password != null) {
+      user = User(values: {
+        'username': App.application.data.prefs.getString('username'),
+        'password': password,
         'zoneName': App.application.data.prefs.getString('zoneName'),
         'agentName': App.application.data.prefs.getString('agentName'),
         'email': App.application.data.prefs.getString('email'),
@@ -62,6 +66,10 @@ class User extends BaseModel {
     }
 
     return user;
+  }
+
+  bool isLogged() {
+    return currentUser().password != null;
   }
 
   static Future<User> import(Map<String, dynamic> userData) async {
@@ -90,7 +98,7 @@ class User extends BaseModel {
   }
 
   static Future<User> create(Map<String, dynamic> values) async {
-    User user = User(values);
+    User user = User(values: values);
     await user.save();
 
     return user;
@@ -109,14 +117,14 @@ class User extends BaseModel {
   }
 
   Future<void> delete() async {
-    username = null;
+    username = defaultUsername;
     password = null;
     email = null;
     zoneName = null;
     agentName = null;
-    firebaseToken = null;
-    curLatitude = null;
-    curLongitude = null;
+    firebaseToken = '';
+    curLatitude = defaultCurLatitude;
+    curLongitude = defaultCurLongitude;
 
     await save();
   }

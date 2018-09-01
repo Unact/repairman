@@ -49,7 +49,7 @@ class App {
           stackTrace: errorDetails.stack,
           userContext: sentryLib.User(
             id: config.clientId,
-            username: User.currentUser()?.username ?? 'guest'
+            username: User.currentUser().username
           ),
           environment: config.env
         );

@@ -4,7 +4,7 @@ import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
 
 class TerminalComponentLink extends DatabaseModel {
-  static final String _tableName = 'terminal_component_link';
+  static final String _tableName = 'terminal_component_links';
 
   int taskId;
   int compId;
@@ -71,5 +71,12 @@ class TerminalComponentLink extends DatabaseModel {
   static Future<void> import(List<dynamic> recs) async {
     await TerminalComponentLink.deleteAll();
     await Future.wait(recs.map((rec) => TerminalComponentLink.create(rec)));
+  }
+
+  static Future<List<Map<String, dynamic>>> export() async {
+    List<TerminalComponentLink> recs = await TerminalComponentLink.all();
+    return recs.
+      where((TerminalComponentLink rec) => rec.localInserted || rec.localUpdated || rec.localDeleted).
+      map((req) => req.toExportMap()).toList();
   }
 }

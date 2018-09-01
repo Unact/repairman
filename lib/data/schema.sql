@@ -81,7 +81,7 @@ CREATE TABLE defects(
     local_updated INTEGER DEFAULT 0,
     local_deleted INTEGER DEFAULT 0
 );
-CREATE TABLE task_defect_link(
+CREATE TABLE task_defect_links(
     task_id INTEGER,
     defect_id INTEGER,
 
@@ -91,7 +91,7 @@ CREATE TABLE task_defect_link(
     local_updated INTEGER DEFAULT 0,
     local_deleted INTEGER DEFAULT 0
 );
-CREATE TABLE task_repair_link(
+CREATE TABLE task_repair_links(
     task_id INTEGER,
     repair_id INTEGER,
 
@@ -101,7 +101,7 @@ CREATE TABLE task_repair_link(
     local_updated INTEGER DEFAULT 0,
     local_deleted INTEGER DEFAULT 0
 );
-CREATE TABLE terminal_component_link(
+CREATE TABLE terminal_component_links(
     task_id INTEGER,
     comp_id INTEGER,
     component_group_id INTEGER,

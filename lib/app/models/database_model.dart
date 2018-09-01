@@ -20,6 +20,19 @@ abstract class DatabaseModel<T> extends BaseModel {
     localDeleted = Nullify.parseBool(values['local_deleted']);
   }
 
+  Map<String, dynamic> toExportMap() {
+    Map<String, dynamic> values = toMap();
+    values.addEntries({
+      'local_id': localId,
+      'local_ts': localTs?.toIso8601String(),
+      'local_inserted': localInserted,
+      'local_updated': localUpdated,
+      'local_deleted': localDeleted,
+    }.entries);
+
+    return values;
+  }
+
   Future<void> reload() async {
     build((await App.application.data.db.query(tableName, where: 'local_id = $localId')).first);
   }

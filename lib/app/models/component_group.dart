@@ -64,11 +64,11 @@ class ComponentGroup extends DatabaseModel {
           select count(*)
           from components c
           where c.component_group_id = cg.id and
-            not exists(select 1 from terminal_component_link l where l.comp_id = c.id and l.local_deleted != 1)
+            not exists(select 1 from terminal_component_links l where l.comp_id = c.id and l.local_deleted != 1)
         ) freecnt,
         (
           select count(*)
-          from terminal_component_link tcl
+          from terminal_component_links tcl
           join components c on c.id = tcl.comp_id
           where tcl.task_id=$taskId and c.component_group_id = cg.id and tcl.local_deleted != 1
         ) inscnt

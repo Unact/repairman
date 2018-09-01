@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:repairman/app/app.dart';
 import 'package:repairman/app/pages/info_page.dart';
 import 'package:repairman/app/pages/tasks_page.dart';
 import 'package:repairman/app/pages/terminals_page.dart';
@@ -43,6 +44,15 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildBody(BuildContext context) {
     return _children[_currentIndex];
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (App.application.api.isLogged()) {
+      App.application.data.dataSync.startSyncTimer();
+    }
   }
 
   @override

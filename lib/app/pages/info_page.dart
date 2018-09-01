@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/pages/person_page.dart';
+import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/models/location.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
@@ -31,11 +32,18 @@ class _InfoPageState extends State<InfoPage> {
   int _allTasksCnt = 0;
 
   Future<void> _loadData() async {
+    User user = User.currentUser();
     List<Terminal> terminals = await Terminal.all();
     List<Task> tasks = await Task.all();
 
+    terminals.sort((term1, term2) {
+      double dist1 = (term1.latitude - user.curLatitude).abs() + (term1.longitude - user.curLongitude).abs();
+      double dist2 = (term2.latitude - user.curLatitude).abs() + (term2.longitude - user.curLongitude).abs();
+      return dist1.compareTo(dist2);
+    });
+
     _distance = (await Location.currentDistance()) ?? 0.0;
-    _nearTerminalName =  terminals.isNotEmpty ? terminals.first.address : 'Не найден';
+    _nearTerminalName = terminals.isNotEmpty ? terminals.first.address : 'Не найден';
     _terminalCnt = terminals.length;
     _allTasksCnt = tasks.length;
     _redCnt = tasks.where((task) => !task.servstatus && task.routePriority == Task.redRoute).length;
@@ -44,6 +52,8 @@ class _InfoPageState extends State<InfoPage> {
     _uncompletedTasksCnt = tasks.where((task) => !task.servstatus).length;
 
     if (mounted) {
+      Timer(Duration(seconds: 10), _loadData);
+
       setState(() {});
     }
   }
@@ -84,6 +94,8 @@ class _InfoPageState extends State<InfoPage> {
   }
 
   List<Widget> _buildInfoCards(BuildContext context) {
+    String exportLocationErrors = App.application.data.dataSync.exportLocationErrors;
+
     return <Widget>[
       Card(
         child: ListTile(
@@ -103,10 +115,35 @@ class _InfoPageState extends State<InfoPage> {
         child: ListTile(
           isThreeLine: true,
           title: Text('Управление'),
-          subtitle: Text('Геотрек: $_distance км'),
-        ),
+          subtitle: RichText(
+            text: TextSpan(
+              style: TextStyle(color: Colors.grey),
+              children: <TextSpan>[
+                TextSpan(text: 'Геотрек: $_distance км'),
+                TextSpan(text: exportLocationErrors != null ? 'Ошибки: $exportLocationErrors' : '')
+              ]
+            )
+          )
+        )
       ),
+      _buildErrorCard()
     ];
+  }
+
+  Widget _buildErrorCard() {
+    String exportSyncErrors = App.application.data.dataSync.exportSyncErrors;
+
+    if (exportSyncErrors != null) {
+      return Card(
+        child: ListTile(
+          isThreeLine: true,
+          title: Text('Ошибки'),
+          subtitle: Text(exportSyncErrors, style: TextStyle(color: Colors.red[300])),
+        )
+      );
+    } else {
+      return Container();
+    }
   }
 
   Widget _buildTasksSubtitle() {
@@ -115,9 +152,9 @@ class _InfoPageState extends State<InfoPage> {
         style: TextStyle(color: Colors.grey),
         children: <TextSpan>[
           TextSpan(text: 'Не выполненных: $_uncompletedTasksCnt '),
-          _redCnt == 0 ? TextSpan() : TextSpan(text: '$_redCnt ', style: TextStyle(color: Colors.red)),
-          _yellowCnt == 0 ? TextSpan() : TextSpan(text: '$_yellowCnt ', style: TextStyle(color: Colors.yellow)),
-          _greenCnt == 0 ? TextSpan() : TextSpan(text: '$_greenCnt', style: TextStyle(color: Colors.green)),
+          _redCnt == 0 ? TextSpan() : TextSpan(text: '$_redCnt ', style: TextStyle(color: Colors.red[400])),
+          _yellowCnt == 0 ? TextSpan() : TextSpan(text: '$_yellowCnt ', style: TextStyle(color: Colors.yellow[400])),
+          _greenCnt == 0 ? TextSpan() : TextSpan(text: '$_greenCnt', style: TextStyle(color: Colors.green[400])),
           TextSpan(text: '\nВсего: $_allTasksCnt')
         ]
       )

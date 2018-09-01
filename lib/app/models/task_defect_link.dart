@@ -4,7 +4,7 @@ import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
 
 class TaskDefectLink extends DatabaseModel {
-  static final String _tableName = 'task_defect_link';
+  static final String _tableName = 'task_defect_links';
 
   int taskId;
   int defectId;
@@ -54,5 +54,12 @@ class TaskDefectLink extends DatabaseModel {
   static Future<void> import(List<dynamic> recs) async {
     await TaskDefectLink.deleteAll();
     await Future.wait(recs.map((rec) => TaskDefectLink.create(rec)));
+  }
+
+  static Future<List<Map<String, dynamic>>> export() async {
+    List<TaskDefectLink> recs = await TaskDefectLink.all();
+    return recs.
+      where((TaskDefectLink rec) => rec.localInserted || rec.localUpdated || rec.localDeleted).
+      map((req) => req.toExportMap()).toList();
   }
 }

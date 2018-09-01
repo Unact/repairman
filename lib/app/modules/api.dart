@@ -16,20 +16,20 @@ class Api {
   String _token;
   User _loggedUser;
 
-  User loggedUser() {
+  get loggedUser {
     _loggedUser = _loggedUser ?? User.currentUser();
     return _loggedUser;
   }
 
   bool isLogged() {
-    return loggedUser() != null;
+    return loggedUser.isLogged();
   }
 
   Future<dynamic> get(String method) async {
     try {
       return parseResponse(await _get(method));
     } on AuthException {
-      if (loggedUser() != null) {
+      if (isLogged()) {
         await relogin();
         return parseResponse(await _get(method));
       }
@@ -42,7 +42,7 @@ class Api {
     try {
       return parseResponse(await _post(method, body));
     } on AuthException {
-      if (loggedUser() != null) {
+      if (isLogged()) {
         await relogin();
         return parseResponse(await _post(method, body));
       }
@@ -56,7 +56,7 @@ class Api {
       App.application.config.apiBaseUrl + method,
       headers: {
         'Authorization': 'RApi client_id=${App.application.config.clientId},token=$_token',
-        'FirebaseToken': '${loggedUser().firebaseToken}',
+        'FirebaseToken': '${loggedUser.firebaseToken}',
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       }
@@ -69,7 +69,7 @@ class Api {
       body: _encoder.convert(body),
       headers: {
         'Authorization': 'RApi client_id=${App.application.config.clientId},token=$_token',
-        'FirebaseToken': '${loggedUser().firebaseToken}',
+        'FirebaseToken': '${loggedUser.firebaseToken}',
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       }
@@ -93,17 +93,18 @@ class Api {
 
   Future<void> login(String username, String password) async {
     await _authenticate(username, password);
-    _loggedUser = await User.create({'username': username, 'password': password});
+    _loggedUser.username = username;
+    _loggedUser.password = password;
+    _loggedUser.update();
   }
 
   Future<void> logout() async {
     _loggedUser.delete();
-    _loggedUser = null;
     _token = null;
   }
 
   Future<void> relogin() async {
-    await _authenticate(loggedUser().username, loggedUser().password);
+    await _authenticate(loggedUser.username, loggedUser.password);
   }
 
   Future<void> _authenticate(String username, String password) async {

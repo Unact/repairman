@@ -26,7 +26,7 @@ void main() async {
     packageInfo: await PackageInfo.fromPlatform(),
     isPhysicalDevice: isPhysicalDevice,
     env: development ? 'development' : 'production',
-    databaseVersion: 1,
+    databaseVersion: 2,
     apiBaseUrl: '${development ? developmentUrl : 'https://rapi.unact.ru'}/api/',
     sentryDsn: appEnv['SENTRY_DSN']
   )).run();
