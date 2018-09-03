@@ -137,6 +137,7 @@ class _TaskPageState extends State<TaskPage> {
               padding: baseColumnPadding,
               child: TextFormField(
                 maxLines: 2,
+                keyboardType: TextInputType.text,
                 initialValue: widget.task.info,
                 style: defaultTextStyle,
                 decoration: InputDecoration(

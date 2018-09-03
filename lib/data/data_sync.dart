@@ -40,7 +40,7 @@ class DataSync {
   void _syncTimerCallback(Timer curTimer) async {
     Map<String, dynamic> data = await dataForExport();
 
-    if (data.values.isNotEmpty) {
+    if (data.values.any((val) => val.isNotEmpty)) {
       try {
         await exportData(data);
         exportSyncErrors = null;

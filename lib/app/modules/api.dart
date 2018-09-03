@@ -57,6 +57,7 @@ class Api {
       headers: {
         'Authorization': 'RApi client_id=${App.application.config.clientId},token=$_token',
         'FirebaseToken': '${loggedUser.firebaseToken}',
+        'Repairman': '${App.application.config.packageInfo.version}',
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       }
@@ -70,6 +71,7 @@ class Api {
       headers: {
         'Authorization': 'RApi client_id=${App.application.config.clientId},token=$_token',
         'FirebaseToken': '${loggedUser.firebaseToken}',
+        'Repairman': '${App.application.config.packageInfo.version}',
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       }
