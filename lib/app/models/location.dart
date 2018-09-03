@@ -39,7 +39,6 @@ class Location extends DatabaseModel {
     map['longitude'] = longitude;
     map['accuracy'] = accuracy;
     map['altitude'] = altitude;
-    map['ts'] = localTs;
 
     return map;
   }
@@ -52,15 +51,16 @@ class Location extends DatabaseModel {
   }
 
   static Future<List<Location>> todayLocations() async {
-    return (await App.application.data.db.query(_tableName, where: "ts >= date('now')", orderBy: 'ts')).map((rec) {
-      return Location(values: rec);
-    }).toList();
+    return (await App.application.data.db.query(_tableName, where: "local_ts >= date('now')", orderBy: 'local_ts')).
+      map((rec) {
+        return Location(values: rec);
+      }).toList();
   }
 
   static Future<double> currentDistance() async {
     List<Location> locs = (await todayLocations());
 
-    if (locs.length != minPoints) {
+    if (locs.length < minPoints) {
       return 0.0;
     }
 

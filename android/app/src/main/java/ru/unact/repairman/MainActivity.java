@@ -38,20 +38,7 @@ public class MainActivity extends FlutterActivity{
           case REQUEST_PERMISSIONS_REQUEST_CODE: {
               // If request is cancelled, the result arrays are empty.
               if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                  locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-                  locationManager.requestLocationUpdates(
-                      LocationManager.GPS_PROVIDER,
-                      1000 * 10,
-                      10,
-                      locationListener
-                  );
-                  locationManager.requestLocationUpdates(
-                      LocationManager.NETWORK_PROVIDER,
-                      1000 * 10,
-                      10,
-                      locationListener
-                  );
+                  setupLocationManager();
               }
               return;
           }
@@ -66,7 +53,26 @@ public class MainActivity extends FlutterActivity{
 
     if (!checkPermissions()) {
         requestPermissions();
+    } else {
+        setupLocationManager();
     }
+  }
+
+  private void setupLocationManager() {
+      locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+      locationManager.requestLocationUpdates(
+              LocationManager.GPS_PROVIDER,
+              1000 * 10,
+              10,
+              locationListener
+      );
+      locationManager.requestLocationUpdates(
+              LocationManager.NETWORK_PROVIDER,
+              1000 * 10,
+              10,
+              locationListener
+      );
   }
 
   private LocationListener locationListener = new LocationListener() {

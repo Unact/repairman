@@ -117,7 +117,6 @@ CREATE TABLE locations(
     longitude DECIMAL(18,10),
     accuracy  DECIMAL(18,10),
     altitude  DECIMAL(18,10),
-    ts        DATETIME DEFAULT CURRENT_TIMESTAMP,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,

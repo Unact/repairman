@@ -93,9 +93,9 @@ class DataSync {
       exportLocationErrors = e.errorMsg;
     }
 
-    await Future.wait(locations.map((location) {
-      location.localInserted = false;
-      return location.update();
+    await Future.wait(locations.map((location) async {
+      await location.markInserted(false);
+      return location;
     }));
   }
 }

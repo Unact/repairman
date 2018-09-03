@@ -10,6 +10,57 @@
       "client_info": {
         "mobilesdk_app_id": "1:48144966478:android:ef69d246e89837d9",
         "android_client_info": {
+          "package_name": "com.yourcompany.repairman"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "48144966478-tbouc41nen0u0fp90sjvkvu9t9t2ju1a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.yourcompany.repairman",
+            "certificate_hash": "eaf1c2dcbb206645d537ee0d758beca084e6cb1d"
+          }
+        },
+        {
+          "client_id": "48144966478-okj9umgf6enmi1rqro7emntdg68b99ds.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKR0GUhLKdBbuZUzjKQ6-Bzx4Fmp3xqP0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "48144966478-okj9umgf6enmi1rqro7emntdg68b99ds.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "48144966478-hobb88riescvfr7ltl661q89fv8pd300.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "ru.unact.repairman"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:48144966478:android:f3d4ca5161196e3f",
+        "android_client_info": {
           "package_name": "ru.unact.repairman"
         }
       },

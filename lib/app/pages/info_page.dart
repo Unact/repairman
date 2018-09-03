@@ -119,7 +119,7 @@ class _InfoPageState extends State<InfoPage> {
             text: TextSpan(
               style: TextStyle(color: Colors.grey),
               children: <TextSpan>[
-                TextSpan(text: 'Геотрек: $_distance км'),
+                TextSpan(text: 'Геотрек: ${_distance.toStringAsFixed(3)} км\n'),
                 TextSpan(text: exportLocationErrors != null ? 'Ошибки: $exportLocationErrors' : '')
               ]
             )
@@ -179,6 +179,10 @@ class _InfoPageState extends State<InfoPage> {
 
     if (App.application.config.autoRefresh) {
       _importData();
+    }
+
+    if (App.application.api.isLogged()) {
+      App.application.data.dataSync.startSyncTimer();
     }
 
     _loadData();
