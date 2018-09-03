@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/modules/api.dart';
-import 'package:repairman/app/utils/dialogs.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -33,7 +32,13 @@ class _LoginPageState extends State<LoginPage> {
       return null;
     }
     try {
-      Dialogs.showLoading(context);
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Padding(padding: EdgeInsets.all(5.0), child: Center(child: CircularProgressIndicator()));
+        }
+      );
+
       await App.application.api.login(_username, _password);
       Navigator.pushNamedAndRemoveUntil(context, '/', (Route<dynamic> route) => false);
     } on ApiException catch(e) {
