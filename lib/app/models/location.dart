@@ -15,6 +15,7 @@ class Location extends DatabaseModel {
   double altitude;
 
   static const int newLimit = 7;
+  static const int minPoints = 5;
 
   get tableName => _tableName;
 
@@ -59,7 +60,7 @@ class Location extends DatabaseModel {
   static Future<double> currentDistance() async {
     List<Location> locs = (await todayLocations());
 
-    if (locs.length == 0) {
+    if (locs.length != minPoints) {
       return 0.0;
     }
 
