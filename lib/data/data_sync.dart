@@ -53,7 +53,7 @@ class DataSync {
   }
 
   Future<void> importData() async {
-    Map<String, dynamic> importData = await App.application.api.get('v1/repairman');
+    Map<String, dynamic> importData = await App.application.api.get('v2/repairman');
     lastSyncTime = DateTime.now();
 
     await User.import(importData['user']);
@@ -78,14 +78,14 @@ class DataSync {
   }
 
   Future<void> exportData(Map<String, dynamic> exportData) async {
-    await App.application.api.post('v1/repairman/save', body: exportData);
+    await App.application.api.post('v2/repairman/save', body: exportData);
     lastSyncTime = DateTime.now();
   }
 
   Future<void> exportLocations() async {
     List<Location> locations = await Location.allNew();
     try {
-      await App.application.api.post('v1/repairman/locations', body: {
+      await App.application.api.post('v2/repairman/locations', body: {
         'locations': locations.map((req) => req.toExportMap()).toList()
       });
       exportLocationErrors = null;
