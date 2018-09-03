@@ -1,4 +1,4 @@
-package com.yourcompany.repairman;
+package ru.unact.repairman;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
