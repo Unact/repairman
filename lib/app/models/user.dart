@@ -81,7 +81,7 @@ class User extends BaseModel {
     user.zoneName = userData['zone_name'];
     user.agentName = userData['agent_name'];
     // В связи с тем что на симуляторе firebase не работает, делаем заглушку иначе метод вешает приложение
-    user.firebaseToken = appl.config.isPhysicalDevice ? (appl.data.firebaseMessaging.getToken() ?? '') : '';
+    user.firebaseToken = appl.config.isPhysicalDevice ? (await appl.data.firebaseMessaging.getToken() ?? '') : '';
     try {
       currentLocation = await geoLoc.Location().getLocation();
 

@@ -32,23 +32,41 @@ public class MainActivity extends FlutterActivity{
             REQUEST_PERMISSIONS_REQUEST_CODE);
   }
 
+    @Override
+  public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+      switch (requestCode) {
+          case REQUEST_PERMISSIONS_REQUEST_CODE: {
+              // If request is cancelled, the result arrays are empty.
+              if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                  locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
+                  locationManager.requestLocationUpdates(
+                      LocationManager.GPS_PROVIDER,
+                      1000 * 10,
+                      10,
+                      locationListener
+                  );
+                  locationManager.requestLocationUpdates(
+                      LocationManager.NETWORK_PROVIDER,
+                      1000 * 10,
+                      10,
+                      locationListener
+                  );
+              }
+              return;
+          }
+      }
+  }
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     GeneratedPluginRegistrant.registerWith(this);
+    messageChannel = new BasicMessageChannel<>(getFlutterView(), CHANNEL, StringCodec.INSTANCE);
 
     if (!checkPermissions()) {
-      requestPermissions();
+        requestPermissions();
     }
-    locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
-    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-            1000 * 10, 10, locationListener);
-    locationManager.requestLocationUpdates(
-            LocationManager.NETWORK_PROVIDER, 1000 * 10, 10,
-            locationListener);
-
-    messageChannel = new BasicMessageChannel<>(getFlutterView(), CHANNEL, StringCodec.INSTANCE);
   }
 
   private LocationListener locationListener = new LocationListener() {

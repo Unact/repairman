@@ -79,7 +79,7 @@ class AppData {
   Future<String> _handlePlatformIncrement(String message) async {
     List<String> messageParts = message.split(' ');
     User user = User.currentUser();
-
+    
     if (App.application.config.geocode && user != null) {
       user.curLatitude = double.parse(messageParts[0]);
       user.curLongitude = double.parse(messageParts[1]);
