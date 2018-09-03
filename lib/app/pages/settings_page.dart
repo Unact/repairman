@@ -42,8 +42,7 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildInfo() {
     return Column(
       children: <Widget>[
-        _buildInfoRow('Версия', App.application.config.packageInfo.version),
-        _buildInfoRow('ООО ЮНЭКТ', '')
+        _buildInfoRow('Версия', App.application.config.packageInfo.version)
       ]
     );
   }
