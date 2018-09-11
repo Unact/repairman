@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import 'package:repairman/app/models/terminal.dart';
+import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/pages/terminal_page.dart';
 import 'package:repairman/app/utils/format.dart';
 
@@ -19,9 +20,11 @@ class _TerminalsPageState extends State<TerminalsPage> {
   bool _showOnlyWithError = false;
 
   Future<void> _loadData() async {
-    _terminals = (await Terminal.all()).where((term) => !_showOnlyWithError || term.errorText != '').toList();
+    User user = User.currentUser();
+    _terminals = (await Terminal.allWithDistance(user.curLatitude, user.curLongitude)).
+      where((term) => !_showOnlyWithError || term.errorText != '').
+      toList();
     _delegate.terminals = _terminals;
-    _terminals.sort((terminal1, terminal2) => terminal1.terminalId.compareTo(terminal2.terminalId));
 
     if (mounted) {
       setState(() {});
@@ -106,6 +109,7 @@ class _TerminalTile extends StatelessWidget {
       subtitle: RichText(
         text: TextSpan(
           children: <TextSpan>[
+            TextSpan(text: '${terminal.distance.toStringAsFixed(3)} км\n', style: TextStyle(color: Colors.grey)),
             TextSpan(text: terminal.address + '\n', style: TextStyle(color: Colors.grey)),
             TextSpan(text: Format.untilStr(terminal.lastActivityTime), style: TextStyle(color: Colors.blue))
           ]

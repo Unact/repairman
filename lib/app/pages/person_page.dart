@@ -18,7 +18,7 @@ class _PersonPageState extends State<PersonPage> {
 
   void _logout() async {
     await App.application.api.logout();
-    App.application.data.dataSync.stopSyncTimer();
+    App.application.data.dataSync.stopSyncTimers();
     Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> route) => false);
   }
 

@@ -5,14 +5,16 @@ import 'package:intl/intl.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/pages/person_page.dart';
-import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/models/location.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
+import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
 
 class InfoPage extends StatefulWidget {
-  InfoPage({Key key}) : super(key: key);
+  final GlobalKey bottomNavigationBarKey;
+  List<Widget> homeChildren;
+  InfoPage({Key key, @required this.bottomNavigationBarKey}) : super(key: key);
 
   @override
   _InfoPageState createState() => _InfoPageState();
@@ -22,6 +24,7 @@ class _InfoPageState extends State<InfoPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
 
+  Timer loadTimer;
   double _distance = 0.0;
   String _nearTerminalName = '....';
   int _terminalCnt = 0;
@@ -33,14 +36,8 @@ class _InfoPageState extends State<InfoPage> {
 
   Future<void> _loadData() async {
     User user = User.currentUser();
-    List<Terminal> terminals = await Terminal.all();
+    List<Terminal> terminals = await Terminal.allWithDistance(user.curLatitude, user.curLongitude);
     List<Task> tasks = await Task.all();
-
-    terminals.sort((term1, term2) {
-      double dist1 = (term1.latitude - user.curLatitude).abs() + (term1.longitude - user.curLongitude).abs();
-      double dist2 = (term2.latitude - user.curLatitude).abs() + (term2.longitude - user.curLongitude).abs();
-      return dist1.compareTo(dist2);
-    });
 
     _distance = (await Location.currentDistance()) ?? 0.0;
     _nearTerminalName = terminals.isNotEmpty ? terminals.first.address : 'Не найден';
@@ -52,7 +49,7 @@ class _InfoPageState extends State<InfoPage> {
     _uncompletedTasksCnt = tasks.where((task) => !task.servstatus).length;
 
     if (mounted) {
-      Timer(Duration(seconds: 10), _loadData);
+      loadTimer = Timer(Duration(seconds: 10), _loadData);
 
       setState(() {});
     }
@@ -99,6 +96,10 @@ class _InfoPageState extends State<InfoPage> {
     return <Widget>[
       Card(
         child: ListTile(
+          onTap: () {
+            BottomNavigationBar navigationBar = widget.bottomNavigationBarKey.currentWidget;
+            navigationBar.onTap(1);
+          },
           isThreeLine: true,
           title: Text('Задачи'),
           subtitle: _buildTasksSubtitle()
@@ -106,6 +107,10 @@ class _InfoPageState extends State<InfoPage> {
       ),
       Card(
         child: ListTile(
+          onTap: () {
+            BottomNavigationBar navigationBar = widget.bottomNavigationBarKey.currentWidget;
+            navigationBar.onTap(2);
+          },
           isThreeLine: true,
           title: Text('Терминалы'),
           subtitle: Text('Ближайший: $_nearTerminalName\nВсего: $_terminalCnt'),
@@ -132,13 +137,14 @@ class _InfoPageState extends State<InfoPage> {
 
   Widget _buildErrorCard() {
     String exportSyncErrors = App.application.data.dataSync.exportSyncErrors;
+    String importSyncErrors = App.application.data.dataSync.importSyncErrors;
 
-    if (exportSyncErrors != null) {
+    if (exportSyncErrors != null || importSyncErrors != null) {
       return Card(
         child: ListTile(
           isThreeLine: true,
           title: Text('Ошибки'),
-          subtitle: Text(exportSyncErrors, style: TextStyle(color: Colors.red[300])),
+          subtitle: Text(exportSyncErrors ?? importSyncErrors, style: TextStyle(color: Colors.red[300])),
         )
       );
     } else {
@@ -177,26 +183,26 @@ class _InfoPageState extends State<InfoPage> {
   void initState() {
     super.initState();
 
-    if (App.application.config.autoRefresh) {
-      _importData();
-    }
-
     if (App.application.api.isLogged()) {
-      App.application.data.dataSync.startSyncTimer();
+      App.application.data.dataSync.startSyncTimers();
     }
 
     _loadData();
   }
 
-  Future<void> _importData() async {
-    if (App.application.api.isLogged()) {
+  @override
+  void dispose() {
+    super.dispose();
 
-      try {
-        await App.application.data.dataSync.importData();
-        await _loadData();
-      } on ApiException catch(e) {
-        _showErrorSnackBar(e.errorMsg);
-      }
+    loadTimer?.cancel();
+  }
+
+  Future<void> _importData() async {
+    try {
+      await App.application.data.dataSync.importData();
+      await _loadData();
+    } on ApiException catch(e) {
+      _showErrorSnackBar(e.errorMsg);
     }
   }
 
