@@ -15,8 +15,10 @@ import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
 
 class DataSync {
-  Timer syncTimer;
+  Timer exportSyncTimer;
   String exportSyncErrors;
+  Timer importSyncTimer;
+  String importSyncErrors;
   String exportLocationErrors;
 
   get lastSyncTime {
@@ -25,19 +27,45 @@ class DataSync {
   }
   set lastSyncTime(val) => App.application.data.prefs.setString('lastSyncTime', val.toString());
 
-  void startSyncTimer() {
-    if (syncTimer == null || !syncTimer.isActive) {
-      syncTimer = Timer.periodic(Duration(minutes: 1), _syncTimerCallback);
+  void startSyncTimers() {
+    startImportSyncTimer();
+    startExportSyncTimer();
+  }
+
+  void stopSyncTimers() {
+    stopImportSyncTimer();
+    stopExportSyncTimer();
+  }
+
+  void startImportSyncTimer() {
+    importSyncTimer = _startTimer(importSyncTimer, _importSyncTimerCallback);
+  }
+
+  void stopImportSyncTimer() {
+    _stopTimer(importSyncTimer);
+  }
+
+  void _importSyncTimerCallback(Timer curTimer) async {
+    if (App.application.config.autoRefresh) {
+      try {
+        await importData();
+
+        importSyncErrors = null;
+      } on ApiException catch(e) {
+        importSyncErrors = e.errorMsg;
+      }
     }
   }
 
-  void stopSyncTimer() {
-    if (syncTimer != null && syncTimer.isActive) {
-      syncTimer.cancel();
-    }
+  void startExportSyncTimer() {
+    exportSyncTimer = _startTimer(exportSyncTimer, _exportSyncTimerCallback);
   }
 
-  void _syncTimerCallback(Timer curTimer) async {
+  void stopExportSyncTimer() {
+    _stopTimer(exportSyncTimer);
+  }
+
+  void _exportSyncTimerCallback(Timer curTimer) async {
     Map<String, dynamic> data = await dataForExport();
 
     if (data.values.any((val) => val.isNotEmpty)) {
@@ -49,6 +77,20 @@ class DataSync {
       } on ApiException catch(e) {
         exportSyncErrors = e.errorMsg;
       }
+    }
+  }
+
+  Timer _startTimer(Timer timer, Function callback) {
+    if (timer == null || !timer.isActive) {
+      timer = Timer.periodic(Duration(minutes: 1), callback);
+    }
+
+    return timer;
+  }
+
+  void _stopTimer(Timer timer) {
+    if (timer != null && timer.isActive) {
+      timer.cancel();
     }
   }
 
