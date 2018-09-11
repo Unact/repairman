@@ -42,7 +42,7 @@ class App {
   void _setupEnv() {
     if (config.env != 'development') {
       sentry = sentryLib.SentryClient(dsn: config.sentryDsn,
-        environmentAttributes: sentryLib.Event(release: application.config.packageInfo.version));
+        environmentAttributes: sentryLib.Event(release: config.packageInfo.version));
 
       FlutterError.onError = (errorDetails) async {
         final sentryLib.Event event = sentryLib.Event(
