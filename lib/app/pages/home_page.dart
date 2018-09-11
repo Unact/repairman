@@ -13,15 +13,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey _bottomNavigationBarKey = GlobalKey();
   int _currentIndex = 0;
-  final List<Widget> _children = [
-    InfoPage(),
-    TasksPage(),
-    TerminalsPage()
-  ];
+  List<Widget> _children = [];
 
   Widget _buildBottomNavigationBar(BuildContext context) {
     return BottomNavigationBar(
+      key: _bottomNavigationBarKey,
       currentIndex: _currentIndex,
       onTap: (int index) => setState(() => _currentIndex = index),
       items: [
@@ -43,6 +41,17 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildBody(BuildContext context) {
     return _children[_currentIndex];
+  }
+
+  @override
+  void initState() {
+
+    super.initState();
+    _children = [
+      InfoPage(bottomNavigationBarKey: _bottomNavigationBarKey),
+      TasksPage(),
+      TerminalsPage()
+    ];
   }
 
   @override

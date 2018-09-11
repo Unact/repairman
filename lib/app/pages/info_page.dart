@@ -5,14 +5,16 @@ import 'package:intl/intl.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/pages/person_page.dart';
-import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/models/location.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
+import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
 
 class InfoPage extends StatefulWidget {
-  InfoPage({Key key}) : super(key: key);
+  final GlobalKey bottomNavigationBarKey;
+  List<Widget> homeChildren;
+  InfoPage({Key key, @required this.bottomNavigationBarKey}) : super(key: key);
 
   @override
   _InfoPageState createState() => _InfoPageState();
@@ -34,14 +36,8 @@ class _InfoPageState extends State<InfoPage> {
 
   Future<void> _loadData() async {
     User user = User.currentUser();
-    List<Terminal> terminals = await Terminal.all();
+    List<Terminal> terminals = await Terminal.allWithDistance(user.curLatitude, user.curLongitude);
     List<Task> tasks = await Task.all();
-
-    terminals.sort((term1, term2) {
-      double dist1 = (term1.latitude - user.curLatitude).abs() + (term1.longitude - user.curLongitude).abs();
-      double dist2 = (term2.latitude - user.curLatitude).abs() + (term2.longitude - user.curLongitude).abs();
-      return dist1.compareTo(dist2);
-    });
 
     _distance = (await Location.currentDistance()) ?? 0.0;
     _nearTerminalName = terminals.isNotEmpty ? terminals.first.address : 'Не найден';
@@ -100,6 +96,10 @@ class _InfoPageState extends State<InfoPage> {
     return <Widget>[
       Card(
         child: ListTile(
+          onTap: () {
+            BottomNavigationBar navigationBar = widget.bottomNavigationBarKey.currentWidget;
+            navigationBar.onTap(1);
+          },
           isThreeLine: true,
           title: Text('Задачи'),
           subtitle: _buildTasksSubtitle()
@@ -107,6 +107,10 @@ class _InfoPageState extends State<InfoPage> {
       ),
       Card(
         child: ListTile(
+          onTap: () {
+            BottomNavigationBar navigationBar = widget.bottomNavigationBarKey.currentWidget;
+            navigationBar.onTap(2);
+          },
           isThreeLine: true,
           title: Text('Терминалы'),
           subtitle: Text('Ближайший: $_nearTerminalName\nВсего: $_terminalCnt'),

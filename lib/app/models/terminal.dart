@@ -19,6 +19,8 @@ class Terminal extends DatabaseModel {
   DateTime lastActivityTime;
   DateTime lastPaymentTime;
 
+  double distance;
+
   get tableName => _tableName;
 
   Terminal({
@@ -89,6 +91,21 @@ class Terminal extends DatabaseModel {
 
   static Future<Terminal> byPpsTerminalId(int ppsTerminalId) async {
     return Terminal(values: (await App.application.data.db.query(_tableName, where: 'id = $ppsTerminalId')).first);
+  }
+
+  static Future<List<Terminal>> allWithDistance(double curLatitude, double curLongitude) async {
+    return (await App.application.data.db.rawQuery("""
+      select
+        terminals.*,
+        abs(latitude - ($curLatitude)) + abs(longitude-($curLongitude)) distance
+      from $_tableName terminals
+      order by distance
+    """)).map((rec) {
+      Terminal terminal = Terminal(values: rec);
+      terminal.distance = rec['distance'];
+
+      return terminal;
+    }).toList();
   }
 
   static Future<void> import(List<dynamic> recs) async {
