@@ -16,11 +16,12 @@ class TasksPage extends StatefulWidget {
 
 class _TasksPageState extends State<TasksPage> {
   List<Task> _tasks = [];
+  List<Terminal> _terminals = [];
   bool _showOnlyNew = false;
 
   Future<void> _loadData() async {
-    _tasks = (await Task.allWithTerminalInfo()).where((term) => !_showOnlyNew || term.isSeen).toList();
-
+    _tasks = (await Task.all()).where((task) => !_showOnlyNew || task.isSeen).toList();
+    _terminals = await Terminal.all();
 
     if (mounted) {
       setState(() {});
@@ -28,17 +29,22 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   Widget _taskTile(BuildContext context, Task task) {
+    Terminal terminal = _terminals.firstWhere((terminal) => terminal.id == task.ppsTerminalId);
+
     return Container(
       child: GestureDetector(
         onTap: () async {
           task.isSeen = false;
           await task.update();
-          Terminal terminal = await Terminal.byPpsTerminalId(task.ppsTerminalId);
 
           Navigator.push(context, MaterialPageRoute(builder: (context) => TaskPage(terminal: terminal, task: task)));
         },
         child: ListTile(
-          isThreeLine: true,
+          isThreeLine: false,
+          leading: CircleAvatar(
+            backgroundImage: terminal.mobileOpImg(),
+            backgroundColor: Colors.white12
+          ),
           trailing: Checkbox(
             value: task.isSeen,
             onChanged: (bool value) async {
@@ -47,11 +53,14 @@ class _TasksPageState extends State<TasksPage> {
               await _loadData();
             },
           ),
-          title: Text(task.routePriority.toString() + '|' + task.code + ' : ' + task.terminalBreakName),
+          title: Text(
+            task.routePriority.toString() + '|' + terminal.code + ' : ' + task.terminalBreakName,
+            style: TextStyle(fontSize: 14.0)
+          ),
           subtitle: RichText(
             text: TextSpan(
               children: <TextSpan>[
-                TextSpan(text: task.address + '\n', style: TextStyle(color: Colors.grey)),
+                TextSpan(text: terminal.address + '\n', style: TextStyle(color: Colors.grey, fontSize: 12.0)),
                 TextSpan(text: Format.untilStr(task.dobefore), style: TextStyle(color: Colors.blue))
               ]
             )

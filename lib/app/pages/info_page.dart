@@ -13,7 +13,6 @@ import 'package:repairman/app/modules/api.dart';
 
 class InfoPage extends StatefulWidget {
   final GlobalKey bottomNavigationBarKey;
-  List<Widget> homeChildren;
   InfoPage({Key key, @required this.bottomNavigationBarKey}) : super(key: key);
 
   @override

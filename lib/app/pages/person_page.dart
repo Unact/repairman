@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/user.dart';
+import 'package:repairman/app/modules/api.dart';
 import 'package:repairman/app/pages/settings_page.dart';
 
 class PersonPage extends StatefulWidget {
@@ -12,14 +13,38 @@ class PersonPage extends StatefulWidget {
 }
 
 class _PersonPageState extends State<PersonPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String _agentName;
   String _zoneName;
   String _email;
 
   void _logout() async {
-    await App.application.api.logout();
-    App.application.data.dataSync.stopSyncTimers();
-    Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> route) => false);
+    User user = User.currentUser();
+
+    try {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return Padding(padding: EdgeInsets.all(5.0), child: Center(child: CircularProgressIndicator()));
+          }
+      );
+
+      if (user.firebaseSubscribed) {
+        await user.subscribeToFirebase(false);
+      }
+      await App.application.api.logout();
+      App.application.data.dataSync.stopSyncTimers();
+      Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> route) => false);
+    } on ApiException catch(e) {
+      Navigator.pop(context);
+      _showSnackBar(e.errorMsg);
+    }
+  }
+
+  void _showSnackBar(String content) {
+    _scaffoldKey.currentState?.showSnackBar(SnackBar(
+        content: Text(content)
+    ));
   }
 
   void _loadData() async {
@@ -124,6 +149,7 @@ class _PersonPageState extends State<PersonPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Пользователь'),
       ),

@@ -1,6 +1,10 @@
 import 'package:intl/intl.dart';
 
 class Format {
+  static String defaultWithTime(DateTime date) {
+    return DateFormat.MMMMd('ru').addPattern('HH:mm').format(date);
+  }
+
   static String untilStr(DateTime date) {
     if (date == null) {
       return '';
@@ -22,5 +26,12 @@ class Format {
 
       return strdate + DateFormat.MMMMd('ru').add_jm().format(date);
     }
+  }
+
+  static String timeStr(int minutes) {
+    DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    DateTime newDate = today.add(Duration(minutes: minutes));
+
+    return DateFormat.Hm().format(newDate);
   }
 }

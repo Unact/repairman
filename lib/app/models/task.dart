@@ -21,8 +21,6 @@ class Task extends DatabaseModel {
   DateTime dobefore;
   DateTime executionmarkTs;
 
-  String address;
-  String code;
   bool isSeen;
 
   static const int redRoute = 3;
@@ -149,24 +147,6 @@ class Task extends DatabaseModel {
     return recs.
       where((Task rec) => rec.localInserted || rec.localUpdated || rec.localDeleted).
       map((req) => req.toExportMap()).toList();
-  }
-
-  static Future<List<Task>> allWithTerminalInfo() async {
-    return (await App.application.data.db.rawQuery("""
-      select
-        tasks.*,
-        terminals.code,
-        terminals.address
-      from $_tableName tasks
-      left join terminals on terminals.id = tasks.pps_terminal_id
-      order by tasks.servstatus, tasks.route_priority desc, tasks.dobefore
-    """)).map((rec) {
-      Task task = Task(values: rec);
-      task.address = rec['address'] ?? '';
-      task.code = rec['code'] ?? '';
-
-      return task;
-    }).toList();
   }
 
   static Future<List<Task>> byPpsTerminalId(int ppsTerminalId) async {

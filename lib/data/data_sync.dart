@@ -126,18 +126,16 @@ class DataSync {
 
   Future<void> exportLocations() async {
     List<Location> locations = await Location.allNew();
+
     try {
+      await Future.wait(locations.map((location) async => await location.markInserted(false)));
       await App.application.api.post('v2/repairman/locations', body: {
         'locations': locations.map((req) => req.toExportMap()).toList()
       });
       exportLocationErrors = null;
-    }  on ApiException catch(e) {
+    } on ApiException catch(e) {
       exportLocationErrors = e.errorMsg;
+      await Future.wait(locations.map((location) async => await location.markInserted(true)));
     }
-
-    await Future.wait(locations.map((location) async {
-      await location.markInserted(false);
-      return location;
-    }));
   }
 }
