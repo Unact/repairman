@@ -14,14 +14,28 @@ import 'package:repairman/app/models/terminal_component_link.dart';
 import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
 
+enum SyncEvent {
+  importCompleted,
+  exportCompleted,
+  locationExportCompleted
+}
+
 class DataSync {
+  StreamController<SyncEvent> _streamController = StreamController<SyncEvent>();
+  Stream<SyncEvent> stream;
   Timer exportSyncTimer;
   String exportSyncErrors;
   Timer importSyncTimer;
   String importSyncErrors;
   String exportLocationErrors;
 
-  get lastSyncTime {
+  static const Duration kSyncTimerPeriod = Duration(minutes: 1);
+
+  DataSync() {
+    stream = _streamController.stream.asBroadcastStream();
+  }
+
+  DateTime get lastSyncTime {
     String time = App.application.data.prefs.getString('lastSyncTime');
     return time != null ? DateTime.parse(time) : null;
   }
@@ -82,7 +96,7 @@ class DataSync {
 
   Timer _startTimer(Timer timer, Function callback) {
     if (timer == null || !timer.isActive) {
-      timer = Timer.periodic(Duration(minutes: 1), callback);
+      timer = Timer.periodic(kSyncTimerPeriod, callback);
     }
 
     return timer;
@@ -108,6 +122,7 @@ class DataSync {
     await TaskRepairLink.import(importData['task_repair_links']);
     await Terminal.import(importData['terminals']);
     await TerminalComponentLink.import(importData['terminal_component_links']);
+    _streamController.add(SyncEvent.importCompleted);
   }
 
   Future<Map<String, dynamic>> dataForExport() async {
@@ -122,6 +137,7 @@ class DataSync {
   Future<void> exportData(Map<String, dynamic> exportData) async {
     await App.application.api.post('v2/repairman/save', body: exportData);
     lastSyncTime = DateTime.now();
+    _streamController.add(SyncEvent.exportCompleted);
   }
 
   Future<void> exportLocations() async {
@@ -139,5 +155,7 @@ class DataSync {
       await location.markInserted(false);
       return location;
     }));
+
+    _streamController.add(SyncEvent.locationExportCompleted);
   }
 }

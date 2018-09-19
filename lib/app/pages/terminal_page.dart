@@ -1,12 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/pages/task_page.dart';
 import 'package:repairman/app/utils/format.dart';
+
 
 class TerminalPage extends StatefulWidget {
   final Terminal terminal;
@@ -18,6 +20,7 @@ class TerminalPage extends StatefulWidget {
 }
 
 class _TerminalPageState extends State<TerminalPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final EdgeInsets listViewItemsPadding = EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0);
   final EdgeInsets headingPadding = EdgeInsets.only(top: 12.0);
   final TextStyle headingStyle = TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
@@ -79,7 +82,13 @@ class _TerminalPageState extends State<TerminalPage> {
         ),
         Padding(
           padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
-          child: Text(rightStr)
+          child: GestureDetector(
+            child: Text(rightStr),
+            onLongPress: () {
+              Clipboard.setData(ClipboardData(text: rightStr));
+              _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text('Скопировано')));
+            },
+          )
         ),
       ]
     );
@@ -159,6 +168,7 @@ class _TerminalPageState extends State<TerminalPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Терминал ${widget.terminal.code}')
       ),
