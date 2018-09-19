@@ -86,7 +86,7 @@ DEPENDENCIES:
   - barcode_scan (from `Pods/.symlinks/plugins/barcode_scan/ios`)
   - device_info (from `Pods/.symlinks/plugins/device_info/ios`)
   - firebase_messaging (from `Pods/.symlinks/plugins/firebase_messaging/ios`)
-  - Flutter (from `Pods/.symlinks/flutter/ios-release`)
+  - Flutter (from `Pods/.symlinks/flutter/ios`)
   - location (from `Pods/.symlinks/plugins/location/ios`)
   - package_info (from `Pods/.symlinks/plugins/package_info/ios`)
   - path_provider (from `Pods/.symlinks/plugins/path_provider/ios`)
@@ -116,7 +116,7 @@ EXTERNAL SOURCES:
   firebase_messaging:
     :path: Pods/.symlinks/plugins/firebase_messaging/ios
   Flutter:
-    :path: Pods/.symlinks/flutter/ios-release
+    :path: Pods/.symlinks/flutter/ios
   location:
     :path: Pods/.symlinks/plugins/location/ios
   package_info:

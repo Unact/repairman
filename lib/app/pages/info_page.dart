@@ -10,6 +10,7 @@ import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
+import 'package:repairman/data/data_sync.dart';
 
 class InfoPage extends StatefulWidget {
   final GlobalKey bottomNavigationBarKey;
@@ -20,11 +21,12 @@ class InfoPage extends StatefulWidget {
   _InfoPageState createState() => _InfoPageState();
 }
 
-class _InfoPageState extends State<InfoPage> {
+class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
+  static const Duration _kWaitDuration = Duration(milliseconds: 300);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
+  StreamSubscription<SyncEvent> syncStreamSubscription;
 
-  Timer loadTimer;
   double _distance = 0.0;
   String _nearTerminalName = '....';
   int _terminalCnt = 0;
@@ -49,17 +51,8 @@ class _InfoPageState extends State<InfoPage> {
     _uncompletedTasksCnt = tasks.where((task) => !task.servstatus).length;
 
     if (mounted) {
-      loadTimer = Timer(Duration(seconds: 10), _loadData);
-
       setState(() {});
     }
-  }
-
-  Future<Null> _refresh() async {
-    _refreshIndicatorKey.currentState.show();
-    return Future(() async {
-      await _importData();
-    });
   }
 
   void _showErrorSnackBar(String content) {
@@ -67,7 +60,7 @@ class _InfoPageState extends State<InfoPage> {
       content: Text(content),
       action: SnackBarAction(
         label: 'Повторить',
-        onPressed: _refresh
+        onPressed: _refreshIndicatorKey.currentState?.show
       )
     ));
   }
@@ -75,7 +68,7 @@ class _InfoPageState extends State<InfoPage> {
   Widget _buildBody(BuildContext context) {
     return RefreshIndicator(
       key: _refreshIndicatorKey,
-      onRefresh: _refresh,
+      onRefresh: _importData,
       child: ListView.builder(
         padding: EdgeInsets.only(top: 24.0, left: 8.0, right: 8.0),
         itemCount: 1,
@@ -173,10 +166,21 @@ class _InfoPageState extends State<InfoPage> {
       icon: Icon(Icons.info),
       onPressed: () {
         DateTime lastsyncTime = App.application.data.dataSync.lastSyncTime;
-        String content = lastsyncTime != null ? DateFormat.yMMMd('ru').add_jm().format(lastsyncTime) : 'Не проводилась';
-        _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text('Синхронизация: $content')));
+        String text = lastsyncTime != null ? DateFormat.yMMMd('ru').add_jms().format(lastsyncTime) : 'Не проводилась';
+        _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text('Синхронизация: $text')));
       }
     );
+  }
+
+  void _backgroundRefresh() async {
+    if (
+      DateTime.now().difference(App.application.data.dataSync.lastSyncTime) > DataSync.kSyncTimerPeriod &&
+      App.application.config.autoRefresh
+    ) {
+      // Чтобы корректно отобразить RefreshIndicator надо подождать, когда закончится построение виджетов страницы
+      await Future.delayed(_kWaitDuration);
+      _refreshIndicatorKey.currentState?.show();
+    }
   }
 
   @override
@@ -185,16 +189,29 @@ class _InfoPageState extends State<InfoPage> {
 
     if (App.application.api.isLogged()) {
       App.application.data.dataSync.startSyncTimers();
+      WidgetsBinding.instance.addObserver(this);
+      _backgroundRefresh();
     }
 
+    syncStreamSubscription = App.application.data.dataSync.stream.listen((SyncEvent syncEvent) => _loadData());
+
     _loadData();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _backgroundRefresh();
   }
 
   @override
   void dispose() {
     super.dispose();
 
-    loadTimer?.cancel();
+    if (App.application.api.isLogged()) {
+      WidgetsBinding.instance.removeObserver(this);
+    }
+
+    syncStreamSubscription.cancel();
   }
 
   Future<void> _importData() async {

@@ -85,7 +85,13 @@ class _TaskPageState extends State<TaskPage> {
         ),
         Padding(
           padding: baseColumnPadding,
-          child: Text(rightStr)
+          child: GestureDetector(
+            child: Text(rightStr),
+            onLongPress: () {
+              Clipboard.setData(ClipboardData(text: rightStr));
+              _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text('Скопировано')));
+            },
+          )
         ),
       ]
     );
