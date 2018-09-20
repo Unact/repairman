@@ -252,7 +252,7 @@ class _TaskPageState extends State<TaskPage> {
     }
   }
 
-  Future<bool> _setExecutionMark() async {
+  Future<void> _setExecutionMark() async {
     User user = User.currentUser();
     double distance = GreatCircleDistance.fromDegrees(
       latitude1: widget.terminal.latitude,

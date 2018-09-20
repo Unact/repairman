@@ -14,12 +14,8 @@ class Api {
   final JsonDecoder _decoder = JsonDecoder();
   final JsonEncoder _encoder = JsonEncoder();
   String _token;
-  User _loggedUser;
 
-  get loggedUser {
-    _loggedUser = _loggedUser ?? User.currentUser();
-    return _loggedUser;
-  }
+  get loggedUser => User.currentUser();
 
   bool isLogged() {
     return loggedUser.isLogged();
@@ -94,14 +90,15 @@ class Api {
   }
 
   Future<void> login(String username, String password) async {
+    User user = loggedUser;
     await _authenticate(username, password);
-    _loggedUser.username = username;
-    _loggedUser.password = password;
-    _loggedUser.update();
+    user.username = username;
+    user.password = password;
+    user.update();
   }
 
   Future<void> logout() async {
-    _loggedUser.delete();
+    loggedUser.delete();
     _token = null;
   }
 

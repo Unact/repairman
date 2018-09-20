@@ -11,6 +11,7 @@ import 'package:repairman/app/models/task_defect_link.dart';
 import 'package:repairman/app/models/task_repair_link.dart';
 import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/models/terminal_component_link.dart';
+import 'package:repairman/app/models/terminal_worktime.dart';
 import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
 
@@ -122,6 +123,7 @@ class DataSync {
     await TaskRepairLink.import(importData['task_repair_links']);
     await Terminal.import(importData['terminals']);
     await TerminalComponentLink.import(importData['terminal_component_links']);
+    await TerminalWorktime.import(importData['terminal_worktimes']);
     _streamController.add(SyncEvent.importCompleted);
   }
 
@@ -142,19 +144,17 @@ class DataSync {
 
   Future<void> exportLocations() async {
     List<Location> locations = await Location.allNew();
+
     try {
+      await Future.wait(locations.map((location) async => await location.markInserted(false)));
       await App.application.api.post('v2/repairman/locations', body: {
         'locations': locations.map((req) => req.toExportMap()).toList()
       });
       exportLocationErrors = null;
-    }  on ApiException catch(e) {
+    } on ApiException catch(e) {
       exportLocationErrors = e.errorMsg;
+      await Future.wait(locations.map((location) async => await location.markInserted(true)));
     }
-
-    await Future.wait(locations.map((location) async {
-      await location.markInserted(false);
-      return location;
-    }));
 
     _streamController.add(SyncEvent.locationExportCompleted);
   }

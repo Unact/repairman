@@ -6,14 +6,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/base_model.dart';
+import 'package:repairman/app/utils/nullify.dart';
 
 class User extends BaseModel {
   String username = defaultUsername;
   String password;
-  String email;
+  String email = '';
   String zoneName;
   String agentName;
   String firebaseToken = '';
+  bool firebaseSubscribed = true;
   double curLatitude = defaultCurLatitude;
   double curLongitude = defaultCurLongitude;
 
@@ -21,19 +23,31 @@ class User extends BaseModel {
   static const double defaultCurLatitude = 0.0;
   static const double defaultCurLongitude = 0.0;
 
-  User({Map<String, dynamic> values}) {
+  User({
+    Map<String, dynamic> values,
+    this.username,
+    this.password,
+    this.zoneName,
+    this.agentName,
+    this.email,
+    this.firebaseToken,
+    this.firebaseSubscribed,
+    this.curLatitude,
+    this.curLongitude
+  }) {
     if (values != null) build(values);
   }
 
   void build(Map<String, dynamic> values) {
     username = values['username'];
     password = values['password'];
-    zoneName = values['zoneName'];
-    agentName = values['agentName'];
-    email = values['email'];
-    firebaseToken = values['firebaseToken'];
-    curLatitude = values['curLatitude'];
-    curLongitude = values['curLongitude'];
+    zoneName = values['zone_name'];
+    agentName = values['agent_name'];
+    email = values['email'] ?? '';
+    firebaseToken = values['firebase_token'] ?? '';
+    firebaseSubscribed = Nullify.parseBool(values['firebase_subscribed']) ?? true;
+    curLatitude = values['cur_latitude'] ?? defaultCurLatitude;
+    curLongitude = values['cur_longitude'] ?? defaultCurLongitude;
   }
 
   Map<String, dynamic> toMap() {
@@ -44,6 +58,7 @@ class User extends BaseModel {
     map['zone_name'] = zoneName;
     map['email'] = email;
     map['firebase_token'] = firebaseToken;
+    map['firebase_subscribed'] = firebaseSubscribed;
 
     return map;
   }
@@ -56,12 +71,13 @@ class User extends BaseModel {
       user = User(values: {
         'username': App.application.data.prefs.getString('username'),
         'password': password,
-        'zoneName': App.application.data.prefs.getString('zoneName'),
-        'agentName': App.application.data.prefs.getString('agentName'),
+        'zone_name': App.application.data.prefs.getString('zoneName'),
+        'agent_name': App.application.data.prefs.getString('agentName'),
         'email': App.application.data.prefs.getString('email'),
-        'firebaseToken': App.application.data.prefs.getString('firebaseToken'),
-        'curLatitude': App.application.data.prefs.getDouble('curLatitude'),
-        'curLongitude': App.application.data.prefs.getDouble('curLongitude'),
+        'firebase_token': App.application.data.prefs.getString('firebaseToken'),
+        'firebase_subscribed': App.application.data.prefs.getBool('firebaseSubscribed'),
+        'cur_latitude': App.application.data.prefs.getDouble('curLatitude'),
+        'cur_longitude': App.application.data.prefs.getDouble('curLongitude'),
       });
     }
 
@@ -73,18 +89,14 @@ class User extends BaseModel {
   }
 
   static Future<User> import(Map<String, dynamic> userData) async {
-    App appl = App.application;
     User user = User.currentUser();
     Map<String, double> currentLocation = Map<String, double>();
 
     user.email = userData['email'];
     user.zoneName = userData['zone_name'];
     user.agentName = userData['agent_name'];
-    // В связи с тем что на симуляторе firebase не работает, делаем заглушку иначе метод вешает приложение
-    // https://github.com/flutter/flutter/issues/17086
-    appl.data.firebaseMessaging.configure();
-    user.firebaseToken = appl.config.isPhysicalDevice ? (await appl.data.firebaseMessaging.getToken() ?? '') : '';
-
+    user.firebaseSubscribed = userData['firebase_subscribed'];
+    user.setFirebaseToken();
     try {
       currentLocation = await geoLoc.Location().getLocation();
 
@@ -126,9 +138,24 @@ class User extends BaseModel {
     zoneName = null;
     agentName = null;
     firebaseToken = '';
+    firebaseSubscribed = false;
     curLatitude = defaultCurLatitude;
     curLongitude = defaultCurLongitude;
 
+    await save();
+  }
+
+  Future<void> setFirebaseToken() async {
+    App appl = App.application;
+    // В связи с тем что на симуляторе firebase не работает, делаем заглушку иначе метод вешает приложение
+    // https://github.com/flutter/flutter/issues/17086
+    appl.data.firebaseMessaging.configure();
+    firebaseToken = appl.config.isPhysicalDevice ? (await appl.data.firebaseMessaging.getToken() ?? '') : '';
+  }
+
+  Future<void> subscribeToFirebase(bool sendNotifications) async {
+    await App.application.api.post('v2/repairman/subscribe?send_notifications=$sendNotifications', body: {});
+    firebaseSubscribed = sendNotifications;
     await save();
   }
 
@@ -141,6 +168,7 @@ class User extends BaseModel {
     await (zoneName != null ? prefs.setString('zoneName', zoneName) : prefs.remove('zoneName'));
     await (agentName != null ? prefs.setString('agentName', agentName) : prefs.remove('agentName'));
     await (firebaseToken != null ? prefs.setString('firebaseToken', firebaseToken) : prefs.remove('firebaseToken'));
+    await prefs.setBool('firebaseSubscribed', firebaseSubscribed);
     await (curLatitude != null ? prefs.setDouble('curLatitude', curLatitude) : prefs.remove('curLatitude'));
     await (curLongitude != null ? prefs.setDouble('curLongitude', curLongitude) : prefs.remove('curLongitude'));
   }

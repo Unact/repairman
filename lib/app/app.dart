@@ -45,12 +45,14 @@ class App {
         environmentAttributes: sentryLib.Event(release: config.packageInfo.version));
 
       FlutterError.onError = (errorDetails) async {
+        User user = User.currentUser();
         final sentryLib.Event event = sentryLib.Event(
           exception: errorDetails.exception,
           stackTrace: errorDetails.stack,
           userContext: sentryLib.User(
             id: config.clientId,
-            username: User.currentUser().username
+            username: user.username,
+            email: user.email
           ),
           environment: config.env
         );

@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
+import 'package:great_circle_distance/great_circle_distance.dart';
+
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
 import 'package:repairman/app/utils/nullify.dart';
@@ -18,6 +21,9 @@ class Terminal extends DatabaseModel {
   String mobileop;
   DateTime lastActivityTime;
   DateTime lastPaymentTime;
+  bool exclude;
+  DateTime closedDaysBegin;
+  DateTime closedDaysEnd;
 
   double distance;
 
@@ -55,6 +61,9 @@ class Terminal extends DatabaseModel {
     mobileop = values['mobileop'];
     lastActivityTime = Nullify.parseDate(values['lastactivitytime']);
     lastPaymentTime = Nullify.parseDate(values['lastpaymenttime']);
+    exclude = Nullify.parseBool(values['exclude']);
+    closedDaysBegin = Nullify.parseDate(values['closed_days_begin']);
+    closedDaysEnd = Nullify.parseDate(values['closed_days_end']);
   }
 
   Map<String, dynamic> toMap() {
@@ -70,8 +79,34 @@ class Terminal extends DatabaseModel {
     map['mobileop'] = mobileop;
     map['lastactivitytime'] = lastActivityTime?.toIso8601String();
     map['lastpaymenttime'] = lastPaymentTime?.toIso8601String();
+    map['exclude'] = exclude;
+    map['closed_days_begin'] = closedDaysBegin?.toIso8601String();
+    map['closed_days_end'] = closedDaysEnd?.toIso8601String();
 
     return map;
+  }
+
+  AssetImage mobileOpImg() {
+    String assetName;
+
+    switch (mobileop) {
+      case 'Мегафон':
+        assetName = 'lib/app/assets/images/megafonicon.jpg';
+        break;
+      case 'МТС':
+        assetName = 'lib/app/assets/images/mtsicon.png';
+        break;
+      case 'Билайн':
+        assetName = 'lib/app/assets/images/beelineicon.jpg';
+        break;
+      case 'Теле2':
+        assetName = 'lib/app/assets/images/tele2icon.jpeg';
+        break;
+      default:
+        assetName = 'lib/app/assets/images/unknownicon.png';
+    }
+
+    return AssetImage(assetName);
   }
 
   static Future<Terminal> create(Map<String, dynamic> values) async {
@@ -94,18 +129,17 @@ class Terminal extends DatabaseModel {
   }
 
   static Future<List<Terminal>> allWithDistance(double curLatitude, double curLongitude) async {
-    return (await App.application.data.db.rawQuery("""
-      select
-        terminals.*,
-        abs(latitude - ($curLatitude)) + abs(longitude-($curLongitude)) distance
-      from $_tableName terminals
-      order by distance
-    """)).map((rec) {
+    return (await App.application.data.db.query(_tableName)).map((rec) {
       Terminal terminal = Terminal(values: rec);
-      terminal.distance = rec['distance'];
+      terminal.distance = GreatCircleDistance.fromDegrees(
+          latitude1: terminal.latitude,
+          longitude1: terminal.longitude,
+          latitude2: curLatitude,
+          longitude2: curLongitude
+        ).haversineDistance() / 1000.0;
 
       return terminal;
-    }).toList();
+    }).toList()..sort((terminal1, terminal2) => terminal1.distance.compareTo(terminal2.distance));
   }
 
   static Future<void> import(List<dynamic> recs) async {

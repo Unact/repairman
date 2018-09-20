@@ -31,6 +31,9 @@ CREATE TABLE terminals(
     longitude DECIMAL,
     mobileop TEXT,
     terminalId INTEGER,
+    exclude INTEGER,
+    closed_days_begin DATETIME,
+    closed_days_end DATETIME,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,
@@ -117,6 +120,20 @@ CREATE TABLE locations(
     longitude DECIMAL(18,10),
     accuracy  DECIMAL(18,10),
     altitude  DECIMAL(18,10),
+
+    local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
+);
+CREATE TABLE terminal_worktimes(
+    id INTEGER UNIQUE,
+    pps_terminal_id INTEGER,
+    weekday INTEGER,
+    time_begin INTEGER,
+    time_end INTEGER,
+    exclude INTEGER,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,

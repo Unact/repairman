@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:repairman/app/app.dart';
+import 'package:repairman/app/models/user.dart';
+import 'package:repairman/app/modules/api.dart';
 
 class SettingsPage extends StatefulWidget {
   SettingsPage({Key key}) : super(key: key);
@@ -10,6 +12,7 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextStyle headingStyle = TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
 
   Widget _buildBody(BuildContext context) {
@@ -48,6 +51,8 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildSwitches() {
+    User user = User.currentUser();
+
     return Column(
       children: [
         Row(
@@ -75,14 +80,35 @@ class _SettingsPageState extends State<SettingsPage> {
               }
             )
           ],
+        ),
+        Row(
+          children: <Widget>[
+            Expanded(child: Text('Push-сообщения')),
+            Switch(
+              value: user.firebaseSubscribed,
+              onChanged: (bool value) async {
+                try {
+                  await user.subscribeToFirebase(value);
+                } on ApiException catch(e) {
+                  _showErrorSnackBar(e.errorMsg);
+                }
+                setState(() {});
+              }
+            )
+          ],
         )
       ]
     );
   }
 
+  void _showErrorSnackBar(String content) {
+    _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Настройки'),
       ),
