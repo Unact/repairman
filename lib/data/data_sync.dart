@@ -11,6 +11,7 @@ import 'package:repairman/app/models/task_defect_link.dart';
 import 'package:repairman/app/models/task_repair_link.dart';
 import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/models/terminal_component_link.dart';
+import 'package:repairman/app/models/terminal_worktime.dart';
 import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
 
@@ -108,6 +109,7 @@ class DataSync {
     await TaskRepairLink.import(importData['task_repair_links']);
     await Terminal.import(importData['terminals']);
     await TerminalComponentLink.import(importData['terminal_component_links']);
+    await TerminalWorktime.import(importData['terminal_worktimes']);
   }
 
   Future<Map<String, dynamic>> dataForExport() async {

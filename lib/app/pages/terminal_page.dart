@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
+import 'package:repairman/app/models/terminal_worktime.dart';
 import 'package:repairman/app/pages/task_page.dart';
 import 'package:repairman/app/utils/format.dart';
 
@@ -22,9 +24,11 @@ class _TerminalPageState extends State<TerminalPage> {
   final EdgeInsets headingPadding = EdgeInsets.only(top: 12.0);
   final TextStyle headingStyle = TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
   List<Task> _tasks = [];
+  List<TerminalWorktime> _terminalWorktimes = [];
 
   Future<void> _loadData() async {
     _tasks = await Task.byPpsTerminalId(widget.terminal.id);
+    _terminalWorktimes = await TerminalWorktime.byPpsTerminalId(widget.terminal.id);
 
     if (mounted) {
       setState(() {});
@@ -162,15 +166,14 @@ class _TerminalPageState extends State<TerminalPage> {
   Widget _buildScheduleColumn() {
     Terminal terminal = widget.terminal;
 
-    List<Widget> dayList = [
-        _buildDayRow('Понедельник', terminal.mondayBegin, terminal.mondayEnd, terminal.monday),
-        _buildDayRow('Вторник', terminal.tuesdayBegin, terminal.tuesdayEnd, terminal.tuesday),
-        _buildDayRow('Среда', terminal.wednesdayBegin, terminal.wednesdayEnd, terminal.wednesday),
-        _buildDayRow('Четверг', terminal.thursdayBegin, terminal.thursdayEnd, terminal.thursday),
-        _buildDayRow('Пятница', terminal.fridayBegin, terminal.fridayEnd, terminal.friday),
-        _buildDayRow('Суббота', terminal.saturdayBegin, terminal.saturdayEnd, terminal.saturday),
-        _buildDayRow('Воскресенье', terminal.sundayBegin, terminal.sundayEnd, terminal.sunday)
-    ];
+    List<Widget> dayList = _terminalWorktimes.map((TerminalWorktime worktime) {
+      return _buildDayRow(
+        Format.dayOfWeek(worktime.weekday),
+        worktime.timeBegin,
+        worktime.timeEnd,
+        worktime.exclude
+      );
+    }).toList();
 
     Widget excludeText = Padding(
       padding: EdgeInsets.only(top: 8.0, bottom: 4.0, left: 8.0),

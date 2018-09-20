@@ -1,6 +1,8 @@
 import 'package:intl/intl.dart';
 
 class Format {
+  static final _kMondayDateTime = DateTime(2018, 09, 17);
+
   static String defaultWithTime(DateTime date) {
     return DateFormat.MMMMd('ru').addPattern('HH:mm').format(date);
   }
@@ -33,5 +35,11 @@ class Format {
     DateTime newDate = today.add(Duration(minutes: minutes));
 
     return DateFormat.Hm().format(newDate);
+  }
+
+  static String dayOfWeek(int weekday) {
+    String dayName = DateFormat.EEEE('ru').format(_kMondayDateTime.add(Duration(days: weekday - 1)));
+
+    return dayName[0].toUpperCase() + dayName.substring(1);
   }
 }
