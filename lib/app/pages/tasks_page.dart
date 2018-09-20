@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
+import 'package:repairman/app/pages/map_page.dart';
 import 'package:repairman/app/pages/task_page.dart';
 import 'package:repairman/app/utils/format.dart';
 
@@ -15,6 +16,7 @@ class TasksPage extends StatefulWidget {
 }
 
 class _TasksPageState extends State<TasksPage> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Task> _tasks = [];
   List<Terminal> _terminals = [];
   bool _showOnlyNew = false;
@@ -102,9 +104,25 @@ class _TasksPageState extends State<TasksPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Задачи'),
         actions: <Widget>[
+          IconButton(
+            color: Colors.white,
+            icon: Icon(Icons.map),
+            onPressed: () {
+              if (_terminals.isEmpty) {
+                _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text('Нет терминалов')));
+                return;
+              }
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (BuildContext context) => MapPage(terminals: _terminals))
+              );
+            }
+          ),
           PopupMenuButton<bool>(
             padding: EdgeInsets.zero,
             onSelected: (bool value) async {

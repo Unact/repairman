@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
@@ -22,28 +22,27 @@ class TerminalPage extends StatefulWidget {
 
 class _TerminalPageState extends State<TerminalPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey _appBarKey = GlobalKey();
   final EdgeInsets listViewItemsPadding = EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0);
   final EdgeInsets headingPadding = EdgeInsets.only(top: 12.0);
   final TextStyle headingStyle = TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
   List<Task> _tasks = [];
   List<TerminalWorktime> _terminalWorktimes = [];
+  Placemark _placemark;
+  final GlobalKey<YandexMapViewState> _mapKey = GlobalKey<YandexMapViewState>();
 
   Future<void> _loadData() async {
+    Terminal terminal = widget.terminal;
+    _placemark = Placemark(
+      point: Point(longitude: terminal.longitude, latitude: terminal.latitude),
+      iconName: 'lib/app/assets/images/placeicon.png'
+    );
     _tasks = await Task.byPpsTerminalId(widget.terminal.id);
     _terminalWorktimes = await TerminalWorktime.byPpsTerminalId(widget.terminal.id);
+    _tasks = await Task.byPpsTerminalId(terminal.id);
 
     if (mounted) {
       setState(() {});
-    }
-  }
-
-  void _showPlacemarkOnMap(double longitude, double latitude) async {
-    String url = 'https://maps.yandex.ru/?pt=$longitude,$latitude&ll=$longitude,$latitude&z=18&l=map';
-
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
     }
   }
 
@@ -228,20 +227,23 @@ class _TerminalPageState extends State<TerminalPage> {
   }
 
   Widget _buildBody(BuildContext context) {
-    Terminal terminal = widget.terminal;
-    double longitude = terminal.longitude;
-    double latitude = terminal.latitude;
-
     return ListView(
       padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: 64.0),
       children: <Widget>[
         _buildListViewItem(_buildTable()),
         _buildListViewItem(
-          GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onTap: () => _showPlacemarkOnMap(longitude, latitude),
-            child: Image.network(
-              'https://static-maps.yandex.ru/1.x/?ll=$longitude,$latitude&size=320,240&z=18&l=map&pt=$longitude,$latitude,comma'
+          SizedBox(
+            width: 160.0,
+            height: 240.0,
+            child: YandexMapView(
+              key: _mapKey,
+              afterMapRefresh: () async {
+                YandexMap yandexMap = _mapKey.currentState.yandexMap;
+
+                await yandexMap.removePlacemark(_placemark);
+                await yandexMap.addPlacemark(_placemark);
+                await yandexMap.move(point: _placemark.point, zoom: 17.0);
+              }
             )
           )
         ),
@@ -264,9 +266,26 @@ class _TerminalPageState extends State<TerminalPage> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
+        key: _appBarKey,
         title: Text('Терминал ${widget.terminal.code}')
       ),
-      body: _buildBody(context)
+      body: NotificationListener(
+        child: _buildBody(context),
+        onNotification: (Notification notification) {
+          RenderBox appBarBox = _appBarKey.currentContext.findRenderObject();
+          RenderBox mapBox = _mapKey.currentContext.findRenderObject();
+          Size appBarSize = appBarBox.semanticBounds.size;
+          Rect mapRect = MatrixUtils.transformRect(mapBox.getTransformTo(null), Offset.zero & mapBox.size);
+
+          if (notification is ScrollStartNotification) {
+            _mapKey.currentState.hide();
+          }
+
+          if (notification is ScrollEndNotification && mapRect.top > appBarSize.height) {
+            _mapKey.currentState.refresh();
+          }
+        }
+      )
     );
   }
 }
