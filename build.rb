@@ -14,13 +14,9 @@ raise "create ipa error" unless system("xcodebuild -exportArchive -archivePath b
 -exportOptionsPlist ios/ExportOptions.plist \
 -exportPath  build/ios/iphoneos/Runner.ipa")
 
-puts "------------------ copy to github.io ---------------------------"
+puts "------------------ copy to unact.github.io ---------------------------"
 
-raise "shell error" unless system("cd ../unact.github.io/")
-raise "shell error" unless system("git reset --hard")
-raise "shell error" unless system("git pull")
-
-raise "shell error" unless system("mv ../repairman/build/app/outputs/apk/release/app-release.apk .")
-raise "shell error" unless system("mv ../repairman/build/ios/iphoneos/Runner.ipa/Runner.ipa .")
-
-raise "shell error" unless system("cd ../repairman/")
+raise "shell error" unless system("cd ../unact.github.io/; \
+git reset --hard; git pull; \
+mv ../repairman/build/app/outputs/apk/release/app-release.apk . ; \
+mv ../repairman/build/ios/iphoneos/Runner.ipa/Runner.ipa .")
