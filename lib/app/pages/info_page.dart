@@ -172,10 +172,10 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   }
 
   void _backgroundRefresh() async {
-    if (
-      DateTime.now().difference(App.application.data.dataSync.lastSyncTime) > DataSync.kSyncTimerPeriod &&
-      App.application.config.autoRefresh
-    ) {
+    DateTime time = App.application.data.dataSync.lastSyncTime ??
+      DateTime.now().subtract(Duration(minutes: 1)).subtract(DataSync.kSyncTimerPeriod);
+
+    if (DateTime.now().difference(time) > DataSync.kSyncTimerPeriod && App.application.config.autoRefresh) {
       // Чтобы корректно отобразить RefreshIndicator надо подождать, когда закончится построение виджетов страницы
       await Future.delayed(_kWaitDuration);
       _refreshIndicatorKey.currentState?.show();
