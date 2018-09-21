@@ -6,6 +6,7 @@ import 'package:repairman/app/app.dart';
 import 'package:repairman/config/app_config.dart';
 import 'package:repairman/config/app_env.dart' show appEnv;
 import 'package:package_info/package_info.dart';
+import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 void main() async {
   String developmentUrl;
@@ -22,6 +23,8 @@ void main() async {
   }
 
   await appEnv.load();
+  await YandexMapkit.setup(apiKey: appEnv['YANDEX_API_KEY']);
+
   App.setup(AppConfig(
     packageInfo: await PackageInfo.fromPlatform(),
     isPhysicalDevice: isPhysicalDevice,
