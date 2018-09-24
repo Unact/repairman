@@ -23,7 +23,8 @@ class _TasksPageState extends State<TasksPage> {
 
   Future<void> _loadData() async {
     _tasks = (await Task.all()).where((task) => !_showOnlyNew || task.isSeen).toList();
-    _terminals = await Terminal.all();
+    _terminals = (await Terminal.all()).
+      where((Terminal terminal) => _tasks.any((Task task) => task.ppsTerminalId == terminal.id)).toList();
 
     if (mounted) {
       setState(() {});
