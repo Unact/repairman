@@ -9,22 +9,25 @@ import 'package:repairman/app/models/base_model.dart';
 import 'package:repairman/app/utils/nullify.dart';
 
 class User extends BaseModel {
-  String username = defaultUsername;
+  int id = kGuestId;
+  String username = kGuestUsername;
   String password;
   String email = '';
   String zoneName;
   String agentName;
   String firebaseToken = '';
   bool firebaseSubscribed = true;
-  double curLatitude = defaultCurLatitude;
-  double curLongitude = defaultCurLongitude;
+  double curLatitude = kCurLatitude;
+  double curLongitude = kCurLongitude;
 
-  static const String defaultUsername = 'guest';
-  static const double defaultCurLatitude = 0.0;
-  static const double defaultCurLongitude = 0.0;
+  static const int kGuestId = 1;
+  static const String kGuestUsername = 'guest';
+  static const double kCurLatitude = 0.0;
+  static const double kCurLongitude = 0.0;
 
   User({
     Map<String, dynamic> values,
+    this.id,
     this.username,
     this.password,
     this.zoneName,
@@ -39,6 +42,7 @@ class User extends BaseModel {
   }
 
   void build(Map<String, dynamic> values) {
+    id = values['id'];
     username = values['username'];
     password = values['password'];
     zoneName = values['zone_name'];
@@ -46,12 +50,13 @@ class User extends BaseModel {
     email = values['email'] ?? '';
     firebaseToken = values['firebase_token'] ?? '';
     firebaseSubscribed = Nullify.parseBool(values['firebase_subscribed']) ?? true;
-    curLatitude = values['cur_latitude'] ?? defaultCurLatitude;
-    curLongitude = values['cur_longitude'] ?? defaultCurLongitude;
+    curLatitude = values['cur_latitude'] ?? kCurLatitude;
+    curLongitude = values['cur_longitude'] ?? kCurLongitude;
   }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
+    map['id'] = id;
     map['username'] = username;
     map['password'] = password;
     map['agent_name'] = agentName;
@@ -69,6 +74,7 @@ class User extends BaseModel {
 
     if (password != null) {
       user = User(values: {
+        'id': App.application.data.prefs.getInt('id'),
         'username': App.application.data.prefs.getString('username'),
         'password': password,
         'zone_name': App.application.data.prefs.getString('zoneName'),
@@ -92,6 +98,7 @@ class User extends BaseModel {
     User user = User.currentUser();
     Map<String, double> currentLocation = Map<String, double>();
 
+    user.id = userData['id'];
     user.email = userData['email'];
     user.zoneName = userData['zone_name'];
     user.agentName = userData['agent_name'];
@@ -132,15 +139,16 @@ class User extends BaseModel {
   }
 
   Future<void> delete() async {
-    username = defaultUsername;
+    id = kGuestId;
+    username = kGuestUsername;
     password = null;
     email = null;
     zoneName = null;
     agentName = null;
     firebaseToken = '';
     firebaseSubscribed = false;
-    curLatitude = defaultCurLatitude;
-    curLongitude = defaultCurLongitude;
+    curLatitude = kCurLatitude;
+    curLongitude = kCurLongitude;
 
     await save();
   }
@@ -162,6 +170,7 @@ class User extends BaseModel {
   Future<void> save() async {
     SharedPreferences prefs = App.application.data.prefs;
 
+    await (id != null ? prefs.setInt('id', id) : prefs.remove('id'));
     await (username != null ? prefs.setString('username', username) : prefs.remove('username'));
     await (password != null ? prefs.setString('password', password) : prefs.remove('password'));
     await (email != null ? prefs.setString('email', email) : prefs.remove('email'));

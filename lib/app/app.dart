@@ -50,7 +50,7 @@ class App {
           exception: errorDetails.exception,
           stackTrace: errorDetails.stack,
           userContext: sentryLib.User(
-            id: config.clientId,
+            id: user.id.toString(),
             username: user.username,
             email: user.email
           ),
