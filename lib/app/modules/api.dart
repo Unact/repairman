@@ -29,8 +29,12 @@ class Api {
         await relogin();
         return parseResponse(await _get(method));
       }
-    } on SocketException {
-      throw ApiConnException();
+    } catch(e) {
+      if (e is SocketException || e is http.ClientException || e is HandshakeException) {
+        throw ApiConnException();
+      } else {
+        rethrow;
+      }
     }
   }
 
@@ -42,8 +46,12 @@ class Api {
         await relogin();
         return parseResponse(await _post(method, body));
       }
-    } on SocketException {
-      throw ApiConnException();
+    } catch(e) {
+      if (e is SocketException || e is http.ClientException || e is HandshakeException) {
+        throw ApiConnException();
+      } else {
+        rethrow;
+      }
     }
   }
 
@@ -84,8 +92,12 @@ class Api {
       );
 
       parseResponse(response);
-    } on SocketException {
-      throw ApiConnException();
+    } catch(e) {
+      if (e is SocketException || e is http.ClientException || e is HandshakeException) {
+        throw ApiConnException();
+      } else {
+        rethrow;
+      }
     }
   }
 
@@ -116,8 +128,12 @@ class Api {
       );
 
       _token = parseResponse(response)['token'];
-    } on SocketException {
-      throw ApiConnException();
+    } catch(e) {
+      if (e is SocketException || e is http.ClientException || e is HandshakeException) {
+        throw ApiConnException();
+      } else {
+        rethrow;
+      }
     }
   }
 
@@ -128,13 +144,18 @@ class Api {
 
       if (statusCode < 200) {
         throw ApiException('Ошибка при получении данных', statusCode);
-      } else {
-        parsedResp = _decoder.convert(body);
       }
+
+      if (statusCode >= 500) {
+        throw ServerException(statusCode);
+      }
+
+      parsedResp = _decoder.convert(body);
 
       if (statusCode == 401) {
         throw AuthException(parsedResp['error']);
       }
+
       if (statusCode >= 400) {
         throw ApiException(parsedResp['error'], statusCode);
       }
@@ -152,6 +173,10 @@ class ApiException implements Exception {
 
 class AuthException extends ApiException {
   AuthException(errorMsg) : super(errorMsg, 401);
+}
+
+class ServerException extends ApiException {
+  ServerException(statusCode) : super('Нет связи с сервером', statusCode);
 }
 
 class ApiConnException extends ApiException {

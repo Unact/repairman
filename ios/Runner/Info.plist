@@ -25,13 +25,13 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Camera permission is required for barcode scanning.</string>
+	<string>Для сканирования штрих-кода необходимо дать доступ к камере</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Reason why app needs location</string>
+	<string>Для определения местоположения</string>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Allow GPS track</string>
+	<string>Для определения местоположения</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Reason why app needs location</string>
+	<string>Для определения местоположения</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
