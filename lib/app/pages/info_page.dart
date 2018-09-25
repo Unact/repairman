@@ -123,8 +123,23 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
           )
         )
       ),
+      _buildInfoCard(),
       _buildErrorCard()
     ];
+  }
+
+  Widget _buildInfoCard() {
+    if (App.application.config.newVersionAvailable) {
+      return Card(
+        child: ListTile(
+          isThreeLine: true,
+          title: Text('Информация'),
+          subtitle: Text('Доступна новая версия приложения'),
+        )
+      );
+    } else {
+      return Container();
+    }
   }
 
   Widget _buildErrorCard() {

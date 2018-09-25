@@ -113,6 +113,7 @@ class DataSync {
     Map<String, dynamic> importData = await App.application.api.get('v2/repairman');
     lastSyncTime = DateTime.now();
 
+    await App.application.config.importRemote(importData['app']);
     await User.import(importData['user']);
     await Component.import(importData['components']);
     await ComponentGroup.import(importData['component_groups']);
