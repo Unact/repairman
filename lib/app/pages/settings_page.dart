@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/user.dart';
@@ -14,6 +17,8 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextStyle headingStyle = TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
+  final String androidUpdateUrl = 'https://unact.github.io/app-release.apk';
+  final String iosUpdateUrl = 'itms-services://?action=download-manifest&url=https://unact.github.io/manifest.plist';
 
   Widget _buildBody(BuildContext context) {
     return ListView(
@@ -45,7 +50,15 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildInfo() {
     return Column(
       children: <Widget>[
-        _buildInfoRow('Версия', App.application.config.packageInfo.version)
+        _buildInfoRow('Версия', App.application.config.packageInfo.version),
+        App.application.config.newVersionAvailable ?
+          RaisedButton(
+            child: Text('Обновить приложение'),
+            onPressed: _launchURL,
+            color: Colors.blueAccent,
+            textColor: Colors.white,
+          ) :
+          Container()
       ]
     );
   }
@@ -103,6 +116,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _showErrorSnackBar(String content) {
     _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
+  }
+
+  void _launchURL() async {
+    await launch(Platform.isIOS ? iosUpdateUrl : androidUpdateUrl);
   }
 
   @override
