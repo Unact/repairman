@@ -54,7 +54,11 @@ class App {
             username: user.username,
             email: user.email
           ),
-          environment: config.env
+          environment: config.env,
+          extra: {
+            'osVersion': config.osVersion,
+            'deviceModel': config.deviceModel
+          }
         );
 
         await sentry.capture(event: event);
