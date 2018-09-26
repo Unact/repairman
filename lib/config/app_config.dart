@@ -8,6 +8,8 @@ import 'package:repairman/app/app.dart';
 class AppConfig {
   AppConfig({
     @required this.isPhysicalDevice,
+    @required this.deviceModel,
+    @required this.osVersion,
     @required this.packageInfo,
     @required this.env,
     @required this.databaseVersion,
@@ -17,6 +19,8 @@ class AppConfig {
 
   final PackageInfo packageInfo;
   final bool isPhysicalDevice;
+  final String deviceModel;
+  final String osVersion;
   final String env;
   final String sentryDsn;
   final String clientId = 'repairman';
