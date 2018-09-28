@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
+import 'package:repairman/app/utils/nullify.dart';
 
 class Component extends DatabaseModel {
   static String _tableName = 'components';
@@ -10,6 +11,8 @@ class Component extends DatabaseModel {
   String name;
   String serial;
   int componentGroupId;
+
+  bool isFree;
 
   get tableName => _tableName;
 
@@ -53,11 +56,17 @@ class Component extends DatabaseModel {
   }
 
   static Future<List<Component>> byComponentGroup(int componentGroupId) async {
-    return (await App.application.data.db.query(
-      _tableName,
-      where: 'component_group_id = $componentGroupId'
-    )).map((rec) {
-      return Component(values: rec);
+    return (await App.application.data.db.rawQuery('''
+      select
+        c.*,
+        ifnull((select 0 from terminal_component_links tcl where tcl.comp_id = c.id), 1) is_free
+      from $_tableName c
+      where c.component_group_id = $componentGroupId
+      order by c.name
+    ''')).map((rec) {
+      Component comp = Component(values: rec);
+      comp.isFree = Nullify.parseBool(rec['is_free']);
+      return comp;
     }).toList();
   }
 
