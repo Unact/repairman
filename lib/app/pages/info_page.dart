@@ -67,7 +67,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   Widget _buildBody(BuildContext context) {
     return RefreshIndicator(
       key: _refreshIndicatorKey,
-      onRefresh: _importData,
+      onRefresh: _syncData,
       child: ListView.builder(
         padding: EdgeInsets.only(top: 24.0, left: 8.0, right: 8.0),
         itemCount: 1,
@@ -143,15 +143,14 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   }
 
   Widget _buildErrorCard() {
-    String exportSyncErrors = App.application.data.dataSync.exportSyncErrors;
-    String importSyncErrors = App.application.data.dataSync.importSyncErrors;
+    String syncErrors = App.application.data.dataSync.syncErrors;
 
-    if (exportSyncErrors != null || importSyncErrors != null) {
+    if (syncErrors != null) {
       return Card(
         child: ListTile(
           isThreeLine: true,
           title: Text('Ошибки'),
-          subtitle: Text(exportSyncErrors ?? importSyncErrors, style: TextStyle(color: Colors.red[300])),
+          subtitle: Text(syncErrors, style: TextStyle(color: Colors.red[300])),
         )
       );
     } else {
@@ -190,7 +189,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
     DateTime time = App.application.data.dataSync.lastSyncTime ??
       DateTime.now().subtract(Duration(minutes: 1)).subtract(DataSync.kSyncTimerPeriod);
 
-    if (DateTime.now().difference(time) > DataSync.kSyncTimerPeriod && App.application.config.autoRefresh) {
+    if (DateTime.now().difference(time) > DataSync.kSyncTimerPeriod) {
       // Чтобы корректно отобразить RefreshIndicator надо подождать, когда закончится построение виджетов страницы
       await Future.delayed(_kWaitDuration);
       _refreshIndicatorKey.currentState?.show();
@@ -202,7 +201,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
     super.initState();
 
     if (App.application.api.isLogged()) {
-      App.application.data.dataSync.startSyncTimers();
+      App.application.data.dataSync.startSyncTimer();
       WidgetsBinding.instance.addObserver(this);
       _backgroundRefresh();
     }
@@ -228,9 +227,9 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
     syncStreamSubscription.cancel();
   }
 
-  Future<void> _importData() async {
+  Future<void> _syncData() async {
     try {
-      await App.application.data.dataSync.importData();
+      await App.application.data.dataSync.syncData();
       await _loadData();
     } on ApiException catch(e) {
       _showErrorSnackBar(e.errorMsg);

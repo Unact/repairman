@@ -5,6 +5,7 @@ import 'package:great_circle_distance/great_circle_distance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/task_defect_link.dart';
 import 'package:repairman/app/models/task_repair_link.dart';
@@ -16,6 +17,7 @@ import 'package:repairman/app/pages/defects_page.dart';
 import 'package:repairman/app/pages/repairs_page.dart';
 import 'package:repairman/app/pages/terminal_page.dart';
 import 'package:repairman/app/utils/format.dart';
+import 'package:repairman/data/data_sync.dart';
 
 class TaskPage extends StatefulWidget {
   final Task task;
@@ -37,9 +39,11 @@ class _TaskPageState extends State<TaskPage> {
   final TextStyle headingStyle = TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
   final TextStyle defaultTextStyle = TextStyle(fontSize: 14.0, color: Colors.black);
   final TextStyle firstColumnTextStyle = TextStyle(color: Colors.blue);
+  StreamSubscription<SyncEvent> syncStreamSubscription;
   int _taskRepairCnt = 0;
   int _taskDefectCnt = 0;
   int _taskComponentCnt = 0;
+  bool _actionsEnabled = true;
 
   Future<void> _loadData() async {
     Function searchFn = (rec) => !rec.localDeleted;
@@ -142,6 +146,7 @@ class _TaskPageState extends State<TaskPage> {
             Padding(
               padding: baseColumnPadding,
               child: TextFormField(
+                enabled: _actionsEnabled,
                 maxLines: 4,
                 keyboardType: TextInputType.text,
                 initialValue: widget.task.info,
@@ -170,57 +175,62 @@ class _TaskPageState extends State<TaskPage> {
         Padding(
           padding: headingPadding,
           child: Text('Действия', style: headingStyle)
-        ),
-        ListTile(
-          dense: true,
-          title: Text('Неисправности ($_taskDefectCnt)', style: defaultTextStyle),
-          contentPadding: listPanelPadding,
-          onTap: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => DefectsPage(task: widget.task), fullscreenDialog: true)
-            );
-            await _loadData();
-          }
-        ),
-        ListTile(
-          dense: true,
-          title: Text('Ремонты ($_taskRepairCnt)', style: defaultTextStyle),
-          contentPadding: listPanelPadding,
-          onTap: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => RepairsPage(task: widget.task), fullscreenDialog: true)
-            );
-            await _loadData();
-          }
-        ),
-        ListTile(
-          dense: true,
-          title: Text('ЗИПы ($_taskComponentCnt)', style: defaultTextStyle),
-          contentPadding: listPanelPadding,
-          onTap: () async {
-            await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ComponentGroupsPage(task: widget.task), fullscreenDialog: true)
-            );
-            await _loadData();
-          }
-        ),
-        ListTile(
-          dense: true,
-          title: Text('Терминал', style: defaultTextStyle),
-          contentPadding: listPanelPadding,
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => TerminalPage(terminal: widget.terminal))
-            );
-          }
-        ),
-        _buildGeoTile()
-      ]
+        )
+      ]..addAll(_buildActionTiles())
     );
+  }
+
+  List<Widget> _buildActionTiles() {
+    return !_actionsEnabled ? [Center(heightFactor: 2.0, child: CircularProgressIndicator())] : [
+      ListTile(
+        dense: true,
+        title: Text('Неисправности ($_taskDefectCnt)', style: defaultTextStyle),
+        contentPadding: listPanelPadding,
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => DefectsPage(task: widget.task), fullscreenDialog: true)
+          );
+          await _loadData();
+        }
+      ),
+      ListTile(
+        dense: true,
+        title: Text('Ремонты ($_taskRepairCnt)', style: defaultTextStyle),
+        contentPadding: listPanelPadding,
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => RepairsPage(task: widget.task), fullscreenDialog: true)
+          );
+          await _loadData();
+        }
+      ),
+      ListTile(
+        dense: true,
+        title: Text('ЗИПы ($_taskComponentCnt)', style: defaultTextStyle),
+        contentPadding: listPanelPadding,
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ComponentGroupsPage(task: widget.task), fullscreenDialog: true)
+          );
+          await _loadData();
+        }
+      ),
+      ListTile(
+        dense: true,
+        title: Text('Терминал', style: defaultTextStyle),
+        contentPadding: listPanelPadding,
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => TerminalPage(terminal: widget.terminal))
+          );
+        }
+      ),
+      _buildGeoTile()
+    ];
   }
 
   Widget _buildGeoTile() {
@@ -294,6 +304,27 @@ class _TaskPageState extends State<TaskPage> {
 
     super.initState();
     _loadData();
+    syncStreamSubscription = App.application.data.dataSync.stream.listen((SyncEvent syncEvent) {
+      switch(syncEvent) {
+        case(SyncEvent.syncStarted):
+          _actionsEnabled = false;
+          setState(() {});
+          break;
+        case(SyncEvent.syncCompleted):
+          _actionsEnabled = true;
+          setState(() {});
+          break;
+        default:
+          break;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+
+    syncStreamSubscription.cancel();
   }
 
 

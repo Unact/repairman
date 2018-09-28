@@ -33,7 +33,7 @@ class _PersonPageState extends State<PersonPage> {
         await user.subscribeToFirebase(false);
       }
       await App.application.api.logout();
-      App.application.data.dataSync.stopSyncTimers();
+      App.application.data.dataSync.stopSyncTimer();
       Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> route) => false);
     } on ApiException catch(e) {
       Navigator.pop(context);

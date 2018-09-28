@@ -16,19 +16,18 @@ import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
 
 enum SyncEvent {
-  importCompleted,
-  exportCompleted,
+  syncStarted,
+  syncCompleted,
   locationExportCompleted
 }
 
 class DataSync {
   StreamController<SyncEvent> _streamController = StreamController<SyncEvent>();
   Stream<SyncEvent> stream;
-  Timer exportSyncTimer;
-  String exportSyncErrors;
-  Timer importSyncTimer;
-  String importSyncErrors;
+  Timer syncTimer;
+  String syncErrors;
   String exportLocationErrors;
+  bool _isSyncing = false;
 
   static const Duration kSyncTimerPeriod = Duration(minutes: 1);
 
@@ -42,56 +41,20 @@ class DataSync {
   }
   set lastSyncTime(val) => App.application.data.prefs.setString('lastSyncTime', val.toString());
 
-  void startSyncTimers() {
-    startImportSyncTimer();
-    startExportSyncTimer();
+  void startSyncTimer() {
+    syncTimer = _startTimer(syncTimer, _syncTimerCallback);
   }
 
-  void stopSyncTimers() {
-    stopImportSyncTimer();
-    stopExportSyncTimer();
+  void stopSyncTimer() {
+    _stopTimer(syncTimer);
   }
 
-  void startImportSyncTimer() {
-    importSyncTimer = _startTimer(importSyncTimer, _importSyncTimerCallback);
-  }
-
-  void stopImportSyncTimer() {
-    _stopTimer(importSyncTimer);
-  }
-
-  void _importSyncTimerCallback(Timer curTimer) async {
-    if (App.application.config.autoRefresh) {
-      try {
-        await importData();
-
-        importSyncErrors = null;
-      } on ApiException catch(e) {
-        importSyncErrors = e.errorMsg;
-      }
-    }
-  }
-
-  void startExportSyncTimer() {
-    exportSyncTimer = _startTimer(exportSyncTimer, _exportSyncTimerCallback);
-  }
-
-  void stopExportSyncTimer() {
-    _stopTimer(exportSyncTimer);
-  }
-
-  void _exportSyncTimerCallback(Timer curTimer) async {
-    Map<String, dynamic> data = await dataForExport();
-
-    if (data.values.any((val) => val.isNotEmpty)) {
-      try {
-        await exportData(data);
-        exportSyncErrors = null;
-
-        await importData();
-      } on ApiException catch(e) {
-        exportSyncErrors = e.errorMsg;
-      }
+  void _syncTimerCallback(Timer curTimer) async {
+    try {
+      await syncData();
+      syncErrors = null;
+    } on ApiException catch(e) {
+      syncErrors = e.errorMsg;
     }
   }
 
@@ -109,9 +72,32 @@ class DataSync {
     }
   }
 
-  Future<void> importData() async {
+  Future<void> syncData() async {
+    if (_isSyncing) return;
+
+    try {
+      _streamController.add(SyncEvent.syncStarted);
+      _isSyncing = true;
+      bool needImport = App.application.config.autoRefresh;
+      Map<String, dynamic> exportData = await _dataForExport();
+
+      if (exportData.values.any((val) => val.isNotEmpty)) {
+        await _exportData(exportData);
+        needImport = true;
+      }
+
+      if (needImport) {
+        await _importData();
+      }
+    } finally {
+      lastSyncTime = DateTime.now();
+      _isSyncing = false;
+      _streamController.add(SyncEvent.syncCompleted);
+    }
+  }
+
+  Future<void> _importData() async {
     Map<String, dynamic> importData = await App.application.api.get('v2/repairman');
-    lastSyncTime = DateTime.now();
 
     await App.application.config.importRemote(importData['app']);
     await User.import(importData['user']);
@@ -125,10 +111,9 @@ class DataSync {
     await Terminal.import(importData['terminals']);
     await TerminalComponentLink.import(importData['terminal_component_links']);
     await TerminalWorktime.import(importData['terminal_worktimes']);
-    _streamController.add(SyncEvent.importCompleted);
   }
 
-  Future<Map<String, dynamic>> dataForExport() async {
+  Future<Map<String, dynamic>> _dataForExport() async {
     return {
       'tasks': await Task.export(),
       'terminal_component_links': await TerminalComponentLink.export(),
@@ -137,10 +122,8 @@ class DataSync {
     };
   }
 
-  Future<void> exportData(Map<String, dynamic> exportData) async {
+  Future<void> _exportData(Map<String, dynamic> exportData) async {
     await App.application.api.post('v2/repairman/save', body: exportData);
-    lastSyncTime = DateTime.now();
-    _streamController.add(SyncEvent.exportCompleted);
   }
 
   Future<void> exportLocations() async {
