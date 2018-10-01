@@ -11,3 +11,4 @@ packages
 ios/Flutter/flutter_assets/
 .app_env
 .flutter-plugins
+.env
