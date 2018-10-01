@@ -511,10 +511,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: e85e20a31f23b8d44a1b919885ad293e808e416a
+      resolved-ref: "01a93dc6e2130d173e7fccfef83ffcbf20dca83a"
       url: "git://github.com/Unact/yandex_mapkit"
     source: git
-    version: "0.0.2"
+    version: "0.1.0"
 sdks:
   dart: ">=2.0.0 <3.0.0"
   flutter: ">=0.1.4 <2.0.0"
