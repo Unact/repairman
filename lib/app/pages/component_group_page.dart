@@ -78,6 +78,7 @@ class _ComponentGroupPageState extends State<ComponentGroupPage> {
             (termComp) => termComp.compId == comp.id,
             TerminalComponentLink(taskId: widget.task.id, compId: comp.id, componentGroupId: comp.componentGroupId)
           );
+          await _loadData();
 
           setState(() {});
         }
@@ -119,7 +120,7 @@ class _ComponentGroupPageState extends State<ComponentGroupPage> {
     return _components.
       where((comp) =>
         _terminalComponents.any((termComp) => termComp.compId == comp.id && termComp.localDeleted) ||
-        !_terminalComponents.any((termComp) => termComp.compId == comp.id)).
+        comp.isFree).
       map((Component comp) {
         return _buildCompTile(comp);
       }).toList();
