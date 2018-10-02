@@ -29,6 +29,9 @@ raise "create ipa error" unless system("xcodebuild -exportArchive -archivePath b
 -exportPath  build/ios/iphoneos/Runner.ipa")
 
 puts "------------------ copy to unact.github.io ---------------------------"
+raise "git add error" unless system("git add pubspec.yaml")
+raise "git commit error" unless system("git commit -m '#{new_version}'")
+raise "git push error" unless system("git push")
 
 text = File.read('../unact.github.io/manifest.plist')
 new_contents = text.gsub(old_version, new_version)
