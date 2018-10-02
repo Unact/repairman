@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 import 'package:repairman/app/models/task.dart';
@@ -36,7 +37,12 @@ class _TerminalPageState extends State<TerminalPage> {
     Terminal terminal = widget.terminal;
     _placemark = Placemark(
       point: Point(longitude: terminal.longitude, latitude: terminal.latitude),
-      iconName: 'lib/app/assets/images/placeicon.png'
+      iconName: 'lib/app/assets/images/placeicon.png',
+      onTap: (double lat, double lon) async {
+        String naviUrl = 'yandexnavi://build_route_on_map?lat_to=${terminal.latitude}&lon_to=${terminal.longitude}';
+
+        if (await canLaunch(naviUrl)) await launch(naviUrl);
+      }
     );
     _tasks = await Task.byPpsTerminalId(widget.terminal.id);
     _terminalWorktimes = await TerminalWorktime.byPpsTerminalId(widget.terminal.id);
