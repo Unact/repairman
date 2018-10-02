@@ -105,12 +105,12 @@ class DataSync {
     await ComponentGroup.import(importData['component_groups']);
     await Defect.import(importData['defects']);
     await Repair.import(importData['repairs']);
-    await Task.import(importData['tasks']);
-    await TaskDefectLink.import(importData['task_defect_links']);
-    await TaskRepairLink.import(importData['task_repair_links']);
     await Terminal.import(importData['terminals']);
     await TerminalComponentLink.import(importData['terminal_component_links']);
     await TerminalWorktime.import(importData['terminal_worktimes']);
+    await Task.import(importData['tasks']);
+    await TaskDefectLink.import(importData['task_defect_links']);
+    await TaskRepairLink.import(importData['task_repair_links']);
   }
 
   Future<Map<String, dynamic>> _dataForExport() async {

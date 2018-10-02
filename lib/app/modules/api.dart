@@ -150,7 +150,7 @@ class Api {
         throw ServerException(statusCode);
       }
 
-      parsedResp = _decoder.convert(body);
+      parsedResp = body.isEmpty ? Map<String, dynamic>() : _decoder.convert(body);
 
       if (statusCode == 401) {
         throw AuthException(parsedResp['error']);
@@ -160,7 +160,7 @@ class Api {
         throw ApiException(parsedResp['error'], statusCode);
       }
 
-      return _decoder.convert(body);
+      return parsedResp;
   }
 }
 
