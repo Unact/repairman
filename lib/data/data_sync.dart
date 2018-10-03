@@ -29,7 +29,7 @@ class DataSync {
   String exportLocationErrors;
   bool _isSyncing = false;
 
-  static const Duration kSyncTimerPeriod = Duration(minutes: 1);
+  static const Duration kSyncTimerPeriod = Duration(minutes: 10);
 
   DataSync() {
     stream = _streamController.stream.asBroadcastStream();
