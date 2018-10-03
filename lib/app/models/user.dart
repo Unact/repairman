@@ -42,7 +42,7 @@ class User extends BaseModel {
   }
 
   void build(Map<String, dynamic> values) {
-    id = values['id'];
+    id = values['id'] ?? kGuestId;
     username = values['username'];
     password = values['password'];
     zoneName = values['zone_name'];
