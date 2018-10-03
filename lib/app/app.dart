@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:sentry/sentry.dart' as sentryLib;
 
-import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
+import 'package:repairman/app/modules/sentry.dart';
 import 'package:repairman/app/pages/home_page.dart';
 import 'package:repairman/app/pages/login_page.dart';
 import 'package:repairman/config/app_config.dart';
@@ -27,7 +26,7 @@ class App {
   final AppConfig config;
   final AppData data;
   final Api api;
-  sentryLib.SentryClient sentry;
+  Sentry sentry;
   Widget widget;
 
   Future<void> run() async {
@@ -41,28 +40,7 @@ class App {
 
   void _setupEnv() {
     if (config.env != 'development') {
-      sentry = sentryLib.SentryClient(dsn: config.sentryDsn,
-        environmentAttributes: sentryLib.Event(release: config.packageInfo.version));
-
-      FlutterError.onError = (errorDetails) async {
-        User user = User.currentUser();
-        final sentryLib.Event event = sentryLib.Event(
-          exception: errorDetails.exception,
-          stackTrace: errorDetails.stack,
-          userContext: sentryLib.User(
-            id: user.id.toString(),
-            username: user.username,
-            email: user.email
-          ),
-          environment: config.env,
-          extra: {
-            'osVersion': config.osVersion,
-            'deviceModel': config.deviceModel
-          }
-        );
-
-        await sentry.capture(event: event);
-      };
+      sentry = Sentry.setup(config);
     }
   }
 
