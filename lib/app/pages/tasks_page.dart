@@ -76,6 +76,8 @@ class _TasksPageState extends State<TasksPage> {
   Widget _buildBody(BuildContext context) {
     List<Task> tasks = _tasks ?? [];
 
+    if (_terminals.isEmpty) return Container();
+
     return Container(
       padding: EdgeInsets.only(left: 8.0, right: 8.0),
       child: ListView(
