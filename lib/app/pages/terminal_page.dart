@@ -278,13 +278,16 @@ class _TerminalPageState extends State<TerminalPage> {
         onNotification: (Notification notification) {
           if (Theme.of(context).platform == TargetPlatform.android) return;
 
-          RenderBox appBarBox = _appBarKey.currentContext.findRenderObject();
-          RenderBox mapBox = _mapKey.currentContext.findRenderObject();
-          Size appBarSize = appBarBox.semanticBounds.size;
-          Rect mapRect = MatrixUtils.transformRect(mapBox.getTransformTo(null), Offset.zero & mapBox.size);
+          try {
+            RenderBox appBarBox = _appBarKey.currentContext.findRenderObject();
+            RenderBox mapBox = _mapKey.currentContext.findRenderObject();
+            Size appBarSize = appBarBox.semanticBounds.size;
+            Rect mapRect = MatrixUtils.transformRect(mapBox.getTransformTo(null), Offset.zero & mapBox.size);
 
-          if (notification is ScrollStartNotification) _mapKey.currentState.hide();
-          if (notification is ScrollEndNotification && mapRect.top > appBarSize.height) _mapKey.currentState.refresh();
+            if (notification is ScrollStartNotification) _mapKey.currentState.hide();
+            if (notification is ScrollEndNotification && mapRect.top > appBarSize.height) _mapKey.currentState.refresh();
+            // Если рендер не завершился, то метод findRenderObject вызывает ошибку, в таких случаях ничего не делаем
+          } on NoSuchMethodError {}
         }
       )
     );
