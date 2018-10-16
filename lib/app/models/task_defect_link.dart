@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:sqflite/sqflite.dart';
+
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
 
@@ -30,17 +32,6 @@ class TaskDefectLink extends DatabaseModel {
     return map;
   }
 
-  static Future<TaskDefectLink> create(Map<String, dynamic> values) async {
-    TaskDefectLink rec = TaskDefectLink(values: values);
-    await rec.insert();
-    await rec.reload();
-    return rec;
-  }
-
-  static Future<void> deleteAll() async {
-    await App.application.data.db.delete(_tableName);
-  }
-
   static Future<List<TaskDefectLink>> all() async {
     return (await App.application.data.db.query(_tableName)).map((rec) => TaskDefectLink(values: rec)).toList();
   }
@@ -51,9 +42,9 @@ class TaskDefectLink extends DatabaseModel {
     }).toList();
   }
 
-  static Future<void> import(List<dynamic> recs) async {
-    await TaskDefectLink.deleteAll();
-    await Future.wait(recs.map((rec) => TaskDefectLink.create(rec)));
+  static Future<void> import(List<dynamic> recs, Batch batch) async {
+    batch.delete(_tableName);
+    recs.forEach((rec) => batch.insert(_tableName, TaskDefectLink(values: rec).toMap()));
   }
 
   static Future<List<Map<String, dynamic>>> export() async {

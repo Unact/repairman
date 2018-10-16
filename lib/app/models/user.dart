@@ -119,13 +119,6 @@ class User extends BaseModel {
     return currentUser().toMap();
   }
 
-  static Future<User> create(Map<String, dynamic> values) async {
-    User user = User(values: values);
-    await user.save();
-
-    return user;
-  }
-
   Future<User> insert() async {
     await save();
 

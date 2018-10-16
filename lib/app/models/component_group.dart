@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:sqflite/sqflite.dart';
+
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
 import 'package:repairman/app/utils/nullify.dart';
@@ -39,17 +41,6 @@ class ComponentGroup extends DatabaseModel {
     return map;
   }
 
-  static Future<ComponentGroup> create(Map<String, dynamic> values) async {
-    ComponentGroup rec = ComponentGroup(values: values);
-    await rec.insert();
-    await rec.reload();
-    return rec;
-  }
-
-  static Future<void> deleteAll() async {
-    await App.application.data.db.delete(_tableName);
-  }
-
   static Future<List<ComponentGroup>> all() async {
     return (await App.application.data.db.query(_tableName)).map((rec) => ComponentGroup(values: rec)).toList();
   }
@@ -86,8 +77,8 @@ class ComponentGroup extends DatabaseModel {
     }).toList();
   }
 
-  static Future<List<ComponentGroup>> import(List<dynamic> recs) async {
-    await ComponentGroup.deleteAll();
-    return await Future.wait(recs.map((rec) => ComponentGroup.create(rec)));
+  static Future<void> import(List<dynamic> recs, Batch batch) async {
+    batch.delete(_tableName);
+    recs.forEach((rec) => batch.insert(_tableName, ComponentGroup(values: rec).toMap()));
   }
 }
