@@ -32,7 +32,9 @@ class _TasksPageState extends State<TasksPage> {
   }
 
   Widget _taskTile(BuildContext context, Task task) {
-    Terminal terminal = _terminals.firstWhere((terminal) => terminal.id == task.ppsTerminalId);
+    Terminal terminal = _terminals.firstWhere((term) => term.id == task.ppsTerminalId, orElse: () => Terminal());
+
+    if (terminal.id == null) return Container();
 
     return Container(
       child: GestureDetector(
