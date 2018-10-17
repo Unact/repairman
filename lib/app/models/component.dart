@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:sqflite/sqflite.dart';
+
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
 import 'package:repairman/app/utils/nullify.dart';
@@ -40,17 +42,6 @@ class Component extends DatabaseModel {
     return map;
   }
 
-  static Future<Component> create(Map<String, dynamic> values) async {
-    Component rec = Component(values: values);
-    await rec.insert();
-    await rec.reload();
-    return rec;
-  }
-
-  static Future<void> deleteAll() async {
-    await App.application.data.db.delete(_tableName);
-  }
-
   static Future<List<Component>> all() async {
     return (await App.application.data.db.query(_tableName)).map((rec) => Component(values: rec)).toList();
   }
@@ -70,8 +61,8 @@ class Component extends DatabaseModel {
     }).toList();
   }
 
-  static Future<List<Component>> import(List<dynamic> recs) async {
-    await Component.deleteAll();
-    return await Future.wait(recs.map((rec) => Component.create(rec)));
+  static Future<void> import(List<dynamic> recs, Batch batch) async {
+    batch.delete(_tableName);
+    recs.forEach((rec) => batch.insert(_tableName, Component(values: rec).toMap()));
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:sqflite/sqflite.dart';
+
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
 
@@ -31,23 +33,12 @@ class Repair extends DatabaseModel {
     return map;
   }
 
-  static Future<Repair> create(Map<String, dynamic> values) async {
-    Repair rec = Repair(values: values);
-    await rec.insert();
-    await rec.reload();
-    return rec;
-  }
-
-  static Future<void> deleteAll() async {
-    await App.application.data.db.delete(_tableName);
-  }
-
   static Future<List<Repair>> all() async {
     return (await App.application.data.db.query(_tableName)).map((rec) => Repair(values: rec)).toList();
   }
 
-  static Future<void> import(List<dynamic> recs) async {
-    await Repair.deleteAll();
-    await Future.wait(recs.map((rec) => Repair.create(rec)));
+  static Future<void> import(List<dynamic> recs, Batch batch) async {
+    batch.delete(_tableName);
+    recs.forEach((rec) => batch.insert(_tableName, Repair(values: rec).toMap()));
   }
 }

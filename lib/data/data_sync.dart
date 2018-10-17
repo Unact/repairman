@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:sqflite/sqflite.dart';
+
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/component.dart';
 import 'package:repairman/app/models/component_group.dart';
@@ -99,18 +101,20 @@ class DataSync {
   Future<void> _importData() async {
     Map<String, dynamic> importData = await App.application.api.get('v2/repairman');
 
+    Batch batch = App.application.data.db.batch();
     await App.application.config.importRemote(importData['app']);
     await User.import(importData['user']);
-    await Component.import(importData['components']);
-    await ComponentGroup.import(importData['component_groups']);
-    await Defect.import(importData['defects']);
-    await Repair.import(importData['repairs']);
-    await Terminal.import(importData['terminals']);
-    await TerminalComponentLink.import(importData['terminal_component_links']);
-    await TerminalWorktime.import(importData['terminal_worktimes']);
-    await Task.import(importData['tasks']);
-    await TaskDefectLink.import(importData['task_defect_links']);
-    await TaskRepairLink.import(importData['task_repair_links']);
+    await Component.import(importData['components'], batch);
+    await ComponentGroup.import(importData['component_groups'], batch);
+    await Defect.import(importData['defects'], batch);
+    await Repair.import(importData['repairs'], batch);
+    await Terminal.import(importData['terminals'], batch);
+    await TerminalComponentLink.import(importData['terminal_component_links'], batch);
+    await TerminalWorktime.import(importData['terminal_worktimes'], batch);
+    await Task.import(importData['tasks'], batch);
+    await TaskDefectLink.import(importData['task_defect_links'], batch);
+    await TaskRepairLink.import(importData['task_repair_links'], batch);
+    await batch.commit();
   }
 
   Future<Map<String, dynamic>> _dataForExport() async {

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:great_circle_distance/great_circle_distance.dart';
+import 'package:sqflite/sqflite.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
@@ -109,17 +110,6 @@ class Terminal extends DatabaseModel {
     return AssetImage(assetName);
   }
 
-  static Future<Terminal> create(Map<String, dynamic> values) async {
-    Terminal rec = Terminal(values: values);
-    await rec.insert();
-    await rec.reload();
-    return rec;
-  }
-
-  static Future<void> deleteAll() async {
-    await App.application.data.db.delete(_tableName);
-  }
-
   static Future<List<Terminal>> all() async {
     return (await App.application.data.db.query(_tableName)).map((rec) => Terminal(values: rec)).toList();
   }
@@ -142,8 +132,8 @@ class Terminal extends DatabaseModel {
     }).toList()..sort((terminal1, terminal2) => terminal1.distance.compareTo(terminal2.distance));
   }
 
-  static Future<void> import(List<dynamic> recs) async {
-    await Terminal.deleteAll();
-    await Future.wait(recs.map((rec) => Terminal.create(rec)));
+  static Future<void> import(List<dynamic> recs, Batch batch) async {
+    batch.delete(_tableName);
+    recs.forEach((rec) => batch.insert(_tableName, Terminal(values: rec).toMap()));
   }
 }

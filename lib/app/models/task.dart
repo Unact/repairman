@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
@@ -83,63 +83,20 @@ class Task extends DatabaseModel {
     return map;
   }
 
-  Map<String, Color> colors() {
-    Color bcolor;
-    Color tcolor;
-
-      if (servstatus) {
-        bcolor = Colors.grey;
-        tcolor = Colors.blueGrey;
-      } else {
-        switch (routePriority) {
-          case redRoute:
-            bcolor = Colors.red;
-            tcolor = Colors.white;
-            break;
-          case yellowRoute:
-            bcolor = Colors.yellow;
-            tcolor = Colors.black;
-            break;
-          case greenRoute:
-            bcolor = Colors.green;
-            tcolor = Colors.black;
-            break;
-          default:
-            bcolor = Colors.white;
-            tcolor = Colors.black;
-        }
-      }
-
-    return {
-      'bcolor': bcolor,
-      'tcolor': tcolor
-    };
-  }
-
-  static Future<Task> create(Map<String, dynamic> values) async {
-    Task rec = Task(values: values);
-    await rec.insert();
-    await rec.reload();
-    return rec;
-  }
-
-  static Future<void> deleteAll() async {
-    await App.application.data.db.delete(_tableName);
-  }
-
   static Future<List<Task>> all() async {
     return (await App.application.data.db.query(_tableName)).map((rec) => Task(values: rec)).toList();
   }
 
-  static Future<void> import(List<dynamic> recs) async {
+  static Future<void> import(List<dynamic> recs, Batch batch) async {
     List<Task> allTasks = await Task.all();
     List<dynamic> recsWithInfo = recs.map((rec) {
       rec['is_seen'] = allTasks.any((task) => task.id == rec['id'] && task.isSeen) ? 1 : 0;
 
       return rec;
     }).toList();
-    await Task.deleteAll();
-    await Future.wait(recsWithInfo.map((rec) => Task.create(rec)));
+
+    batch.delete(_tableName);
+    recsWithInfo.forEach((rec) => batch.insert(_tableName, Task(values: rec).toMap()));
   }
 
   static Future<List<Map<String, dynamic>>> export() async {

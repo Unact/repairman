@@ -43,13 +43,6 @@ class Location extends DatabaseModel {
     return map;
   }
 
-  static Future<Location> create(Map<String, dynamic> values) async {
-    Location rec = Location(values: values);
-    await rec.insert();
-    await rec.reload();
-    return rec;
-  }
-
   static Future<List<Location>> todayLocations() async {
     return (await App.application.data.db.query(_tableName, where: "local_ts >= date('now')", orderBy: 'local_ts')).
       map((rec) {
