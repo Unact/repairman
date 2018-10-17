@@ -59,7 +59,7 @@
 	<false/>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
-		<string>yandexnavi</string>
+		<string>yandexmaps</string>
 	</array>
 </dict>
 </plist>

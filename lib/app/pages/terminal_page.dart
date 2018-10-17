@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
+import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/models/terminal_worktime.dart';
@@ -34,12 +35,14 @@ class _TerminalPageState extends State<TerminalPage> {
   final GlobalKey<YandexMapState> _mapKey = GlobalKey<YandexMapState>();
 
   Future<void> _loadData() async {
+    User user = User.currentUser();
     Terminal terminal = widget.terminal;
     _placemark = Placemark(
       point: Point(longitude: terminal.longitude, latitude: terminal.latitude),
       iconName: 'lib/app/assets/images/placeicon.png',
       onTap: (double lat, double lon) async {
-        String naviUrl = 'yandexnavi://build_route_on_map?lat_to=${terminal.latitude}&lon_to=${terminal.longitude}';
+        String params = 'rtext=${user.curLatitude},${user.curLongitude}~${terminal.latitude},${terminal.longitude}';
+        String naviUrl = 'yandexmaps://maps.yandex.ru?$params';
 
         if (await canLaunch(naviUrl)) await launch(naviUrl);
       }
