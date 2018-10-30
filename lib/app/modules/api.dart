@@ -13,92 +13,71 @@ class Api {
 
   final JsonDecoder _decoder = JsonDecoder();
   final JsonEncoder _encoder = JsonEncoder();
+  final httpClient = http.Client();
   String _token;
 
   get loggedUser => User.currentUser();
 
-  bool isLogged() {
-    return loggedUser.isLogged();
+  Future<dynamic> _sendRawRequest(
+    String httpMethod,
+    String apiMethod,
+    Map<String, String> headers,
+    [String body]
+  ) async {
+    http.Request request = http.Request(httpMethod, Uri.parse(App.application.config.apiBaseUrl + apiMethod));
+    if (headers != null) request.headers.addAll(headers);
+    if (body != null) request.body = body;
+
+    request.headers.addAll({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Repairman': '${App.application.config.packageInfo.version}'
+    });
+
+    try {
+      return parseResponse(await http.Response.fromStream(await httpClient.send(request)));
+    } catch(e) {
+      if (e is SocketException || e is http.ClientException || e is HandshakeException) {
+        throw ApiConnException();
+      } else {
+        rethrow;
+      }
+    }
+  }
+
+  Future<dynamic> _sendRequest(
+    String httpMethod,
+    String apiMethod,
+    Map<String, String> headers,
+    [String body = '']
+  ) async {
+    if (_token != null) {
+      headers.addAll({
+        'Authorization': 'RApi client_id=${App.application.config.clientId},token=$_token',
+        'FirebaseToken': '${loggedUser.firebaseToken}'
+      });
+    }
+
+    try {
+      return await _sendRawRequest(httpMethod, apiMethod, headers, body);
+    } on AuthException {
+      await relogin();
+      return await _sendRequest(httpMethod, apiMethod, headers, body);
+    }
   }
 
   Future<dynamic> get(String method) async {
-    try {
-      return parseResponse(await _get(method));
-    } on AuthException {
-      if (isLogged()) {
-        await relogin();
-        return parseResponse(await _get(method));
-      }
-    } catch(e) {
-      if (e is SocketException || e is http.ClientException || e is HandshakeException) {
-        throw ApiConnException();
-      } else {
-        rethrow;
-      }
-    }
+    return await _sendRequest('GET', method, {});
   }
 
   Future<dynamic> post(String method, {body}) async {
-    try {
-      return parseResponse(await _post(method, body));
-    } on AuthException {
-      if (isLogged()) {
-        await relogin();
-        return parseResponse(await _post(method, body));
-      }
-    } catch(e) {
-      if (e is SocketException || e is http.ClientException || e is HandshakeException) {
-        throw ApiConnException();
-      } else {
-        rethrow;
-      }
-    }
-  }
-
-  Future<http.Response> _get(String method) async {
-    return await http.get(
-      App.application.config.apiBaseUrl + method,
-      headers: {
-        'Authorization': 'RApi client_id=${App.application.config.clientId},token=$_token',
-        'FirebaseToken': '${loggedUser.firebaseToken}',
-        'Repairman': '${App.application.config.packageInfo.version}',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    );
-  }
-
-  Future<http.Response> _post(String method, body) async {
-    return await http.post(
-      App.application.config.apiBaseUrl + method,
-      body: _encoder.convert(body),
-      headers: {
-        'Authorization': 'RApi client_id=${App.application.config.clientId},token=$_token',
-        'FirebaseToken': '${loggedUser.firebaseToken}',
-        'Repairman': '${App.application.config.packageInfo.version}',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      }
-    );
+    return await _sendRequest('POST', method, {}, _encoder.convert(body));
   }
 
   Future<void> resetPassword(String username) async {
-    try {
-      http.Response response = await http.post(
-        App.application.config.apiBaseUrl + 'v1/reset_password',
-        headers: {
-          'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username'
-        }
-      );
-
-      parseResponse(response);
-    } catch(e) {
-      if (e is SocketException || e is http.ClientException || e is HandshakeException) {
-        throw ApiConnException();
-      } else {
-        rethrow;
-      }
-    }
+    await _sendRequest('POST', 'v1/reset_password', {
+      'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username'
+    });
   }
 
   Future<void> login(String username, String password) async {
@@ -110,31 +89,20 @@ class Api {
   }
 
   Future<void> logout() async {
-    loggedUser.delete();
     _token = null;
+    loggedUser.delete();
   }
 
   Future<void> relogin() async {
+    _token = null;
     await _authenticate(loggedUser.username, loggedUser.password);
   }
 
   Future<void> _authenticate(String username, String password) async {
-    try {
-      http.Response response = await http.post(
-        App.application.config.apiBaseUrl + 'v1/authenticate',
-        headers: {
-          'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username,password=$password'
-        }
-      );
-
-      _token = parseResponse(response)['token'];
-    } catch(e) {
-      if (e is SocketException || e is http.ClientException || e is HandshakeException) {
-        throw ApiConnException();
-      } else {
-        rethrow;
-      }
-    }
+    dynamic response = await _sendRequest('POST', 'v1/authenticate', {
+      'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username,password=$password'
+    });
+    _token = response['token'];
   }
 
   dynamic parseResponse(http.Response response) {

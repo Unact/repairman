@@ -200,7 +200,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
 
-    if (App.application.api.isLogged()) {
+    if (User.currentUser().isLogged()) {
       App.application.data.dataSync.startSyncTimer();
       WidgetsBinding.instance.addObserver(this);
       _backgroundRefresh();
@@ -220,7 +220,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   void dispose() {
     super.dispose();
 
-    if (App.application.api.isLogged()) {
+    if (User.currentUser().isLogged()) {
       WidgetsBinding.instance.removeObserver(this);
     }
 

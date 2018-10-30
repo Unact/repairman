@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
 import 'package:repairman/app/modules/sentry.dart';
 import 'package:repairman/app/pages/home_page.dart';
@@ -54,7 +55,7 @@ class App {
         '/': (BuildContext context) => HomePage(),
         '/login': (BuildContext context) => LoginPage()
       },
-      initialRoute: api.isLogged() ? '/' : '/login',
+      initialRoute: User.currentUser().isLogged() ? '/' : '/login',
       locale: Locale('ru', 'RU'),
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
