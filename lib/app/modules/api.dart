@@ -99,7 +99,7 @@ class Api {
   }
 
   Future<void> _authenticate(String username, String password) async {
-    dynamic response = await _sendRequest('POST', 'v1/authenticate', {
+    dynamic response = await _sendRawRequest('POST', 'v1/authenticate', {
       'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username,password=$password'
     });
     _token = response['token'];
