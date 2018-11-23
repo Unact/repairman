@@ -27,6 +27,14 @@ class Task extends DatabaseModel {
   static const int yellowRoute = 2;
   static const int greenRoute = 1;
 
+  bool get isUncompleted => !servstatus;
+  bool get isRedRoute => routePriority == redRoute;
+  bool get isYellowRoute => routePriority == yellowRoute;
+  bool get isGreenRoute => routePriority == greenRoute;
+  bool get isRedUncompletedRoute => isUncompleted && isRedRoute;
+  bool get isYellowUncompletedRoute => isUncompleted && isYellowRoute;
+  bool get isGreenUncompletedRoute => isUncompleted && isGreenRoute;
+
   get tableName => _tableName;
 
   Task({

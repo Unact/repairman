@@ -54,10 +54,7 @@ class DataSync {
   void _syncTimerCallback(Timer curTimer) async {
     try {
       await syncData();
-      syncErrors = null;
-    } on ApiException catch(e) {
-      syncErrors = e.errorMsg;
-    }
+    } on ApiException {}
   }
 
   Timer _startTimer(Timer timer, Function callback) {
@@ -91,6 +88,11 @@ class DataSync {
       if (needImport) {
         await _importData();
       }
+
+      syncErrors = null;
+    } on ApiException catch(e) {
+      syncErrors = e.errorMsg;
+      rethrow;
     } finally {
       lastSyncTime = DateTime.now();
       _isSyncing = false;
