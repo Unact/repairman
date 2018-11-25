@@ -122,8 +122,8 @@ class Terminal extends DatabaseModel {
     return (await App.application.data.db.query(_tableName)).map((rec) {
       Terminal terminal = Terminal(values: rec);
       terminal.distance = GreatCircleDistance.fromDegrees(
-          latitude1: terminal.latitude,
-          longitude1: terminal.longitude,
+          latitude1: terminal.latitude ?? 0.0,
+          longitude1: terminal.longitude ?? 0.0,
           latitude2: curLatitude,
           longitude2: curLongitude
         ).haversineDistance() / 1000.0;

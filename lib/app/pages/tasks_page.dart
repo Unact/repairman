@@ -7,6 +7,7 @@ import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/pages/map_page.dart';
 import 'package:repairman/app/pages/task_page.dart';
 import 'package:repairman/app/utils/format.dart';
+import 'package:repairman/app/utils/ui_colors.dart';
 
 class TasksPage extends StatefulWidget {
   TasksPage({Key key}) : super(key: key);
@@ -33,6 +34,11 @@ class _TasksPageState extends State<TasksPage> {
 
   Widget _taskTile(BuildContext context, Task task) {
     Terminal terminal = _terminals.firstWhere((term) => term.id == task.ppsTerminalId, orElse: () => Terminal());
+    Color taskColor = task.isGreenUncompletedRoute ?
+      UIColors.greenTask :
+      (task.isYellowUncompletedRoute ?
+        UIColors.yellowTask :
+        (task.isRedUncompletedRoute ? UIColors.redTask : Colors.black));
 
     if (terminal.id == null) return Container();
 
@@ -60,7 +66,7 @@ class _TasksPageState extends State<TasksPage> {
           ),
           title: Text(
             task.routePriority.toString() + '|' + terminal.code + ' : ' + task.terminalBreakName,
-            style: TextStyle(fontSize: 14.0)
+            style: TextStyle(fontSize: 14.0, color: taskColor)
           ),
           subtitle: RichText(
             text: TextSpan(

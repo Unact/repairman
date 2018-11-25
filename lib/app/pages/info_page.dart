@@ -11,6 +11,7 @@ import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
 import 'package:repairman/data/data_sync.dart';
+import 'package:repairman/app/utils/ui_colors.dart';
 
 class InfoPage extends StatefulWidget {
   final GlobalKey bottomNavigationBarKey;
@@ -44,10 +45,10 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
     _nearTerminalName = terminals.isNotEmpty ? terminals.first.address : 'Не найден';
     _terminalCnt = terminals.length;
     _allTasksCnt = tasks.length;
-    _redCnt = tasks.where((task) => !task.servstatus && task.routePriority == Task.redRoute).length;
-    _yellowCnt = tasks.where((task) => !task.servstatus && task.routePriority == Task.yellowRoute).length;
-    _greenCnt = tasks.where((task) => !task.servstatus && task.routePriority == Task.greenRoute).length;
-    _uncompletedTasksCnt = tasks.where((task) => !task.servstatus).length;
+    _redCnt = tasks.where((task) => task.isRedUncompletedRoute).length;
+    _yellowCnt = tasks.where((task) => task.isYellowUncompletedRoute).length;
+    _greenCnt = tasks.where((task) => task.isGreenUncompletedRoute).length;
+    _uncompletedTasksCnt = tasks.where((task) => task.isUncompleted).length;
 
     if (mounted) {
       setState(() {});
@@ -164,9 +165,9 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
         style: TextStyle(color: Colors.grey),
         children: <TextSpan>[
           TextSpan(text: 'Не выполненных: $_uncompletedTasksCnt '),
-          _redCnt == 0 ? TextSpan() : TextSpan(text: '$_redCnt ', style: TextStyle(color: Colors.red[400])),
-          _yellowCnt == 0 ? TextSpan() : TextSpan(text: '$_yellowCnt ', style: TextStyle(color: Colors.yellow[400])),
-          _greenCnt == 0 ? TextSpan() : TextSpan(text: '$_greenCnt', style: TextStyle(color: Colors.green[400])),
+          _redCnt == 0 ? TextSpan() : TextSpan(text: '$_redCnt ', style: TextStyle(color: UIColors.redTask)),
+          _yellowCnt == 0 ? TextSpan() : TextSpan(text: '$_yellowCnt ', style: TextStyle(color: UIColors.yellowTask)),
+          _greenCnt == 0 ? TextSpan() : TextSpan(text: '$_greenCnt', style: TextStyle(color: UIColors.greenTask)),
           TextSpan(text: '\nВсего: $_allTasksCnt')
         ]
       )
