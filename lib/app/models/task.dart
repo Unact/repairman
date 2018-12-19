@@ -123,4 +123,13 @@ class Task extends DatabaseModel {
       order by tasks.servstatus, tasks.route_priority desc, tasks.dobefore
     """)).map((rec) => Task(values: rec)).toList();
   }
+
+  static Future<List<Task>> allSorted() async {
+    return (await App.application.data.db.rawQuery("""
+      select
+        tasks.*
+      from $_tableName tasks
+      order by tasks.servstatus, tasks.route_priority desc, tasks.dobefore
+    """)).map((rec) => Task(values: rec)).toList();
+  }
 }

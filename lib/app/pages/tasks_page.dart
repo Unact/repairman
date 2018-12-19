@@ -23,7 +23,7 @@ class _TasksPageState extends State<TasksPage> {
   bool _showOnlyNew = false;
 
   Future<void> _loadData() async {
-    _tasks = (await Task.all()).where((task) => !_showOnlyNew || task.isSeen).toList();
+    _tasks = (await Task.allSorted()).where((task) => !_showOnlyNew || task.isSeen).toList();
     _terminals = (await Terminal.all()).
       where((Terminal terminal) => _tasks.any((Task task) => task.ppsTerminalId == terminal.id)).toList();
 
@@ -38,7 +38,7 @@ class _TasksPageState extends State<TasksPage> {
       UIColors.greenTask :
       (task.isYellowUncompletedRoute ?
         UIColors.yellowTask :
-        (task.isRedUncompletedRoute ? UIColors.redTask : Colors.black));
+        (task.isRedUncompletedRoute ? UIColors.redTask : UIColors.normalTask));
 
     if (terminal.id == null) return Container();
 
@@ -53,8 +53,8 @@ class _TasksPageState extends State<TasksPage> {
         child: ListTile(
           isThreeLine: false,
           leading: CircleAvatar(
-            backgroundImage: terminal.mobileOpImg(),
-            backgroundColor: Colors.white12
+            child: Text(task.routePriority.toString()),
+            backgroundColor: taskColor
           ),
           trailing: Checkbox(
             value: task.isSeen,
@@ -64,9 +64,20 @@ class _TasksPageState extends State<TasksPage> {
               await _loadData();
             },
           ),
-          title: Text(
-            task.routePriority.toString() + '|' + terminal.code + ' : ' + task.terminalBreakName,
-            style: TextStyle(fontSize: 14.0, color: taskColor)
+          title: Container(
+            child: Row(
+              children: <Widget>[
+                CircleAvatar(
+                  maxRadius: 6.0,
+                  backgroundImage: terminal.mobileOpImg(),
+                  backgroundColor: Colors.white12
+                ),
+                SizedBox(width: 6.0),
+                Text(terminal.code + ' : ' + task.terminalBreakName,
+                  style: TextStyle(fontSize: 14.0)
+                ),
+              ],
+            )
           ),
           subtitle: RichText(
             text: TextSpan(
@@ -130,7 +141,7 @@ class _TasksPageState extends State<TasksPage> {
 
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (BuildContext context) => MapPage(terminals: _terminals))
+                MaterialPageRoute(builder: (BuildContext context) => MapPage(terminals: _terminals, tasks: _tasks,))
               );
             }
           ),
