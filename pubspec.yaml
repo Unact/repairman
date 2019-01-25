@@ -27,7 +27,7 @@ dependencies:
   yandex_mapkit:
     git:
       url: git://github.com/Unact/yandex_mapkit
-      ref: 845c94ad30604c3593bc5c58303033327a38f5b4
+      ref: fd7b300e004dddcf028dc90e060a8d593d2d7a91
 
 dev_dependencies:
   flutter_test:

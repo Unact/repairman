@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,7 +31,6 @@ class _TerminalPageState extends State<TerminalPage> {
   List<Task> _tasks = [];
   List<TerminalWorktime> _terminalWorktimes = [];
   Placemark _placemark;
-  final GlobalKey<YandexMapState> _mapKey = GlobalKey<YandexMapState>();
 
   Future<void> _loadData() async {
     User user = User.currentUser();
@@ -246,7 +244,6 @@ class _TerminalPageState extends State<TerminalPage> {
             width: 160.0,
             height: 240.0,
             child: YandexMap(
-              key: _mapKey,
               onMapCreated: (YandexMapController controller) async {
                 await controller.addPlacemark(_placemark);
                 await controller.move(point: _placemark.point, zoom: 17.0);
@@ -276,23 +273,7 @@ class _TerminalPageState extends State<TerminalPage> {
         key: _appBarKey,
         title: Text('Терминал ${widget.terminal.code}')
       ),
-      body: NotificationListener(
-        child: _buildBody(context),
-        onNotification: (Notification notification) {
-          if (Theme.of(context).platform == TargetPlatform.android) return;
-
-          try {
-            RenderBox appBarBox = _appBarKey.currentContext.findRenderObject();
-            RenderBox mapBox = _mapKey.currentContext.findRenderObject();
-            Size appBarSize = appBarBox.semanticBounds.size;
-            Rect mapRect = MatrixUtils.transformRect(mapBox.getTransformTo(null), Offset.zero & mapBox.size);
-
-            if (notification is ScrollStartNotification) _mapKey.currentState.hide();
-            if (notification is ScrollEndNotification && mapRect.top > appBarSize.height) _mapKey.currentState.refresh();
-            // Если рендер не завершился, то метод findRenderObject вызывает ошибку, в таких случаях ничего не делаем
-          } on NoSuchMethodError {}
-        }
-      )
+      body: _buildBody(context)
     );
   }
 }

@@ -21,7 +21,6 @@ class MapPage extends StatefulWidget {
 
 class _MapPageState extends State<MapPage> {
   final double _kPointBoundMove = 0.1;
-  final GlobalKey<YandexMapState> _mapKey = GlobalKey<YandexMapState>();
 
   Widget _buildBody(BuildContext context) {
     List<Placemark> placemarks = widget.terminals.map((Terminal terminal) {
@@ -32,7 +31,6 @@ class _MapPageState extends State<MapPage> {
         iconName: 'lib/app/assets/images/${hasUncompletedTask ? 'placenotdoneicon.png' : 'placedoneicon.png'}',
         onTap: (double lat, double lon) async {
           await Navigator.push(context, MaterialPageRoute(builder: (context) => TerminalPage(terminal: terminal)));
-          if (Theme.of(context).platform == TargetPlatform.iOS) await _mapKey.currentState?.refresh();
         }
       );
       return placemark;
@@ -45,7 +43,6 @@ class _MapPageState extends State<MapPage> {
     double minLon = longitudes.reduce(min);
 
     return YandexMap(
-      key: _mapKey,
       onMapCreated: (YandexMapController controller) async {
         await controller.showUserLayer(iconName: 'lib/app/assets/images/usericon.png');
         await Future.wait(placemarks.map((Placemark placemark) => controller.addPlacemark(placemark)));
