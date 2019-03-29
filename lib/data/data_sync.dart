@@ -30,6 +30,7 @@ class DataSync {
   String syncErrors;
   String exportLocationErrors;
   bool _isSyncing = false;
+  bool _isSyncingLocations = false;
 
   static const Duration kSyncTimerPeriod = Duration(minutes: 10);
 
@@ -133,19 +134,33 @@ class DataSync {
   }
 
   Future<void> exportLocations() async {
-    List<Location> locations = await Location.allNew();
+    if (_isSyncingLocations) return;
 
     try {
-      await Future.wait(locations.map((location) async => await location.markInserted(false)));
-      await App.application.api.post('v2/repairman/locations', body: {
-        'locations': locations.map((req) => req.toExportMap()).toList()
-      });
-      exportLocationErrors = null;
-    } on ApiException catch(e) {
-      exportLocationErrors = e.errorMsg;
-      await Future.wait(locations.map((location) async => await location.markInserted(true)));
+      _isSyncingLocations = true;
+      await _syncLocations();
+    } finally {
+      _isSyncingLocations = false;
     }
 
     _streamController.add(SyncEvent.locationExportCompleted);
+  }
+
+  Future<void> _syncLocations() async {
+    while (await Location.hasNew()) {
+      List<Location> locations = await Location.allNew();
+
+      try {
+        await App.application.api.post('v2/repairman/locations', body: {
+          'locations': locations.map((req) => req.toExportMap()).toList()
+        });
+
+        exportLocationErrors = null;
+        await Future.wait(locations.map((location) async => await location.markInserted(false)));
+      } on ApiException catch(e) {
+        exportLocationErrors = e.errorMsg;
+        await Future.wait(locations.map((location) async => await location.markInserted(true)));
+      }
+    }
   }
 }

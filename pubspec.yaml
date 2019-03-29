@@ -24,10 +24,7 @@ dependencies:
   shared_preferences: any
   device_info: any
   package_info: any
-  yandex_mapkit:
-    git:
-      url: git://github.com/Unact/yandex_mapkit
-      ref: fd7b300e004dddcf028dc90e060a8d593d2d7a91
+  yandex_mapkit: any
 
 dev_dependencies:
   flutter_test:

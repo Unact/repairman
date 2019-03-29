@@ -15,7 +15,7 @@ class Location extends DatabaseModel {
   double altitude;
 
   static const int newLimit = 7;
-  static const int minPoints = 5;
+  static const int minPoints = 10;
 
   get tableName => _tableName;
 
@@ -41,6 +41,15 @@ class Location extends DatabaseModel {
     map['altitude'] = altitude;
 
     return map;
+  }
+
+  Map<String, dynamic> toExportMap() {
+    Map<String, dynamic> values = toMap();
+    values.addEntries({
+      'local_ts': localTs?.toIso8601String()
+    }.entries);
+
+    return values;
   }
 
   static Future<List<Location>> todayLocations() async {
@@ -82,7 +91,18 @@ class Location extends DatabaseModel {
   }
 
   static Future<List<Location>> allNew() async {
-    return (await App.application.data.db.query(_tableName, where: 'local_inserted = 1')).
-      map((rec) => Location(values: rec)).toList();
+    return (await App.application.data.db.query(_tableName,
+      where: 'local_inserted = 1',
+      limit: minPoints,
+      orderBy: 'local_ts asc')
+    ).map((rec) => Location(values: rec)).toList();
+  }
+
+  static Future<bool> hasNew() async {
+    return (await App.application.data.db.rawQuery("""
+      select 1
+      from $_tableName locations
+      where local_inserted = 1
+    """)).isNotEmpty;
   }
 }
