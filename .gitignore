@@ -12,3 +12,4 @@ ios/Flutter/flutter_assets/
 .app_env
 .flutter-plugins
 .env
+ios/Flutter/flutter_export_environment.sh

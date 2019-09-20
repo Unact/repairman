@@ -152,32 +152,32 @@ EXTERNAL SOURCES:
     :path: Pods/.symlinks/plugins/yandex_mapkit/ios
 
 SPEC CHECKSUMS:
-  barcode_scan: 8288e70cb430072003bce2c794a1431e7adbcb4d
-  device_info: 76ce0b32e13034d1883be4a382433648f9dcee63
+  barcode_scan: 33f586d02270046fc6559135038b34b5754eaa4f
+  device_info: 3ebad48f726348f69abd802f3334a8d1ed795fbd
   Firebase: c60d49e9c2630875a96207d15e2affb8364996d1
-  firebase_messaging: a5f5d4a9491b660f33a1f94bd0596558f820bad1
+  firebase_messaging: b25b2fa94e685146bcf9d706ed87b4e95cd2a17d
   FirebaseAnalytics: fd72a26bf8dac84cefba2f0864366f718555a5b0
   FirebaseAnalyticsInterop: efbe45c8385ec626e29f9525e5ebd38520dfb6c1
   FirebaseCore: 22a79a961c3951ef2f77b67bfbc99e454247b319
   FirebaseInstanceID: cf488df2f4b79782f0e430b04a0e17c0aa7979b2
   FirebaseMessaging: 2d53d08d752fbe63ce0820428d70be5ab87c11fb
-  Flutter: 9d0fac939486c9aba2809b7982dfdbb47a7b0296
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   GoogleAppMeasurement: 1624046ab1bcc5e170061a56ef5679000b079c8e
   GoogleUtilities: 6481e6318c5fcabaaa8513ef8120f329055d7c10
-  location: 26c90953ad5916331d0d1d913898779910416487
+  location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
   MTBBarcodeScanner: 5b97f10a037e2560ff104da413343c5ce9413911
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
-  package_info: d7c98b64f60add4c2908b9d94d82a45d3c8827ad
-  path_provider: 09407919825bfe3c2deae39453b7a5b44f467873
+  package_info: 78cabb3c322943c55d39676f4a5bfc748c01d055
+  path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
   Protobuf: 7a877b7f3e5964e3fce995e2eb323dbc6831bb5a
-  shared_preferences: 5a1d487c427ee18fcd3ea1f2a131569481834b53
-  sqflite: 801b6b0983f722fa29baf00d1476e4556ada6de4
-  url_launcher: 92b89c1029a0373879933c21642958c874539095
-  yandex_mapkit: 18a6689f766ca4a475d8018485bebd15549a83cb
+  shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
+  sqflite: ff1d9da63c06588cc8d1faf7256d741f16989d5a
+  url_launcher: 0067ddb8f10d36786672aa0722a21717dba3a298
+  yandex_mapkit: c2f430133aa6508c3470840781e858ac99a6d42e
   YandexMapKit: 9bf046c69997348f07a37e587880bf18f147b8d3
   YandexRuntime: 1b2bf8365e5fec2fc91e9fda449fa7fae54b3d79
 
 PODFILE CHECKSUM: c79869c28d067312888823ebc94c21cc7bbc2551
 
-COCOAPODS: 1.5.3
+COCOAPODS: 1.6.1

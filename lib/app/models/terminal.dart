@@ -23,12 +23,15 @@ class Terminal extends DatabaseModel {
   DateTime lastActivityTime;
   DateTime lastPaymentTime;
   bool exclude;
+  bool hasTask;
+  bool hasInc;
   DateTime closedDaysBegin;
   DateTime closedDaysEnd;
 
   double distance;
 
   get tableName => _tableName;
+  get forTech => hasTask || !hasInc;
 
   Terminal({
     Map<String, dynamic> values,
@@ -42,7 +45,9 @@ class Terminal extends DatabaseModel {
     this.srcSystemName,
     this.mobileop,
     this.lastActivityTime,
-    this.lastPaymentTime
+    this.lastPaymentTime,
+    this.hasTask,
+    this.hasInc
   }) {
     if (values != null) build(values);
   }
@@ -63,6 +68,8 @@ class Terminal extends DatabaseModel {
     lastActivityTime = Nullify.parseDate(values['lastactivitytime']);
     lastPaymentTime = Nullify.parseDate(values['lastpaymenttime']);
     exclude = Nullify.parseBool(values['exclude']);
+    hasTask = Nullify.parseBool(values['has_task']);
+    hasInc = Nullify.parseBool(values['has_inc']);
     closedDaysBegin = Nullify.parseDate(values['closed_days_begin']);
     closedDaysEnd = Nullify.parseDate(values['closed_days_end']);
   }
@@ -81,6 +88,8 @@ class Terminal extends DatabaseModel {
     map['lastactivitytime'] = lastActivityTime?.toIso8601String();
     map['lastpaymenttime'] = lastPaymentTime?.toIso8601String();
     map['exclude'] = exclude;
+    map['has_task'] = hasTask;
+    map['has_inc'] = hasInc;
     map['closed_days_begin'] = closedDaysBegin?.toIso8601String();
     map['closed_days_end'] = closedDaysEnd?.toIso8601String();
 

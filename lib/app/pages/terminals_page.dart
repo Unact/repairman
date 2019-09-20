@@ -22,6 +22,7 @@ class _TerminalsPageState extends State<TerminalsPage> {
   Future<void> _loadData() async {
     User user = User.currentUser();
     _terminals = (await Terminal.allWithDistance(user.curLatitude, user.curLongitude)).
+      where((term) => term.forTech).
       where((term) => !_showOnlyWithError || term.errorText != '').
       toList();
     _delegate.terminals = _terminals;

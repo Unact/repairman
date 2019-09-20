@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:device_info/device_info.dart';
+import 'package:flutter/widgets.dart';
 import 'package:package_info/package_info.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
@@ -17,6 +18,9 @@ void main() async {
   bool isPhysicalDevice;
   bool development = false;
   assert(development = true); // Метод выполняется только в debug режиме
+
+  // If you're running an application and need to access the binary messenger before `runApp()` has been called (for example, during plugin initialization), then you need to explicitly call the `WidgetsFlutterBinding.ensureInitialized()` first.
+  WidgetsFlutterBinding.ensureInitialized();
 
   if (Platform.isIOS) {
     developmentUrl = 'http://localhost:3000';
@@ -41,7 +45,7 @@ void main() async {
     deviceModel: deviceModel,
     osVersion: osVersion,
     env: development ? 'development' : 'production',
-    databaseVersion: 3,
+    databaseVersion: 4,
     apiBaseUrl: '${development ? developmentUrl : 'https://rapi.unact.ru'}/api/',
     sentryDsn: appEnv['SENTRY_DSN']
   )).run();

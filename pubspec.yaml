@@ -43,5 +43,6 @@ flutter:
     - lib/app/assets/images/placeicon.png
     - lib/app/assets/images/placedoneicon.png
     - lib/app/assets/images/placenotdoneicon.png
+    - lib/app/assets/images/placeinc.png
 
   uses-material-design: true

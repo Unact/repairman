@@ -160,6 +160,7 @@ class _TerminalPageState extends State<TerminalPage> {
         _buildTableRow('Платеж', Format.untilStr(widget.terminal.lastPaymentTime)),
         _buildTableRow('Ошибка', widget.terminal.errorText ?? ''),
         _buildTableRow('Адрес', widget.terminal.address),
+        _buildTableRow('Инк.', widget.terminal.hasInc ? 'Да' : 'Нет'),
       ]
     );
   }

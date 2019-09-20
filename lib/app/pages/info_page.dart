@@ -38,7 +38,8 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
 
   Future<void> _loadData() async {
     User user = User.currentUser();
-    List<Terminal> terminals = await Terminal.allWithDistance(user.curLatitude, user.curLongitude);
+    List<Terminal> terminals = (await Terminal.allWithDistance(user.curLatitude, user.curLongitude)).
+      where((term) => term.forTech).toList();
     List<Task> tasks = await Task.all();
 
     _distance = (await Location.currentDistance()) ?? 0.0;

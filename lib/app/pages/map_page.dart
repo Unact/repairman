@@ -24,11 +24,20 @@ class _MapPageState extends State<MapPage> {
 
   Widget _buildBody(BuildContext context) {
     List<Placemark> placemarks = widget.terminals.map((Terminal terminal) {
-      bool hasUncompletedTask = widget.tasks.any((Task task) => task.isUncompleted && task.ppsTerminalId == terminal.id);
+      String iconPostfix = 'placedoneicon.png';
+
+      if (terminal.hasInc) {
+        iconPostfix = 'placeinc.png';
+      }
+
+      if (terminal.hasTask && widget.tasks.any((task) => task.isUncompleted && task.ppsTerminalId == terminal.id)) {
+        iconPostfix = 'placenotdoneicon.png';
+      }
+
       Point point = Point(latitude: terminal.latitude, longitude: terminal.longitude);
       Placemark placemark = Placemark(
         point: point,
-        iconName: 'lib/app/assets/images/${hasUncompletedTask ? 'placenotdoneicon.png' : 'placedoneicon.png'}',
+        iconName: 'lib/app/assets/images/$iconPostfix',
         onTap: (double lat, double lon) async {
           await Navigator.push(context, MaterialPageRoute(builder: (context) => TerminalPage(terminal: terminal)));
         }
