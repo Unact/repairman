@@ -23,6 +23,7 @@ class Terminal extends DatabaseModel {
   DateTime lastActivityTime;
   DateTime lastPaymentTime;
   bool exclude;
+  bool inTaskZone;
   bool hasTask;
   bool hasInc;
   DateTime closedDaysBegin;
@@ -31,7 +32,8 @@ class Terminal extends DatabaseModel {
   double distance;
 
   get tableName => _tableName;
-  get forTech => hasTask || !hasInc;
+  get zoneTerminal => hasTask || inTaskZone;
+  get hasWork => hasTask || hasInc;
 
   Terminal({
     Map<String, dynamic> values,
@@ -46,6 +48,7 @@ class Terminal extends DatabaseModel {
     this.mobileop,
     this.lastActivityTime,
     this.lastPaymentTime,
+    this.inTaskZone,
     this.hasTask,
     this.hasInc
   }) {
@@ -68,6 +71,7 @@ class Terminal extends DatabaseModel {
     lastActivityTime = Nullify.parseDate(values['lastactivitytime']);
     lastPaymentTime = Nullify.parseDate(values['lastpaymenttime']);
     exclude = Nullify.parseBool(values['exclude']);
+    inTaskZone = Nullify.parseBool(values['in_task_zone']);
     hasTask = Nullify.parseBool(values['has_task']);
     hasInc = Nullify.parseBool(values['has_inc']);
     closedDaysBegin = Nullify.parseDate(values['closed_days_begin']);
@@ -88,6 +92,7 @@ class Terminal extends DatabaseModel {
     map['lastactivitytime'] = lastActivityTime?.toIso8601String();
     map['lastpaymenttime'] = lastPaymentTime?.toIso8601String();
     map['exclude'] = exclude;
+    map['in_task_zone'] = inTaskZone;
     map['has_task'] = hasTask;
     map['has_inc'] = hasInc;
     map['closed_days_begin'] = closedDaysBegin?.toIso8601String();

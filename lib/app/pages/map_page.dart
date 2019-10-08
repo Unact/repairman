@@ -23,7 +23,7 @@ class _MapPageState extends State<MapPage> {
   final double _kPointBoundMove = 0.1;
 
   Widget _buildBody(BuildContext context) {
-    List<Placemark> placemarks = widget.terminals.map((Terminal terminal) {
+    List<Placemark> placemarks = widget.terminals.where((terminal) => terminal.hasWork).map((Terminal terminal) {
       String iconPostfix = 'placedoneicon.png';
 
       if (terminal.hasInc) {

@@ -32,6 +32,7 @@ CREATE TABLE terminals(
     mobileop TEXT,
     terminalId INTEGER,
     exclude INTEGER,
+    in_task_zone INTEGER,
     has_task INTEGER,
     has_inc INTEGER,
     closed_days_begin DATETIME,
