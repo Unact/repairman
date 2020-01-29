@@ -13,3 +13,6 @@ ios/Flutter/flutter_assets/
 .flutter-plugins
 .env
 ios/Flutter/flutter_export_environment.sh
+.flutter-plugins-dependencies
+.dart_tool/
+*.iml
