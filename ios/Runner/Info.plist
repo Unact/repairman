@@ -25,7 +25,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Для сканирования штрих-кода необходимо дать доступ к камере</string>
+	<string>Для сканирования штрих-кода и фотографирования терминалов</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Для определения местоположения</string>
 	<key>NSLocationAlwaysUsageDescription</key>

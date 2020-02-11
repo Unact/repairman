@@ -1,114 +1,138 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/user.dart';
-import 'package:repairman/config/app_config.dart';
 
 class Api {
-  Api(AppConfig config);
+  static String workingVersion;
 
-  final JsonDecoder _decoder = JsonDecoder();
-  final JsonEncoder _encoder = JsonEncoder();
-  final httpClient = http.Client();
-  String _token;
+  static Future<void> resetPassword(String username) async {
+    await _request(
+      'POST',
+      'v1/reset_password',
+      headers: {
+        'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username'
+      }
+    );
+  }
 
-  get loggedUser => User.currentUser();
+  static Future<void> login(String username, String password) async {
+    await User.currentUser.reset();
+    await _authenticate(username, password);
 
-  Future<dynamic> _sendRawRequest(
-    String httpMethod,
-    String apiMethod,
-    Map<String, String> headers,
-    [String body]
+    User.currentUser.username = username;
+    User.currentUser.password = password;
+    await User.currentUser.save();
+    await User.currentUser.loadDataFromRemote();
+  }
+
+  static Future<void> logout() async {
+    await User.currentUser.reset();
+  }
+
+  static Future<void> relogin() async {
+    User.currentUser.token = null;
+    await _authenticate(User.currentUser.username, User.currentUser.password);
+  }
+
+  static Future<dynamic> get(
+    String method,
+    {
+      Map<String, String> headers,
+      Map<String, dynamic> queryParameters,
+    }
   ) async {
-    http.Request request = http.Request(httpMethod, Uri.parse(App.application.config.apiBaseUrl + apiMethod));
-    if (headers != null) request.headers.addAll(headers);
-    if (body != null) request.body = body;
+    return await request('GET', method, headers: headers, queryParameters: queryParameters);
+  }
 
-    request.headers.addAll({
+  static Future<dynamic> post(
+    String method,
+    {
+      Map<String, String> headers,
+      Map<String, dynamic> queryParameters,
+      dynamic data,
+      List<File> files = const [],
+      String filesKey = 'files'
+    }
+  ) async {
+    return await request(
+      'POST',
+      method,
+      headers: headers,
+      queryParameters: queryParameters,
+      data: data,
+      files: files,
+      filesKey: filesKey
+    );
+  }
+
+  static Future<dynamic> request(
+    String method,
+    String apiMethod,
+    {
+      Map<String, String> headers,
+      Map<String, dynamic> queryParameters,
+      dynamic data,
+      List<File>files = const [],
+      String filesKey = 'files'
+    }
+  ) async {
+    dynamic dataToSend = data;
+
+    if (data is! Map<String, dynamic> && files.isNotEmpty) {
+      throw 'files not empty, data must be Map<String, dynamic>';
+    }
+
+    if (files.isNotEmpty) {
+      dataToSend = _createFilesFormData(data, files, filesKey);
+    }
+
+    try {
+      return await _request(method, apiMethod, headers: headers, data: dataToSend, queryParameters: queryParameters);
+    } on AuthException {
+      await relogin();
+
+      if (dataToSend is FormData) {
+        dataToSend = _createFilesFormData(data, files, filesKey);
+      }
+
+      return await _request(method, apiMethod, headers: headers, data: dataToSend, queryParameters: queryParameters);
+    }
+  }
+
+  static Dio _createDio([Map<String, String> headers = const {}]) {
+    if (headers == null) headers = {};
+
+    if (User.currentUser.token != null) {
+      headers.addAll({
+        'Authorization': 'RApi client_id=${App.application.config.clientId},token=${User.currentUser.token}',
+        'FirebaseToken': '${User.currentUser.firebaseToken}'
+      });
+    }
+
+    headers.addAll({
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'Repairman': '${App.application.config.packageInfo.version}'
     });
 
-    try {
-      return parseResponse(await http.Response.fromStream(await httpClient.send(request)));
-    } catch(e) {
-      if (e is SocketException || e is http.ClientException || e is HandshakeException) {
-        throw ApiConnException();
-      } else {
-        rethrow;
-      }
-    }
+    return Dio(BaseOptions(
+      baseUrl: App.application.config.apiBaseUrl,
+      connectTimeout: 100000,
+      receiveTimeout: 100000,
+      headers: headers,
+      contentType: Headers.jsonContentType,
+      responseType: ResponseType.json,
+    ));
   }
 
-  Future<dynamic> _sendRequest(
-    String httpMethod,
-    String apiMethod,
-    Map<String, String> headers,
-    [String body = '']
-  ) async {
-    if (_token != null) {
-      headers.addAll({
-        'Authorization': 'RApi client_id=${App.application.config.clientId},token=$_token',
-        'FirebaseToken': '${loggedUser.firebaseToken}'
-      });
-    }
-
-    try {
-      return await _sendRawRequest(httpMethod, apiMethod, headers, body);
-    } on AuthException {
-      await relogin();
-      return await _sendRequest(httpMethod, apiMethod, headers, body);
-    }
-  }
-
-  Future<dynamic> get(String method) async {
-    return await _sendRequest('GET', method, {});
-  }
-
-  Future<dynamic> post(String method, {body}) async {
-    return await _sendRequest('POST', method, {}, _encoder.convert(body));
-  }
-
-  Future<void> resetPassword(String username) async {
-    await _sendRequest('POST', 'v1/reset_password', {
-      'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username'
-    });
-  }
-
-  Future<void> login(String username, String password) async {
-    User user = loggedUser;
-    await _authenticate(username, password);
-    user.username = username;
-    user.password = password;
-    user.update();
-  }
-
-  Future<void> logout() async {
-    _token = null;
-    loggedUser.delete();
-  }
-
-  Future<void> relogin() async {
-    _token = null;
-    await _authenticate(loggedUser.username, loggedUser.password);
-  }
-
-  Future<void> _authenticate(String username, String password) async {
-    dynamic response = await _sendRawRequest('POST', 'v1/authenticate', {
-      'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username,password=$password'
-    });
-    _token = response['token'];
-  }
-
-  dynamic parseResponse(http.Response response) {
-      final int statusCode = response.statusCode;
-      final String body = response.body;
-      dynamic parsedResp;
+  static void _onDioError(DioError e) {
+    if (e.response != null) {
+      final int statusCode = e.response.statusCode;
+      final dynamic body = e.response.data;
 
       if (statusCode < 200) {
         throw ApiException('Ошибка при получении данных', statusCode);
@@ -118,17 +142,61 @@ class Api {
         throw ServerException(statusCode);
       }
 
-      parsedResp = body.isEmpty ? Map<String, dynamic>() : _decoder.convert(body);
-
       if (statusCode == 401) {
-        throw AuthException(parsedResp['error']);
+        throw AuthException(body['error']);
+      }
+
+      if (statusCode == 410) {
+        workingVersion = body['working_version'];
+        throw VersionException(body['error']);
       }
 
       if (statusCode >= 400) {
-        throw ApiException(parsedResp['error'], statusCode);
+        throw ApiException(body['error'], statusCode);
       }
+    } else {
+      throw e;
+    }
+  }
 
-      return parsedResp;
+  static FormData _createFilesFormData(Map<String, dynamic> data, List<File> files, String filesKey) {
+    Map<String, dynamic> dataToAdd = data;
+    dataToAdd[filesKey] = files.map(
+      (file) => MultipartFile.fromBytes(file.readAsBytesSync(), filename: file.path.split('/').last)
+    ).toList();
+
+    return FormData.fromMap(dataToAdd);
+  }
+
+  static Future<dynamic> _request(
+    String method,
+    String apiMethod,
+    {
+      Map<String, String> headers,
+      Map<String, dynamic> queryParameters,
+      data
+    }
+  ) async {
+    Dio dio = _createDio(headers);
+    dio.options.method = method;
+
+    try {
+      return (await dio.request(apiMethod, data: data, queryParameters: queryParameters)).data;
+    } on DioError catch(e) {
+      _onDioError(e);
+    }
+  }
+
+  static Future<void> _authenticate(String username, String password) async {
+    dynamic response = await _request(
+      'POST',
+      'v1/authenticate',
+      headers: {
+        'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username,password=$password'
+      }
+    );
+    User.currentUser.token = response['token'];
+    await User.currentUser.save();
   }
 }
 
@@ -149,4 +217,8 @@ class ServerException extends ApiException {
 
 class ApiConnException extends ApiException {
   ApiConnException() : super('Нет связи', 503);
+}
+
+class VersionException extends ApiException {
+  VersionException(errorMsg) : super(errorMsg, 410);
 }

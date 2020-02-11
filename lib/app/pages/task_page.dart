@@ -1,17 +1,21 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:great_circle_distance/great_circle_distance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/task_defect_link.dart';
 import 'package:repairman/app/models/task_repair_link.dart';
+import 'package:repairman/app/models/terminal_image.dart';
 import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/models/terminal_component_link.dart';
 import 'package:repairman/app/models/user.dart';
+import 'package:repairman/app/modules/api.dart';
 import 'package:repairman/app/pages/component_groups_page.dart';
 import 'package:repairman/app/pages/defects_page.dart';
 import 'package:repairman/app/pages/repairs_page.dart';
@@ -44,12 +48,14 @@ class _TaskPageState extends State<TaskPage> {
   int _taskDefectCnt = 0;
   int _taskComponentCnt = 0;
   bool _actionsEnabled = true;
+  List<TerminalImage> _terminalImages = [];
 
   Future<void> _loadData() async {
     Function searchFn = (rec) => !rec.localDeleted;
     _taskRepairCnt = (await TaskRepairLink.byTaskId(widget.task.id)).where(searchFn).length;
     _taskDefectCnt = (await TaskDefectLink.byTaskId(widget.task.id)).where(searchFn).length;
     _taskComponentCnt = (await TerminalComponentLink.byTaskId(widget.task.id)).where(searchFn).length;
+    _terminalImages = await TerminalImage.byPpsTerminalId(widget.task.ppsTerminalId);
 
     if (mounted) {
       setState(() {});
@@ -93,7 +99,7 @@ class _TaskPageState extends State<TaskPage> {
             child: Text(rightStr),
             onLongPress: () {
               Clipboard.setData(ClipboardData(text: rightStr));
-              _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text('Скопировано')));
+              _showSnackBar('Скопировано');
             },
           )
         ),
@@ -229,8 +235,39 @@ class _TaskPageState extends State<TaskPage> {
           );
         }
       ),
+      ListTile(
+        dense: true,
+        title: Text('Добавить фотографию', style: defaultTextStyle),
+        contentPadding: listPanelPadding,
+        onTap: () async {
+          File file = await ImagePicker.pickImage(source: ImageSource.camera);
+
+          if (file != null) {
+            try {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return Padding(padding: EdgeInsets.all(5.0), child: Center(child: CircularProgressIndicator()));
+                }
+              );
+
+              await TerminalImage.saveToRemote(widget.task.ppsTerminalId, file);
+              _showSnackBar('Фотография успешно сохранена');
+            } on ApiException catch(e) {
+              _showSnackBar(e.errorMsg);
+            } finally {
+              Navigator.pop(context);
+            }
+          }
+        }
+      ),
       _buildGeoTile()
     ];
+  }
+
+  void _showSnackBar(String errorMsg) {
+    _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(errorMsg)));
   }
 
   Widget _buildGeoTile() {
@@ -263,24 +300,30 @@ class _TaskPageState extends State<TaskPage> {
   }
 
   Future<void> _setExecutionMark() async {
-    User user = User.currentUser();
+    User user = User.currentUser;
     double distance = GreatCircleDistance.fromDegrees(
       latitude1: widget.terminal.latitude,
       longitude1: widget.terminal.longitude,
       latitude2: user.curLatitude,
       longitude2: user.curLongitude
     ).haversineDistance();
+    List<DateTime> terminalImagesCts = _terminalImages.map((e) => e.cts).toList();
+    terminalImagesCts.sort((a, b) => a.isBefore(b) ? 1 : -1);
+
+    if (terminalImagesCts.isEmpty || DateTime.now().difference(terminalImagesCts.first).inDays > 30) {
+      _showSnackBar('Необходимо сфотографировать терминал');
+      return;
+    }
 
     if (distance > 500) {
-      _scaffoldKey.currentState?.showSnackBar(SnackBar(
-        content: Text('До терминала ${distance.floor()} м (больше чем 500м)')
-      ));
-    } else {
-      widget.task.executionmarkTs = DateTime.now();
-      widget.task.markLatitude = user.curLatitude;
-      widget.task.markLongitude = user.curLongitude;
-      widget.task.markAndUpdate();
+      _showSnackBar('До терминала ${distance.floor()} м (больше чем 500м)');
+      return;
     }
+
+    widget.task.executionmarkTs = DateTime.now();
+    widget.task.markLatitude = user.curLatitude;
+    widget.task.markLongitude = user.curLongitude;
+    widget.task.markAndUpdate();
   }
 
   Widget _buildBody(BuildContext context) {

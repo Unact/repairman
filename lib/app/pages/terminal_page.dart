@@ -7,8 +7,9 @@ import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/models/task.dart';
-import 'package:repairman/app/models/terminal.dart';
+import 'package:repairman/app/models/terminal_image.dart';
 import 'package:repairman/app/models/terminal_worktime.dart';
+import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/pages/task_page.dart';
 import 'package:repairman/app/utils/format.dart';
 
@@ -30,10 +31,11 @@ class _TerminalPageState extends State<TerminalPage> {
   final TextStyle headingStyle = TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
   List<Task> _tasks = [];
   List<TerminalWorktime> _terminalWorktimes = [];
+  List<TerminalImage> _terminalImages = [];
   Placemark _placemark;
 
   Future<void> _loadData() async {
-    User user = User.currentUser();
+    User user = User.currentUser;
     Terminal terminal = widget.terminal;
     _placemark = Placemark(
       point: Point(longitude: terminal.longitude, latitude: terminal.latitude),
@@ -45,8 +47,8 @@ class _TerminalPageState extends State<TerminalPage> {
         if (await canLaunch(naviUrl)) await launch(naviUrl);
       }
     );
-    _tasks = await Task.byPpsTerminalId(widget.terminal.id);
-    _terminalWorktimes = await TerminalWorktime.byPpsTerminalId(widget.terminal.id);
+    _terminalImages = await TerminalImage.byPpsTerminalId(terminal.id);
+    _terminalWorktimes = await TerminalWorktime.byPpsTerminalId(terminal.id);
     _tasks = await Task.byPpsTerminalId(terminal.id);
 
     if (mounted) {
@@ -179,6 +181,29 @@ class _TerminalPageState extends State<TerminalPage> {
     );
   }
 
+  Widget _buildImageColumn() {
+    List<TerminalImage> terminalImages = _terminalImages ?? [];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: headingPadding,
+          child: Text('Фотографии', style: headingStyle)
+        )
+      ]..addAll(
+        terminalImages.map(
+          (TerminalImage image) => Center(
+            child: Container(
+              padding: listViewItemsPadding,
+              child: Image.network(image.shortUrl, width: 256, height: 256)
+            )
+          )
+        )
+      )
+    );
+  }
+
   Widget _buildScheduleColumn() {
     Terminal terminal = widget.terminal;
 
@@ -255,9 +280,12 @@ class _TerminalPageState extends State<TerminalPage> {
         _buildListViewItem(_buildScheduleColumn()),
         _buildListViewItem(_buildClosedDaysColumn()),
         _buildListViewItem(_buildTaskColumn()),
+        _buildListViewItem(_buildImageColumn()),
       ]
     );
   }
+
+
 
   @override
   void initState() {

@@ -64,7 +64,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Widget _buildSwitches() {
-    User user = User.currentUser();
+    User user = User.currentUser;
 
     return Column(
       children: [

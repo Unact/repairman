@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:repairman/app/models/user.dart';
-import 'package:repairman/app/modules/api.dart';
 import 'package:repairman/app/modules/sentry.dart';
 import 'package:repairman/app/pages/home_page.dart';
 import 'package:repairman/app/pages/login_page.dart';
@@ -13,8 +12,7 @@ import 'package:repairman/data/app_data.dart';
 
 class App {
   App.setup(this.config) :
-    data = AppData(config),
-    api = Api(config)
+    data = AppData(config)
   {
     _setupEnv();
     _application = this;
@@ -26,12 +24,12 @@ class App {
   final String title = 'Семен';
   final AppConfig config;
   final AppData data;
-  final Api api;
   Sentry sentry;
   Widget widget;
 
   Future<void> run() async {
     await data.setup();
+    User.init();
     config.loadSaved();
     widget = _buildWidget();
 
@@ -52,11 +50,7 @@ class App {
         primarySwatch: Colors.blue,
         platform: TargetPlatform.android
       ),
-      routes: {
-        '/': (BuildContext context) => HomePage(),
-        '/login': (BuildContext context) => LoginPage()
-      },
-      initialRoute: User.currentUser().isLogged() ? '/' : '/login',
+      home: User.currentUser.isLogged() ? HomePage() : LoginPage(),
       locale: Locale('ru', 'RU'),
       localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,

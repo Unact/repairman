@@ -144,3 +144,15 @@ CREATE TABLE terminal_worktimes(
     local_updated INTEGER DEFAULT 0,
     local_deleted INTEGER DEFAULT 0
 );
+CREATE TABLE terminal_images(
+    id INTEGER UNIQUE,
+    pps_terminal_id INTEGER,
+    short_url TEXT,
+    cts DATETIME,
+
+    local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
+);

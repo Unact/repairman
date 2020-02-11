@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/modules/api.dart';
+import 'package:repairman/app/pages/home_page.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -39,8 +40,12 @@ class _LoginPageState extends State<LoginPage> {
         }
       );
 
-      await App.application.api.login(_username, _password);
-      Navigator.pushNamedAndRemoveUntil(context, '/', (Route<dynamic> route) => false);
+      await Api.login(_username, _password);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => HomePage()),
+        (Route<dynamic> route) => false
+      );
     } on ApiException catch(e) {
       Navigator.pop(context);
       _showSnackBar(e.errorMsg);
@@ -54,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
       _showSnackBar('Не заполнено поле с логином');
     } else {
       try {
-        await App.application.api.resetPassword(_username);
+        await Api.resetPassword(_username);
         _showSnackBar('Пароль отправлен на почту');
       } on ApiException catch(e) {
         _showSnackBar(e.errorMsg);
@@ -129,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                     Padding(
                       padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
                       child: Container(
-                        width: 152.0,
+                        width: 160.0,
                         child: RaisedButton(
                           onPressed: _getNewPassword,
                           color: Colors.blueAccent,

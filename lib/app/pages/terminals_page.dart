@@ -20,7 +20,7 @@ class _TerminalsPageState extends State<TerminalsPage> {
   bool _showOnlyWithError = false;
 
   Future<void> _loadData() async {
-    User user = User.currentUser();
+    User user = User.currentUser;
     _terminals = (await Terminal.allWithDistance(user.curLatitude, user.curLongitude)).
       where((term) => term.zoneTerminal).
       where((term) => !_showOnlyWithError || term.errorText != '').

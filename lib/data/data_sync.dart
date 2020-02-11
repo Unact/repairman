@@ -11,10 +11,10 @@ import 'package:repairman/app/models/repair.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/task_defect_link.dart';
 import 'package:repairman/app/models/task_repair_link.dart';
-import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/models/terminal_component_link.dart';
+import 'package:repairman/app/models/terminal_image.dart';
 import 'package:repairman/app/models/terminal_worktime.dart';
-import 'package:repairman/app/models/user.dart';
+import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/modules/api.dart';
 
 enum SyncEvent {
@@ -102,17 +102,17 @@ class DataSync {
   }
 
   Future<void> _importData() async {
-    Map<String, dynamic> importData = await App.application.api.get('v2/repairman');
+    Map<String, dynamic> importData = await Api.get('v2/repairman');
 
     Batch batch = App.application.data.db.batch();
     await App.application.config.importRemote(importData['app']);
-    await User.import(importData['user']);
     await Component.import(importData['components'], batch);
     await ComponentGroup.import(importData['component_groups'], batch);
     await Defect.import(importData['defects'], batch);
     await Repair.import(importData['repairs'], batch);
     await Terminal.import(importData['terminals'], batch);
     await TerminalComponentLink.import(importData['terminal_component_links'], batch);
+    await TerminalImage.import(importData['terminal_images'], batch);
     await TerminalWorktime.import(importData['terminal_worktimes'], batch);
     await Task.import(importData['tasks'], batch);
     await TaskDefectLink.import(importData['task_defect_links'], batch);
@@ -130,7 +130,7 @@ class DataSync {
   }
 
   Future<void> _exportData(Map<String, dynamic> exportData) async {
-    await App.application.api.post('v2/repairman/save', body: exportData);
+    await Api.post('v2/repairman/save', data: exportData);
   }
 
   Future<void> exportLocations() async {
@@ -151,7 +151,7 @@ class DataSync {
       List<Location> locations = await Location.allNew();
 
       try {
-        await App.application.api.post('v2/repairman/locations', body: {
+        await Api.post('v2/repairman/locations', data: {
           'locations': locations.map((req) => req.toExportMap()).toList()
         });
 

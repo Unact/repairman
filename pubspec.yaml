@@ -9,7 +9,8 @@ dependencies:
     sdk: flutter
   path_provider: any
   sqflite: any
-  http: any
+  dio: any
+  image_picker: any
   intl: any
   cupertino_icons: any
   url_launcher: any

@@ -37,7 +37,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   int _allTasksCnt = 0;
 
   Future<void> _loadData() async {
-    User user = User.currentUser();
+    User user = User.currentUser;
     List<Terminal> terminals = (await Terminal.allWithDistance(user.curLatitude, user.curLongitude)).
       where((term) => term.zoneTerminal).toList();
     List<Task> tasks = await Task.all();
@@ -202,7 +202,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
 
-    if (User.currentUser().isLogged()) {
+    if (User.currentUser.isLogged()) {
       App.application.data.dataSync.startSyncTimer();
       WidgetsBinding.instance.addObserver(this);
       _backgroundRefresh();
@@ -222,7 +222,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   void dispose() {
     super.dispose();
 
-    if (User.currentUser().isLogged()) {
+    if (User.currentUser.isLogged()) {
       WidgetsBinding.instance.removeObserver(this);
     }
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
+import 'package:repairman/app/pages/login_page.dart';
 import 'package:repairman/app/pages/settings_page.dart';
 
 class PersonPage extends StatefulWidget {
@@ -19,7 +20,7 @@ class _PersonPageState extends State<PersonPage> {
   String _email;
 
   void _logout() async {
-    User user = User.currentUser();
+    User user = User.currentUser;
 
     try {
       showDialog(
@@ -32,9 +33,13 @@ class _PersonPageState extends State<PersonPage> {
       if (user.firebaseSubscribed) {
         await user.subscribeToFirebase(false);
       }
-      await App.application.api.logout();
+      await Api.logout();
       App.application.data.dataSync.stopSyncTimer();
-      Navigator.pushNamedAndRemoveUntil(context, '/login', (Route<dynamic> route) => false);
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (BuildContext context) => LoginPage()),
+        (Route<dynamic> route) => false
+      );
     } on ApiException catch(e) {
       Navigator.pop(context);
       _showSnackBar(e.errorMsg);
@@ -48,7 +53,7 @@ class _PersonPageState extends State<PersonPage> {
   }
 
   void _loadData() async {
-    User user = User.currentUser();
+    User user = User.currentUser;
 
     _email = user.email;
     _agentName = user.agentName;
