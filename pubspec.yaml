@@ -1,6 +1,6 @@
 name: repairman
 description: repairman semen
-version: 1.4.0+10
+version: 1.4.0+11
 
 dependencies:
   flutter:
@@ -23,7 +23,7 @@ dependencies:
   sentry: any
   dotenv: any
   shared_preferences: any
-  device_info: any
+  device_info: 0.4.1
   package_info: any
   yandex_mapkit: any
 
