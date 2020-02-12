@@ -10,7 +10,7 @@ dependencies:
   path_provider: any
   sqflite: any
   dio: any
-  image_picker: any
+  image_picker: 0.4.12
   intl: any
   cupertino_icons: any
   url_launcher: any
