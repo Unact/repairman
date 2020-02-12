@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:location/location.dart' as geoLoc;
+import 'package:location/location.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -66,7 +66,7 @@ class User {
 
   Future<void> loadDataFromRemote() async {
     Map<String, dynamic> userData = await Api.get('v2/repairman/user_info');
-    Map<String, double> currentLocation = Map<String, double>();
+    LocationData currentLocation;
 
     id = userData['id'];
     email = userData['email'];
@@ -75,10 +75,10 @@ class User {
     firebaseSubscribed = userData['firebase_subscribed'];
     setFirebaseToken();
     try {
-      currentLocation = await geoLoc.Location().getLocation();
+      currentLocation = await Location().getLocation();
 
-      curLatitude = currentLocation['latitude'];
-      curLongitude = currentLocation['longitude'];
+      curLatitude = currentLocation.latitude;
+      curLongitude = currentLocation.longitude;
     } on PlatformException {}
 
     await save();

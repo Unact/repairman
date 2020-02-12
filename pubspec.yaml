@@ -10,16 +10,16 @@ dependencies:
   path_provider: any
   sqflite: any
   dio: any
-  image_picker: 0.4.12
+  image_picker: 0.6.3
   intl: any
   cupertino_icons: any
   url_launcher: any
-  location: any
+  location: 2.3.5
   great_circle_distance:
     git:
       url: git://github.com/swipesight/great_circle_distance.dart
-  barcode_scan: any
-  firebase_messaging: any
+  barcode_scan: 1.0.0
+  firebase_messaging: 6.0.9
   sentry: any
   dotenv: any
   shared_preferences: any

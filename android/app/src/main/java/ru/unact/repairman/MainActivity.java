@@ -7,7 +7,7 @@ import io.flutter.plugins.GeneratedPluginRegistrant;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.support.v4.app.ActivityCompat;
+import androidx.core.app.ActivityCompat;
 import android.util.Log;
 import android.Manifest;
 import io.flutter.plugin.common.BasicMessageChannel;
