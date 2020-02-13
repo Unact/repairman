@@ -13,6 +13,7 @@ import android.Manifest;
 import io.flutter.plugin.common.BasicMessageChannel;
 import io.flutter.plugin.common.StringCodec;
 import io.flutter.view.FlutterView;
+import com.yandex.mapkit.MapKitFactory;
 
 public class MainActivity extends FlutterActivity{
   private LocationManager locationManager;
@@ -48,6 +49,7 @@ public class MainActivity extends FlutterActivity{
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    MapKitFactory.setApiKey(BuildConfig.YANDEX_API_KEY);
     GeneratedPluginRegistrant.registerWith(this);
     messageChannel = new BasicMessageChannel<>(getFlutterView(), CHANNEL, StringCodec.INSTANCE);
 

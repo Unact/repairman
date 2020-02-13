@@ -6,7 +6,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.0'
+        classpath 'com.android.tools.build:gradle:3.5.3'
         classpath 'com.google.gms:google-services:4.2.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
@@ -29,22 +29,4 @@ subprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
-}
-subprojects {
-    project.configurations.all {
-        resolutionStrategy.eachDependency { details ->
-            if (details.requested.group == 'com.android.support'
-                    && !details.requested.name.contains('multidex') ) {
-                details.useVersion "26.1.0"
-            }
-            if (details.requested.group == 'androidx.core'
-                        && !details.requested.name.contains('androidx') ) {
-                    details.useVersion "1.0.1"
-                }
-            if (details.requested.group == 'androidx.appcompat'
-                        && !details.requested.name.contains('androidx') ) {
-                    details.useVersion "1.0.2"
-                }
-        }
-    }
 }

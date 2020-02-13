@@ -4,116 +4,148 @@ PODS:
     - MTBBarcodeScanner
   - device_info (0.0.1):
     - Flutter
-  - Firebase/Core (5.19.0):
+  - Firebase/Core (6.17.0):
     - Firebase/CoreOnly
-    - FirebaseAnalytics (= 5.8.0)
-  - Firebase/CoreOnly (5.19.0):
-    - FirebaseCore (= 5.4.0)
-  - Firebase/Messaging (5.19.0):
+    - FirebaseAnalytics (= 6.2.2)
+  - Firebase/CoreOnly (6.17.0):
+    - FirebaseCore (= 6.6.2)
+  - Firebase/Messaging (6.17.0):
     - Firebase/CoreOnly
-    - FirebaseMessaging (= 3.4.0)
+    - FirebaseMessaging (~> 4.2.1)
   - firebase_messaging (0.0.1):
     - Firebase/Core
     - Firebase/Messaging
     - Flutter
-  - FirebaseAnalytics (5.8.0):
-    - FirebaseCore (~> 5.4)
-    - FirebaseInstanceID (~> 3.8)
-    - GoogleAppMeasurement (= 5.8.0)
-    - GoogleUtilities/AppDelegateSwizzler (~> 5.2)
-    - GoogleUtilities/MethodSwizzler (~> 5.2)
-    - GoogleUtilities/Network (~> 5.2)
-    - "GoogleUtilities/NSData+zlib (~> 5.2)"
-    - nanopb (~> 0.3)
-  - FirebaseAnalyticsInterop (1.2.0)
-  - FirebaseCore (5.4.0):
-    - GoogleUtilities/Environment (~> 5.2)
-    - GoogleUtilities/Logger (~> 5.2)
-  - FirebaseInstanceID (3.8.0):
-    - FirebaseCore (~> 5.2)
-    - GoogleUtilities/Environment (~> 5.2)
-    - GoogleUtilities/UserDefaults (~> 5.2)
-  - FirebaseMessaging (3.4.0):
-    - FirebaseAnalyticsInterop (~> 1.1)
-    - FirebaseCore (~> 5.2)
-    - FirebaseInstanceID (~> 3.6)
-    - GoogleUtilities/Environment (~> 5.3)
-    - GoogleUtilities/Reachability (~> 5.3)
-    - GoogleUtilities/UserDefaults (~> 5.3)
-    - Protobuf (~> 3.1)
+  - FirebaseAnalytics (6.2.2):
+    - FirebaseCore (~> 6.6)
+    - FirebaseInstanceID (~> 4.3)
+    - GoogleAppMeasurement (= 6.2.2)
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
+    - GoogleUtilities/MethodSwizzler (~> 6.0)
+    - GoogleUtilities/Network (~> 6.0)
+    - "GoogleUtilities/NSData+zlib (~> 6.0)"
+    - nanopb (= 0.3.9011)
+  - FirebaseAnalyticsInterop (1.5.0)
+  - FirebaseCore (6.6.2):
+    - FirebaseCoreDiagnostics (~> 1.2)
+    - FirebaseCoreDiagnosticsInterop (~> 1.2)
+    - GoogleUtilities/Environment (~> 6.5)
+    - GoogleUtilities/Logger (~> 6.5)
+  - FirebaseCoreDiagnostics (1.2.0):
+    - FirebaseCoreDiagnosticsInterop (~> 1.2)
+    - GoogleDataTransportCCTSupport (~> 1.3)
+    - GoogleUtilities/Environment (~> 6.5)
+    - GoogleUtilities/Logger (~> 6.5)
+    - nanopb (~> 0.3.901)
+  - FirebaseCoreDiagnosticsInterop (1.2.0)
+  - FirebaseInstallations (1.1.0):
+    - FirebaseCore (~> 6.6)
+    - GoogleUtilities/UserDefaults (~> 6.5)
+    - PromisesObjC (~> 1.2)
+  - FirebaseInstanceID (4.3.1):
+    - FirebaseCore (~> 6.6)
+    - FirebaseInstallations (~> 1.0)
+    - GoogleUtilities/Environment (~> 6.5)
+    - GoogleUtilities/UserDefaults (~> 6.5)
+  - FirebaseMessaging (4.2.1):
+    - FirebaseAnalyticsInterop (~> 1.5)
+    - FirebaseCore (~> 6.6)
+    - FirebaseInstanceID (~> 4.3)
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.5)
+    - GoogleUtilities/Environment (~> 6.5)
+    - GoogleUtilities/Reachability (~> 6.5)
+    - GoogleUtilities/UserDefaults (~> 6.5)
+    - Protobuf (>= 3.9.2, ~> 3.9)
   - Flutter (1.0.0)
   - flutter_plugin_android_lifecycle (0.0.1):
     - Flutter
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
-  - GoogleAppMeasurement (5.8.0):
-    - GoogleUtilities/AppDelegateSwizzler (~> 5.2)
-    - GoogleUtilities/MethodSwizzler (~> 5.2)
-    - GoogleUtilities/Network (~> 5.2)
-    - "GoogleUtilities/NSData+zlib (~> 5.2)"
-    - nanopb (~> 0.3)
-  - GoogleUtilities/AppDelegateSwizzler (5.5.0):
+  - GoogleAppMeasurement (6.2.2):
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
+    - GoogleUtilities/MethodSwizzler (~> 6.0)
+    - GoogleUtilities/Network (~> 6.0)
+    - "GoogleUtilities/NSData+zlib (~> 6.0)"
+    - nanopb (= 0.3.9011)
+  - GoogleDataTransport (4.0.0)
+  - GoogleDataTransportCCTSupport (1.4.0):
+    - GoogleDataTransport (~> 4.0)
+    - nanopb (~> 0.3.901)
+  - GoogleUtilities/AppDelegateSwizzler (6.5.1):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (5.5.0)
-  - GoogleUtilities/Logger (5.5.0):
+  - GoogleUtilities/Environment (6.5.1)
+  - GoogleUtilities/Logger (6.5.1):
     - GoogleUtilities/Environment
-  - GoogleUtilities/MethodSwizzler (5.5.0):
+  - GoogleUtilities/MethodSwizzler (6.5.1):
     - GoogleUtilities/Logger
-  - GoogleUtilities/Network (5.5.0):
+  - GoogleUtilities/Network (6.5.1):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (5.5.0)"
-  - GoogleUtilities/Reachability (5.5.0):
+  - "GoogleUtilities/NSData+zlib (6.5.1)"
+  - GoogleUtilities/Reachability (6.5.1):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (5.5.0):
+  - GoogleUtilities/UserDefaults (6.5.1):
     - GoogleUtilities/Logger
   - image_picker (0.0.1):
     - Flutter
   - location (0.0.1):
     - Flutter
-  - MTBBarcodeScanner (5.0.8)
-  - nanopb (0.3.901):
-    - nanopb/decode (= 0.3.901)
-    - nanopb/encode (= 0.3.901)
-  - nanopb/decode (0.3.901)
-  - nanopb/encode (0.3.901)
+  - MTBBarcodeScanner (5.0.11)
+  - nanopb (0.3.9011):
+    - nanopb/decode (= 0.3.9011)
+    - nanopb/encode (= 0.3.9011)
+  - nanopb/decode (0.3.9011)
+  - nanopb/encode (0.3.9011)
   - package_info (0.0.1):
     - Flutter
   - path_provider (0.0.1):
     - Flutter
-  - Protobuf (3.7.0)
+  - PromisesObjC (1.2.8)
+  - Protobuf (3.11.3)
   - shared_preferences (0.0.1):
+    - Flutter
+  - shared_preferences_macos (0.0.1):
+    - Flutter
+  - shared_preferences_web (0.0.1):
     - Flutter
   - sqflite (0.0.1):
     - Flutter
     - FMDB (~> 2.7.2)
   - url_launcher (0.0.1):
     - Flutter
+  - url_launcher_macos (0.0.1):
+    - Flutter
+  - url_launcher_web (0.0.1):
+    - Flutter
   - yandex_mapkit (0.0.1):
     - Flutter
-    - YandexMapKit (= 3.2.0)
-    - YandexRuntime (= 3.2.0)
-  - YandexMapKit (3.2.0):
-    - YandexRuntime (~> 3.2)
-  - YandexRuntime (3.2.0)
+    - YandexMapKit (= 3.4.0)
+    - YandexRuntime (= 3.4.0)
+  - YandexMapKit (3.4):
+    - YandexRuntime (= 3.4)
+  - YandexRuntime (3.4)
 
 DEPENDENCIES:
   - barcode_scan (from `Pods/.symlinks/plugins/barcode_scan/ios`)
   - device_info (from `Pods/.symlinks/plugins/device_info/ios`)
   - firebase_messaging (from `Pods/.symlinks/plugins/firebase_messaging/ios`)
-  - Flutter (from `Pods/.symlinks/flutter/ios`)
+  - Flutter (from `Pods/.symlinks/flutter/ios-release`)
   - flutter_plugin_android_lifecycle (from `Pods/.symlinks/plugins/flutter_plugin_android_lifecycle/ios`)
   - image_picker (from `Pods/.symlinks/plugins/image_picker/ios`)
   - location (from `Pods/.symlinks/plugins/location/ios`)
   - package_info (from `Pods/.symlinks/plugins/package_info/ios`)
   - path_provider (from `Pods/.symlinks/plugins/path_provider/ios`)
   - shared_preferences (from `Pods/.symlinks/plugins/shared_preferences/ios`)
+  - shared_preferences_macos (from `Pods/.symlinks/plugins/shared_preferences_macos/ios`)
+  - shared_preferences_web (from `Pods/.symlinks/plugins/shared_preferences_web/ios`)
   - sqflite (from `Pods/.symlinks/plugins/sqflite/ios`)
   - url_launcher (from `Pods/.symlinks/plugins/url_launcher/ios`)
+  - url_launcher_macos (from `Pods/.symlinks/plugins/url_launcher_macos/ios`)
+  - url_launcher_web (from `Pods/.symlinks/plugins/url_launcher_web/ios`)
   - yandex_mapkit (from `Pods/.symlinks/plugins/yandex_mapkit/ios`)
 
 SPEC REPOS:
@@ -122,13 +154,19 @@ SPEC REPOS:
     - FirebaseAnalytics
     - FirebaseAnalyticsInterop
     - FirebaseCore
+    - FirebaseCoreDiagnostics
+    - FirebaseCoreDiagnosticsInterop
+    - FirebaseInstallations
     - FirebaseInstanceID
     - FirebaseMessaging
     - FMDB
     - GoogleAppMeasurement
+    - GoogleDataTransport
+    - GoogleDataTransportCCTSupport
     - GoogleUtilities
     - MTBBarcodeScanner
     - nanopb
+    - PromisesObjC
     - Protobuf
     - YandexMapKit
     - YandexRuntime
@@ -141,7 +179,7 @@ EXTERNAL SOURCES:
   firebase_messaging:
     :path: Pods/.symlinks/plugins/firebase_messaging/ios
   Flutter:
-    :path: Pods/.symlinks/flutter/ios
+    :path: Pods/.symlinks/flutter/ios-release
   flutter_plugin_android_lifecycle:
     :path: Pods/.symlinks/plugins/flutter_plugin_android_lifecycle/ios
   image_picker:
@@ -154,41 +192,59 @@ EXTERNAL SOURCES:
     :path: Pods/.symlinks/plugins/path_provider/ios
   shared_preferences:
     :path: Pods/.symlinks/plugins/shared_preferences/ios
+  shared_preferences_macos:
+    :path: Pods/.symlinks/plugins/shared_preferences_macos/ios
+  shared_preferences_web:
+    :path: Pods/.symlinks/plugins/shared_preferences_web/ios
   sqflite:
     :path: Pods/.symlinks/plugins/sqflite/ios
   url_launcher:
     :path: Pods/.symlinks/plugins/url_launcher/ios
+  url_launcher_macos:
+    :path: Pods/.symlinks/plugins/url_launcher_macos/ios
+  url_launcher_web:
+    :path: Pods/.symlinks/plugins/url_launcher_web/ios
   yandex_mapkit:
     :path: Pods/.symlinks/plugins/yandex_mapkit/ios
 
 SPEC CHECKSUMS:
   barcode_scan: 33f586d02270046fc6559135038b34b5754eaa4f
-  device_info: 3ebad48f726348f69abd802f3334a8d1ed795fbd
-  Firebase: c60d49e9c2630875a96207d15e2affb8364996d1
-  firebase_messaging: b25b2fa94e685146bcf9d706ed87b4e95cd2a17d
-  FirebaseAnalytics: fd72a26bf8dac84cefba2f0864366f718555a5b0
-  FirebaseAnalyticsInterop: efbe45c8385ec626e29f9525e5ebd38520dfb6c1
-  FirebaseCore: 22a79a961c3951ef2f77b67bfbc99e454247b319
-  FirebaseInstanceID: cf488df2f4b79782f0e430b04a0e17c0aa7979b2
-  FirebaseMessaging: 2d53d08d752fbe63ce0820428d70be5ab87c11fb
+  device_info: cbf09d2ec12aa7110e0b09fabe54b5bd6c8efe74
+  Firebase: 2672e5636b42f977177716317e68346ae5e9de25
+  firebase_messaging: 73b3e7dd7b3b6a7e4bdac10d5295211ca4f87f90
+  FirebaseAnalytics: cf95d3aab897612783020fbd98401d5366f135ee
+  FirebaseAnalyticsInterop: 3f86269c38ae41f47afeb43ebf32a001f58fcdae
+  FirebaseCore: a1dd9dd6355a8356dd30a8f076839e242285a81c
+  FirebaseCoreDiagnostics: 5e78803ab276bc5b50340e3c539c06c3de35c649
+  FirebaseCoreDiagnosticsInterop: 296e2c5f5314500a850ad0b83e9e7c10b011a850
+  FirebaseInstallations: 575cd32f2aec0feeb0e44f5d0110a09e5e60b47b
+  FirebaseInstanceID: 031d7d0c8e7b5c030bbeb4d2a690550375e83fec
+  FirebaseMessaging: 9e23f9d603b1fb71ccbeb48d79bf0d4ba0272c84
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_plugin_android_lifecycle: 47de533a02850f070f5696a623995e93eddcdb9b
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  GoogleAppMeasurement: 1624046ab1bcc5e170061a56ef5679000b079c8e
-  GoogleUtilities: 6481e6318c5fcabaaa8513ef8120f329055d7c10
+  GoogleAppMeasurement: d0560d915abf15e692e8538ba1d58442217b6aff
+  GoogleDataTransport: 47fe3b8e1673e5187dfd615656a3c5034f150d69
+  GoogleDataTransportCCTSupport: 36f69887fd212db6d7ef4dd45ba44523717a434e
+  GoogleUtilities: 06eb53bb579efe7099152735900dd04bf09e7275
   image_picker: e3eacd46b94694dde7cf2705955cece853aa1a8f
   location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
-  MTBBarcodeScanner: 5b97f10a037e2560ff104da413343c5ce9413911
-  nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
-  package_info: 78cabb3c322943c55d39676f4a5bfc748c01d055
-  path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
-  Protobuf: 7a877b7f3e5964e3fce995e2eb323dbc6831bb5a
-  shared_preferences: 1feebfa37bb57264736e16865e7ffae7fc99b523
-  sqflite: ff1d9da63c06588cc8d1faf7256d741f16989d5a
-  url_launcher: 0067ddb8f10d36786672aa0722a21717dba3a298
-  yandex_mapkit: c2f430133aa6508c3470840781e858ac99a6d42e
-  YandexMapKit: 9bf046c69997348f07a37e587880bf18f147b8d3
-  YandexRuntime: 1b2bf8365e5fec2fc91e9fda449fa7fae54b3d79
+  MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
+  nanopb: 18003b5e52dab79db540fe93fe9579f399bd1ccd
+  package_info: 48b108e75b8802c2d5e126f208ef540561c98aef
+  path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
+  PromisesObjC: c119f3cd559f50b7ae681fa59dc1acd19173b7e6
+  Protobuf: 0e94afe3b47cb11876eb6aee296638711a24bf75
+  shared_preferences: 430726339841afefe5142b9c1f50cb6bd7793e01
+  shared_preferences_macos: f3f29b71ccbb56bf40c9dd6396c9acf15e214087
+  shared_preferences_web: 141cce0c3ed1a1c5bf2a0e44f52d31eeb66e5ea9
+  sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
+  url_launcher: a1c0cc845906122c4784c542523d8cacbded5626
+  url_launcher_macos: fd7894421cd39320dce5f292fc99ea9270b2a313
+  url_launcher_web: e5527357f037c87560776e36436bf2b0288b965c
+  yandex_mapkit: 8c42a5db8e175e38ebbf1babe071aa7949efc64f
+  YandexMapKit: f222923561fe159dd8480d927f61950fc5ff3b8d
+  YandexRuntime: 2547d72a3ce4757f16ad188cfbe8a124ae13d806
 
 PODFILE CHECKSUM: c79869c28d067312888823ebc94c21cc7bbc2551
 

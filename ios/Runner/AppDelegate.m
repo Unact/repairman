@@ -1,5 +1,6 @@
 #include "AppDelegate.h"
 #include "GeneratedPluginRegistrant.h"
+#import <YandexMapKit/YMKMapKit.h>
 #import <MapKit/MapKit.h>
 
 @interface AppDelegate()
@@ -17,6 +18,10 @@ static NSString* const channel = @"increment";
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+    NSString *resourcePath = [[NSBundle mainBundle] pathForResource:@"env" ofType:@"plist"];
+    NSDictionary *dict = [[NSDictionary alloc] initWithContentsOfFile:resourcePath];
+
+    [YMKMapKit setApiKey: dict[@"YANDEX_API_KEY"]];
 
     self.messageChannel = [ FlutterBasicMessageChannel messageChannelWithName:channel
                             binaryMessenger:self.window.rootViewController

@@ -7,25 +7,27 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  path_provider: 1.6.0
-  sqflite: 1.2.0
+  path_provider: any
+  sqflite: any
   dio: any
-  image_picker: 0.6.3
+  image_picker: any
   intl: any
   cupertino_icons: any
-  url_launcher: 5.4.1
-  location: 2.3.5
+  url_launcher: any
+  location: any
   great_circle_distance:
     git:
       url: git://github.com/swipesight/great_circle_distance.dart
-  barcode_scan: 1.0.0
-  firebase_messaging: 6.0.9
+  barcode_scan: any
+  firebase_messaging: any
   sentry: any
   dotenv: any
-  shared_preferences: 0.5.6
-  device_info: 0.4.1
-  package_info: 0.4.0
-  yandex_mapkit: any
+  shared_preferences: any
+  device_info: any
+  package_info: any
+  yandex_mapkit:
+    git:
+      url: git://github.com/Unact/yandex_mapkit
 
 dev_dependencies:
   flutter_test:

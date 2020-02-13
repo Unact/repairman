@@ -37,7 +37,6 @@ void main() async {
   }
 
   await appEnv.load();
-  await YandexMapkit.setup(apiKey: appEnv['YANDEX_API_KEY']);
 
   App.setup(AppConfig(
     packageInfo: await PackageInfo.fromPlatform(),
