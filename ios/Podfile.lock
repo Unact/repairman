@@ -130,23 +130,23 @@ PODS:
   - YandexRuntime (3.4)
 
 DEPENDENCIES:
-  - barcode_scan (from `Pods/.symlinks/plugins/barcode_scan/ios`)
-  - device_info (from `Pods/.symlinks/plugins/device_info/ios`)
-  - firebase_messaging (from `Pods/.symlinks/plugins/firebase_messaging/ios`)
-  - Flutter (from `Pods/.symlinks/flutter/ios-release`)
-  - flutter_plugin_android_lifecycle (from `Pods/.symlinks/plugins/flutter_plugin_android_lifecycle/ios`)
-  - image_picker (from `Pods/.symlinks/plugins/image_picker/ios`)
-  - location (from `Pods/.symlinks/plugins/location/ios`)
-  - package_info (from `Pods/.symlinks/plugins/package_info/ios`)
-  - path_provider (from `Pods/.symlinks/plugins/path_provider/ios`)
-  - shared_preferences (from `Pods/.symlinks/plugins/shared_preferences/ios`)
-  - shared_preferences_macos (from `Pods/.symlinks/plugins/shared_preferences_macos/ios`)
-  - shared_preferences_web (from `Pods/.symlinks/plugins/shared_preferences_web/ios`)
-  - sqflite (from `Pods/.symlinks/plugins/sqflite/ios`)
-  - url_launcher (from `Pods/.symlinks/plugins/url_launcher/ios`)
-  - url_launcher_macos (from `Pods/.symlinks/plugins/url_launcher_macos/ios`)
-  - url_launcher_web (from `Pods/.symlinks/plugins/url_launcher_web/ios`)
-  - yandex_mapkit (from `Pods/.symlinks/plugins/yandex_mapkit/ios`)
+  - barcode_scan (from `.symlinks/plugins/barcode_scan/ios`)
+  - device_info (from `.symlinks/plugins/device_info/ios`)
+  - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_plugin_android_lifecycle (from `.symlinks/plugins/flutter_plugin_android_lifecycle/ios`)
+  - image_picker (from `.symlinks/plugins/image_picker/ios`)
+  - location (from `.symlinks/plugins/location/ios`)
+  - package_info (from `.symlinks/plugins/package_info/ios`)
+  - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
+  - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
+  - shared_preferences_web (from `.symlinks/plugins/shared_preferences_web/ios`)
+  - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
+  - url_launcher_macos (from `.symlinks/plugins/url_launcher_macos/ios`)
+  - url_launcher_web (from `.symlinks/plugins/url_launcher_web/ios`)
+  - yandex_mapkit (from `.symlinks/plugins/yandex_mapkit/ios`)
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
@@ -173,39 +173,39 @@ SPEC REPOS:
 
 EXTERNAL SOURCES:
   barcode_scan:
-    :path: Pods/.symlinks/plugins/barcode_scan/ios
+    :path: ".symlinks/plugins/barcode_scan/ios"
   device_info:
-    :path: Pods/.symlinks/plugins/device_info/ios
+    :path: ".symlinks/plugins/device_info/ios"
   firebase_messaging:
-    :path: Pods/.symlinks/plugins/firebase_messaging/ios
+    :path: ".symlinks/plugins/firebase_messaging/ios"
   Flutter:
-    :path: Pods/.symlinks/flutter/ios-release
+    :path: Flutter
   flutter_plugin_android_lifecycle:
-    :path: Pods/.symlinks/plugins/flutter_plugin_android_lifecycle/ios
+    :path: ".symlinks/plugins/flutter_plugin_android_lifecycle/ios"
   image_picker:
-    :path: Pods/.symlinks/plugins/image_picker/ios
+    :path: ".symlinks/plugins/image_picker/ios"
   location:
-    :path: Pods/.symlinks/plugins/location/ios
+    :path: ".symlinks/plugins/location/ios"
   package_info:
-    :path: Pods/.symlinks/plugins/package_info/ios
+    :path: ".symlinks/plugins/package_info/ios"
   path_provider:
-    :path: Pods/.symlinks/plugins/path_provider/ios
+    :path: ".symlinks/plugins/path_provider/ios"
   shared_preferences:
-    :path: Pods/.symlinks/plugins/shared_preferences/ios
+    :path: ".symlinks/plugins/shared_preferences/ios"
   shared_preferences_macos:
-    :path: Pods/.symlinks/plugins/shared_preferences_macos/ios
+    :path: ".symlinks/plugins/shared_preferences_macos/ios"
   shared_preferences_web:
-    :path: Pods/.symlinks/plugins/shared_preferences_web/ios
+    :path: ".symlinks/plugins/shared_preferences_web/ios"
   sqflite:
-    :path: Pods/.symlinks/plugins/sqflite/ios
+    :path: ".symlinks/plugins/sqflite/ios"
   url_launcher:
-    :path: Pods/.symlinks/plugins/url_launcher/ios
+    :path: ".symlinks/plugins/url_launcher/ios"
   url_launcher_macos:
-    :path: Pods/.symlinks/plugins/url_launcher_macos/ios
+    :path: ".symlinks/plugins/url_launcher_macos/ios"
   url_launcher_web:
-    :path: Pods/.symlinks/plugins/url_launcher_web/ios
+    :path: ".symlinks/plugins/url_launcher_web/ios"
   yandex_mapkit:
-    :path: Pods/.symlinks/plugins/yandex_mapkit/ios
+    :path: ".symlinks/plugins/yandex_mapkit/ios"
 
 SPEC CHECKSUMS:
   barcode_scan: 33f586d02270046fc6559135038b34b5754eaa4f
@@ -246,6 +246,6 @@ SPEC CHECKSUMS:
   YandexMapKit: f222923561fe159dd8480d927f61950fc5ff3b8d
   YandexRuntime: 2547d72a3ce4757f16ad188cfbe8a124ae13d806
 
-PODFILE CHECKSUM: c79869c28d067312888823ebc94c21cc7bbc2551
+PODFILE CHECKSUM: 9ec0b926d741f3b13993aceabf2687bc78d2468b
 
 COCOAPODS: 1.6.1
