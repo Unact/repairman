@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/widgets.dart';
 import 'package:package_info/package_info.dart';
-import 'package:yandex_mapkit/yandex_mapkit.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/config/app_config.dart';

@@ -49,6 +49,7 @@ class _TaskPageState extends State<TaskPage> {
   int _taskComponentCnt = 0;
   bool _actionsEnabled = true;
   List<TerminalImage> _terminalImages = [];
+  List<DateTime> _terminalImagesCts = [];
 
   Future<void> _loadData() async {
     Function searchFn = (rec) => !rec.localDeleted;
@@ -56,6 +57,9 @@ class _TaskPageState extends State<TaskPage> {
     _taskDefectCnt = (await TaskDefectLink.byTaskId(widget.task.id)).where(searchFn).length;
     _taskComponentCnt = (await TerminalComponentLink.byTaskId(widget.task.id)).where(searchFn).length;
     _terminalImages = await TerminalImage.byPpsTerminalId(widget.task.ppsTerminalId);
+
+    _terminalImagesCts = _terminalImages.map((e) => e.cts).toList();
+    _terminalImagesCts.sort((a, b) => a.isBefore(b) ? 1 : -1);
 
     if (mounted) {
       setState(() {});
@@ -237,7 +241,7 @@ class _TaskPageState extends State<TaskPage> {
       ),
       ListTile(
         dense: true,
-        title: Text('Добавить фотографию', style: defaultTextStyle),
+        title: Text('Добавить фотографию (${_terminalImagesCts.length})', style: defaultTextStyle),
         contentPadding: listPanelPadding,
         onTap: () async {
           File file = await ImagePicker.pickImage(source: ImageSource.camera);
@@ -253,6 +257,7 @@ class _TaskPageState extends State<TaskPage> {
               );
 
               await TerminalImage.saveToRemote(widget.task.ppsTerminalId, file);
+              await _loadData();
               _showSnackBar('Фотография успешно сохранена');
             } on ApiException catch(e) {
               _showSnackBar(e.errorMsg);
@@ -307,10 +312,8 @@ class _TaskPageState extends State<TaskPage> {
       latitude2: user.curLatitude,
       longitude2: user.curLongitude
     ).haversineDistance();
-    List<DateTime> terminalImagesCts = _terminalImages.map((e) => e.cts).toList();
-    terminalImagesCts.sort((a, b) => a.isBefore(b) ? 1 : -1);
 
-    if (terminalImagesCts.isEmpty || DateTime.now().difference(terminalImagesCts.first).inDays > 30) {
+    if (_terminalImagesCts.isEmpty || DateTime.now().difference(_terminalImagesCts.first).inDays > 30) {
       _showSnackBar('Необходимо сфотографировать терминал');
       return;
     }
