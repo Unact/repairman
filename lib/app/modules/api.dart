@@ -155,7 +155,11 @@ class Api {
         throw ApiException(body['error'], statusCode);
       }
     } else {
-      throw e;
+      if (e.error is SocketException || e.error is HandshakeException) {
+        throw ApiConnException();
+      } else {
+        throw e;
+      }
     }
   }
 

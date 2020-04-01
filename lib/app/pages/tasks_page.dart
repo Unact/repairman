@@ -72,10 +72,14 @@ class _TasksPageState extends State<TasksPage> {
                   backgroundColor: Colors.white12
                 ),
                 SizedBox(width: 6.0),
-                Text(terminal.code + ' : ' + task.terminalBreakName,
-                  style: TextStyle(fontSize: 14.0)
-                ),
-              ],
+                Flexible(
+                  child: Text(terminal.code + ' : ' + task.terminalBreakName,
+                    overflow: TextOverflow.fade,
+                    softWrap: false,
+                    style: TextStyle(fontSize: 14.0)
+                  )
+                )
+              ]
             )
           ),
           subtitle: RichText(

@@ -156,3 +156,14 @@ CREATE TABLE terminal_images(
     local_updated INTEGER DEFAULT 0,
     local_deleted INTEGER DEFAULT 0
 );
+CREATE TABLE terminal_images_temp(
+    pps_terminal_id INTEGER,
+    filepath TEXT,
+    filedata TEXT,
+
+    local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
+    local_id INTEGER PRIMARY KEY,
+    local_inserted INTEGER DEFAULT 0,
+    local_updated INTEGER DEFAULT 0,
+    local_deleted INTEGER DEFAULT 0
+);

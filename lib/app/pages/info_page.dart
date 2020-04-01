@@ -69,7 +69,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   Widget _buildBody(BuildContext context) {
     return RefreshIndicator(
       key: _refreshIndicatorKey,
-      onRefresh: _syncData,
+      onRefresh: _syncAll,
       child: ListView.builder(
         padding: EdgeInsets.only(top: 24.0, left: 8.0, right: 8.0),
         itemCount: 1,
@@ -85,8 +85,6 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   }
 
   List<Widget> _buildInfoCards(BuildContext context) {
-    String exportLocationErrors = App.application.data.dataSync.exportLocationErrors;
-
     return <Widget>[
       Card(
         child: ListTile(
@@ -118,16 +116,14 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
             text: TextSpan(
               style: TextStyle(color: Colors.grey),
               children: <TextSpan>[
-                TextSpan(text: 'Геотрек: ${_distance.toStringAsFixed(3)} км\n'),
-                TextSpan(text: exportLocationErrors != null ? 'Ошибки: $exportLocationErrors' : '')
+                TextSpan(text: 'Геотрек: ${_distance.toStringAsFixed(3)} км\n')
               ]
             )
           )
         )
       ),
       _buildInfoCard(),
-      _buildErrorCard()
-    ];
+    ]..addAll(_buildErrorCards());
   }
 
   Widget _buildInfoCard() {
@@ -144,20 +140,31 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
     }
   }
 
-  Widget _buildErrorCard() {
-    String syncErrors = App.application.data.dataSync.syncErrors;
+  List<Widget> _buildErrorCards() {
+    List<Map<String, String>> errors = [
+      {
+        'name': 'Ошибки синхронизации данных',
+        'value': App.application.data.dataSync.syncErrors
+      },
+      {
+        'name': 'Ошибки синхронизации геотрека',
+        'value': App.application.data.dataSync.syncLocationErrors
+      },
+      {
+        'name': 'Ошибки синхронизации фотографий',
+        'value': App.application.data.dataSync.syncImagesErrors
+      }
+    ];
 
-    if (syncErrors != null) {
+    return errors.where((error) => error['value'] != null).map((error) {
       return Card(
         child: ListTile(
           isThreeLine: true,
-          title: Text('Ошибки'),
-          subtitle: Text(syncErrors, style: TextStyle(color: Colors.red[300])),
+          title: Text(error['name']),
+          subtitle: Text(error['value'], style: TextStyle(color: Colors.red[300])),
         )
       );
-    } else {
-      return Container();
-    }
+    }).toList();
   }
 
   Widget _buildTasksSubtitle() {
@@ -180,7 +187,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
       color: Colors.white,
       icon: Icon(Icons.info),
       onPressed: () {
-        DateTime lastsyncTime = App.application.data.dataSync.lastSyncTime;
+        DateTime lastsyncTime = App.application.data.dataSync.lastDataSyncTime;
         String text = lastsyncTime != null ? DateFormat.yMMMd('ru').add_jms().format(lastsyncTime) : 'Не проводилась';
         _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text('Синхронизация: $text')));
       }
@@ -188,7 +195,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   }
 
   void _backgroundRefresh() async {
-    DateTime time = App.application.data.dataSync.lastSyncTime ??
+    DateTime time = App.application.data.dataSync.lastDataSyncTime ??
       DateTime.now().subtract(Duration(minutes: 1)).subtract(DataSync.kSyncTimerPeriod);
 
     if (DateTime.now().difference(time) > DataSync.kSyncTimerPeriod) {
@@ -229,9 +236,9 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
     syncStreamSubscription.cancel();
   }
 
-  Future<void> _syncData() async {
+  Future<void> _syncAll() async {
     try {
-      await App.application.data.dataSync.syncData();
+      await App.application.data.dataSync.syncAll();
       await _loadData();
     } on ApiException catch(e) {
       _showErrorSnackBar(e.errorMsg);

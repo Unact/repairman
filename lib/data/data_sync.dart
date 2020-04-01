@@ -13,6 +13,7 @@ import 'package:repairman/app/models/task_defect_link.dart';
 import 'package:repairman/app/models/task_repair_link.dart';
 import 'package:repairman/app/models/terminal_component_link.dart';
 import 'package:repairman/app/models/terminal_image.dart';
+import 'package:repairman/app/models/terminal_image_temp.dart';
 import 'package:repairman/app/models/terminal_worktime.dart';
 import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/modules/api.dart';
@@ -20,7 +21,10 @@ import 'package:repairman/app/modules/api.dart';
 enum SyncEvent {
   syncStarted,
   syncCompleted,
-  locationExportCompleted
+  imageSyncStarted,
+  imageSyncCompleted,
+  locationSyncStarted,
+  locationSyncCompleted
 }
 
 class DataSync {
@@ -28,9 +32,11 @@ class DataSync {
   Stream<SyncEvent> stream;
   Timer syncTimer;
   String syncErrors;
-  String exportLocationErrors;
+  String syncImagesErrors;
+  String syncLocationErrors;
   bool _isSyncing = false;
   bool _isSyncingLocations = false;
+  bool _isSyncingImages = false;
 
   static const Duration kSyncTimerPeriod = Duration(minutes: 10);
 
@@ -38,11 +44,11 @@ class DataSync {
     stream = _streamController.stream.asBroadcastStream();
   }
 
-  DateTime get lastSyncTime {
-    String time = App.application.data.prefs.getString('lastSyncTime');
+  DateTime get lastDataSyncTime {
+    String time = App.application.data.prefs.getString('lastDataSyncTime');
     return time != null ? DateTime.parse(time) : null;
   }
-  set lastSyncTime(val) => App.application.data.prefs.setString('lastSyncTime', val.toString());
+  set lastDataSyncTime(val) => App.application.data.prefs.setString('lastDataSyncTime', val.toString());
 
   void startSyncTimer() {
     syncTimer = _startTimer(syncTimer, _syncTimerCallback);
@@ -54,7 +60,7 @@ class DataSync {
 
   void _syncTimerCallback(Timer curTimer) async {
     try {
-      await syncData();
+      await syncAll();
     } on ApiException {}
   }
 
@@ -69,6 +75,31 @@ class DataSync {
   void _stopTimer(Timer timer) {
     if (timer != null && timer.isActive) {
       timer.cancel();
+    }
+  }
+
+  Future<void> syncAll() async {
+    await syncData();
+    await syncImageData();
+    await syncLocations();
+  }
+
+  Future<void> syncImageData() async {
+    if (_isSyncingImages) return;
+
+    try {
+      _streamController.add(SyncEvent.imageSyncStarted);
+      _isSyncingImages = true;
+
+      await Future.forEach((await TerminalImageTemp.all()), (element) => element.saveToRemote());
+
+      syncImagesErrors = null;
+    } on ApiException catch(e) {
+      syncImagesErrors = e.errorMsg;
+      rethrow;
+    } finally {
+      _isSyncingImages = false;
+      _streamController.add(SyncEvent.syncCompleted);
     }
   }
 
@@ -95,7 +126,7 @@ class DataSync {
       syncErrors = e.errorMsg;
       rethrow;
     } finally {
-      lastSyncTime = DateTime.now();
+      lastDataSyncTime = DateTime.now();
       _isSyncing = false;
       _streamController.add(SyncEvent.syncCompleted);
     }
@@ -133,34 +164,35 @@ class DataSync {
     await Api.post('v2/repairman/save', data: exportData);
   }
 
-  Future<void> exportLocations() async {
+  Future<void> syncLocations() async {
     if (_isSyncingLocations) return;
 
     try {
+      _streamController.add(SyncEvent.locationSyncStarted);
       _isSyncingLocations = true;
       await _syncLocations();
     } finally {
       _isSyncingLocations = false;
     }
 
-    _streamController.add(SyncEvent.locationExportCompleted);
+    _streamController.add(SyncEvent.locationSyncCompleted);
   }
 
   Future<void> _syncLocations() async {
-    while (await Location.hasNew()) {
-      List<Location> locations = await Location.allNew();
+    List<Location> locations = await Location.allNew();
 
-      try {
-        await Api.post('v2/repairman/locations', data: {
-          'locations': locations.map((req) => req.toExportMap()).toList()
-        });
+    if (locations.isEmpty) return;
 
-        exportLocationErrors = null;
-        await Future.wait(locations.map((location) async => await location.markInserted(false)));
-      } on ApiException catch(e) {
-        exportLocationErrors = e.errorMsg;
-        await Future.wait(locations.map((location) async => await location.markInserted(true)));
-      }
+    try {
+      await Api.post('v2/repairman/locations', data: {
+        'locations': locations.map((req) => req.toExportMap()).toList()
+      });
+
+      syncLocationErrors = null;
+      await Future.wait(locations.map((location) async => await location.markInserted(false)));
+    } on ApiException catch(e) {
+      syncLocationErrors = e.errorMsg;
+      await Future.wait(locations.map((location) async => await location.markInserted(true)));
     }
   }
 }

@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:great_circle_distance/great_circle_distance.dart';
@@ -11,6 +13,7 @@ import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/task_defect_link.dart';
 import 'package:repairman/app/models/task_repair_link.dart';
+import 'package:repairman/app/models/terminal_image_temp.dart';
 import 'package:repairman/app/models/terminal_image.dart';
 import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/models/terminal_component_link.dart';
@@ -49,7 +52,8 @@ class _TaskPageState extends State<TaskPage> {
   int _taskComponentCnt = 0;
   bool _actionsEnabled = true;
   List<TerminalImage> _terminalImages = [];
-  List<DateTime> _terminalImagesCts = [];
+  List<TerminalImageTemp> _terminalImagesTemp = [];
+  List<DateTime> _imagesCts = [];
 
   Future<void> _loadData() async {
     Function searchFn = (rec) => !rec.localDeleted;
@@ -57,9 +61,10 @@ class _TaskPageState extends State<TaskPage> {
     _taskDefectCnt = (await TaskDefectLink.byTaskId(widget.task.id)).where(searchFn).length;
     _taskComponentCnt = (await TerminalComponentLink.byTaskId(widget.task.id)).where(searchFn).length;
     _terminalImages = await TerminalImage.byPpsTerminalId(widget.task.ppsTerminalId);
+    _terminalImagesTemp = await TerminalImageTemp.byPpsTerminalId(widget.task.ppsTerminalId);
 
-    _terminalImagesCts = _terminalImages.map((e) => e.cts).toList();
-    _terminalImagesCts.sort((a, b) => a.isBefore(b) ? 1 : -1);
+    _imagesCts = _terminalImages.map((e) => e.cts).toList() + _terminalImagesTemp.map((e) => e.localTs).toList();
+    _imagesCts.sort((a, b) => a.isBefore(b) ? 1 : -1);
 
     if (mounted) {
       setState(() {});
@@ -241,29 +246,43 @@ class _TaskPageState extends State<TaskPage> {
       ),
       ListTile(
         dense: true,
-        title: Text('Добавить фотографию (${_terminalImagesCts.length})', style: defaultTextStyle),
+        title: Text('Добавить фотографию (${_imagesCts.length})', style: defaultTextStyle),
         contentPadding: listPanelPadding,
         onTap: () async {
           File file = await ImagePicker.pickImage(source: ImageSource.camera);
 
           if (file != null) {
-            try {
-              showDialog(
-                context: context,
-                barrierDismissible: false,
-                builder: (BuildContext context) {
-                  return Padding(padding: EdgeInsets.all(5.0), child: Center(child: CircularProgressIndicator()));
-                }
-              );
+            TerminalImageTemp image = TerminalImageTemp(
+              ppsTerminalId: widget.task.ppsTerminalId,
+              filepath: file.path,
+              filedata: base64Encode(await file.readAsBytes())
+            );
+            await image.markAndInsert();
+            await _loadData();
+            _showSnackBar('Фотография успешно сохранена');
+          }
+        }
+      ),
+      ListTile(
+        dense: true,
+        title: Text('Сохранить фотографии (${_terminalImagesTemp.length})', style: defaultTextStyle),
+        contentPadding: listPanelPadding,
+        onTap: _terminalImagesTemp.isEmpty ? null : () async {
+          try {
+            showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return Padding(padding: EdgeInsets.all(5.0), child: Center(child: CircularProgressIndicator()));
+              }
+            );
 
-              await TerminalImage.saveToRemote(widget.task.ppsTerminalId, file);
-              await _loadData();
-              _showSnackBar('Фотография успешно сохранена');
-            } on ApiException catch(e) {
-              _showSnackBar(e.errorMsg);
-            } finally {
-              Navigator.pop(context);
-            }
+            await App.application.data.dataSync.syncImageData();
+            await _loadData();
+            Navigator.pop(context);
+            _showSnackBar('Фотографии успешно сохранены');
+          } on ApiException catch(e) {
+            Navigator.pop(context);
+            _showSnackBar(e.errorMsg);
           }
         }
       ),
@@ -313,7 +332,7 @@ class _TaskPageState extends State<TaskPage> {
       longitude2: user.curLongitude
     ).haversineDistance();
 
-    if (_terminalImagesCts.isEmpty || DateTime.now().difference(_terminalImagesCts.first).inDays > 30) {
+    if (_imagesCts.isEmpty || DateTime.now().difference(_imagesCts.first).inDays > 30) {
       _showSnackBar('Необходимо сфотографировать терминал');
       return;
     }

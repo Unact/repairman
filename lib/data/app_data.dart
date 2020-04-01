@@ -92,10 +92,6 @@ class AppData {
         altitude: double.parse(messageParts[3])
       );
       location.markAndInsert();
-
-      if ((await Location.allNew()).length > Location.newLimit) {
-        await dataSync.exportLocations();
-      }
     }
 
     return '';
