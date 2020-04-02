@@ -25,9 +25,7 @@ dependencies:
   shared_preferences: any
   device_info: any
   package_info: any
-  yandex_mapkit:
-    git:
-      url: git://github.com/Unact/yandex_mapkit
+  yandex_mapkit: any
 
 dev_dependencies:
   flutter_test:

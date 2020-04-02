@@ -118,7 +118,7 @@ CREATE TABLE terminal_component_links(
     local_updated INTEGER DEFAULT 0,
     local_deleted INTEGER DEFAULT 0
 );
-CREATE TABLE locations(
+CREATE TABLE geo_points(
     latitude  DECIMAL(18,10),
     longitude DECIMAL(18,10),
     accuracy  DECIMAL(18,10),

@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:repairman/app/app.dart';
-import 'package:repairman/app/models/location.dart';
+import 'package:repairman/app/models/geo_point.dart';
 import 'package:repairman/app/models/user.dart';
 import 'package:repairman/config/app_config.dart';
 import 'package:repairman/data/data_sync.dart';
@@ -23,7 +23,7 @@ class AppData {
   SharedPreferences prefs;
   DataSync dataSync;
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
-  BasicMessageChannel<String> _incrementPlatform = BasicMessageChannel<String>('increment', StringCodec());
+  final MethodChannel _locationChannel = MethodChannel("ru.unact.repairman/location");
 
   Future<void> setup() async {
     String currentPath = (await getApplicationDocumentsDirectory()).path;
@@ -73,27 +73,32 @@ class AppData {
   }
 
   void _setupPlatform() {
-    _incrementPlatform.setMessageHandler(_handlePlatformIncrement);
+    _locationChannel.setMethodCallHandler((call) async {
+      switch(call.method) {
+        case 'onLocationChanged':
+          await _onLocationChanged(call.arguments);
+          break;
+        default:
+          throw MissingPluginException();
+      }
+    });
   }
 
-  Future<String> _handlePlatformIncrement(String message) async {
-    List<String> messageParts = message.split(' ');
+  Future<void> _onLocationChanged(Map<dynamic, dynamic> arguments) async {
     User user = User.currentUser;
 
     if (App.application.config.geocode && user != null) {
-      user.curLatitude = double.parse(messageParts[0]);
-      user.curLongitude = double.parse(messageParts[1]);
-      user.save();
+      user.curLatitude = arguments['latitude'];
+      user.curLongitude = arguments['longitude'];
+      await user.save();
 
-      Location location = Location(
-        latitude: double.parse(messageParts[0]),
-        longitude: double.parse(messageParts[1]),
-        accuracy: double.parse(messageParts[2]),
-        altitude: double.parse(messageParts[3])
+      GeoPoint geoPoint = GeoPoint(
+        latitude: arguments['latitude'],
+        longitude: arguments['longitude'],
+        accuracy: arguments['accuracy'],
+        altitude: arguments['altitude']
       );
-      location.markAndInsert();
+      await geoPoint.markAndInsert();
     }
-
-    return '';
   }
 }

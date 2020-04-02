@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/pages/person_page.dart';
-import 'package:repairman/app/models/location.dart';
+import 'package:repairman/app/models/geo_point.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal.dart';
 import 'package:repairman/app/models/user.dart';
@@ -42,7 +42,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
       where((term) => term.zoneTerminal).toList();
     List<Task> tasks = await Task.all();
 
-    _distance = (await Location.currentDistance()) ?? 0.0;
+    _distance = (await GeoPoint.currentDistance()) ?? 0.0;
     _nearTerminalName = terminals.isNotEmpty ? terminals.first.address : 'Не найден';
     _terminalCnt = terminals.length;
     _allTasksCnt = tasks.length;
@@ -148,7 +148,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
       },
       {
         'name': 'Ошибки синхронизации геотрека',
-        'value': App.application.data.dataSync.syncLocationErrors
+        'value': App.application.data.dataSync.syncGeoPointsErrors
       },
       {
         'name': 'Ошибки синхронизации фотографий',

@@ -6,7 +6,7 @@ import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/component.dart';
 import 'package:repairman/app/models/component_group.dart';
 import 'package:repairman/app/models/defect.dart';
-import 'package:repairman/app/models/location.dart';
+import 'package:repairman/app/models/geo_point.dart';
 import 'package:repairman/app/models/repair.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/task_defect_link.dart';
@@ -23,8 +23,8 @@ enum SyncEvent {
   syncCompleted,
   imageSyncStarted,
   imageSyncCompleted,
-  locationSyncStarted,
-  locationSyncCompleted
+  geoPointsSyncStarted,
+  geoPointsSyncCompleted
 }
 
 class DataSync {
@@ -33,9 +33,9 @@ class DataSync {
   Timer syncTimer;
   String syncErrors;
   String syncImagesErrors;
-  String syncLocationErrors;
+  String syncGeoPointsErrors;
   bool _isSyncing = false;
-  bool _isSyncingLocations = false;
+  bool _isSyncingGeoPoints = false;
   bool _isSyncingImages = false;
 
   static const Duration kSyncTimerPeriod = Duration(minutes: 10);
@@ -165,34 +165,34 @@ class DataSync {
   }
 
   Future<void> syncLocations() async {
-    if (_isSyncingLocations) return;
+    if (_isSyncingGeoPoints) return;
 
     try {
-      _streamController.add(SyncEvent.locationSyncStarted);
-      _isSyncingLocations = true;
+      _streamController.add(SyncEvent.geoPointsSyncStarted);
+      _isSyncingGeoPoints = true;
       await _syncLocations();
     } finally {
-      _isSyncingLocations = false;
+      _isSyncingGeoPoints = false;
     }
 
-    _streamController.add(SyncEvent.locationSyncCompleted);
+    _streamController.add(SyncEvent.geoPointsSyncCompleted);
   }
 
   Future<void> _syncLocations() async {
-    List<Location> locations = await Location.allNew();
+    List<GeoPoint> geoPoints = await GeoPoint.allNew();
 
-    if (locations.isEmpty) return;
+    if (geoPoints.isEmpty) return;
 
     try {
       await Api.post('v2/repairman/locations', data: {
-        'locations': locations.map((req) => req.toExportMap()).toList()
+        'locations': geoPoints.map((req) => req.toExportMap()).toList()
       });
 
-      syncLocationErrors = null;
-      await Future.wait(locations.map((location) async => await location.markInserted(false)));
+      syncGeoPointsErrors = null;
+      await Future.wait(geoPoints.map((geoPoint) async => await geoPoint.markInserted(false)));
     } on ApiException catch(e) {
-      syncLocationErrors = e.errorMsg;
-      await Future.wait(locations.map((location) async => await location.markInserted(true)));
+      syncGeoPointsErrors = e.errorMsg;
+      await Future.wait(geoPoints.map((geoPoint) async => await geoPoint.markInserted(true)));
     }
   }
 }

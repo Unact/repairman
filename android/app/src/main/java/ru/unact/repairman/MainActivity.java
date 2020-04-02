@@ -2,89 +2,105 @@ package ru.unact.repairman;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+
 import io.flutter.app.FlutterActivity;
+import io.flutter.plugin.common.MethodCall;
+import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import androidx.core.app.ActivityCompat;
-import android.util.Log;
 import android.Manifest;
-import io.flutter.plugin.common.BasicMessageChannel;
-import io.flutter.plugin.common.StringCodec;
-import io.flutter.view.FlutterView;
 import com.yandex.mapkit.MapKitFactory;
 
-public class MainActivity extends FlutterActivity{
-  private LocationManager locationManager;
-  private static final String CHANNEL = "increment";
-  private BasicMessageChannel messageChannel;
-  private FlutterView flutterView;
+import java.util.HashMap;
+import java.util.Map;
+
+public class MainActivity extends FlutterActivity {
+  private static final String CHANNEL = "ru.unact.repairman/location";
+  private MethodChannel methodChannel;
 
   private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
 
-  private boolean checkPermissions() {
-    int permissionState = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-    return permissionState == PackageManager.PERMISSION_GRANTED;
-  }
-
   private void requestPermissions() {
-    ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
-            REQUEST_PERMISSIONS_REQUEST_CODE);
+    ActivityCompat.requestPermissions(
+      this,
+      new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
+      REQUEST_PERMISSIONS_REQUEST_CODE
+    );
   }
 
-    @Override
+  @Override
   public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-      switch (requestCode) {
-          case REQUEST_PERMISSIONS_REQUEST_CODE: {
-              // If request is cancelled, the result arrays are empty.
-              if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                  setupLocationManager();
-              }
-              return;
-          }
+    switch (requestCode) {
+      case REQUEST_PERMISSIONS_REQUEST_CODE: {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+          setupLocationManager();
+        }
+        return;
       }
+      default: {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+      }
+    }
   }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     MapKitFactory.setApiKey(BuildConfig.YANDEX_API_KEY);
-    GeneratedPluginRegistrant.registerWith(this);
-    messageChannel = new BasicMessageChannel<>(getFlutterView(), CHANNEL, StringCodec.INSTANCE);
 
-    if (!checkPermissions()) {
-        requestPermissions();
-    } else {
-        setupLocationManager();
-    }
+    methodChannel = new MethodChannel(getFlutterView(), CHANNEL);
+    methodChannel.setMethodCallHandler(
+      (call, result) -> {
+        switch (call.method) {
+          default:
+            result.notImplemented();
+            break;
+        }
+      }
+    );
+
+    setupLocationManager();
+
+    GeneratedPluginRegistrant.registerWith(this);
   }
 
   private void setupLocationManager() {
-      locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+    int permissionState = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+    LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-      locationManager.requestLocationUpdates(
-              LocationManager.GPS_PROVIDER,
-              1000 * 10,
-              10,
-              locationListener
-      );
-      locationManager.requestLocationUpdates(
-              LocationManager.NETWORK_PROVIDER,
-              1000 * 10,
-              10,
-              locationListener
-      );
+    if (permissionState != PackageManager.PERMISSION_GRANTED) {
+      requestPermissions();
+      return;
+    }
+
+    locationManager.requestLocationUpdates(
+      LocationManager.GPS_PROVIDER,
+      1000 * 10,
+      10,
+      locationListener
+    );
+    locationManager.requestLocationUpdates(
+      LocationManager.NETWORK_PROVIDER,
+      1000 * 10,
+      10,
+      locationListener
+    );
   }
 
   private LocationListener locationListener = new LocationListener() {
     @Override
     public void onLocationChanged(Location location) {
-      Log.v("tag", "get location");
-      messageChannel.send(new Double(location.getLatitude()).toString() + " " +
-                          new Double(location.getLongitude()).toString() + " " +
-                          new Double(location.getAccuracy()).toString() + " " +
-                          new Double(location.getAltitude()).toString());
+      Map<String, Object> arguments = new HashMap<>();
+
+      arguments.put("latitude", location.getLatitude());
+      arguments.put("longitude", location.getLongitude());
+      arguments.put("accuracy", location.getAccuracy());
+      arguments.put("altitude", location.getAltitude());
+
+      methodChannel.invokeMethod("onLocationChanged", arguments);
     }
 
     @Override
@@ -99,5 +115,4 @@ public class MainActivity extends FlutterActivity{
     public void onStatusChanged(String provider, int status, Bundle extras) {
     }
   };
-
 }

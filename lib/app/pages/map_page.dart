@@ -53,7 +53,9 @@ class _MapPageState extends State<MapPage> {
 
     return YandexMap(
       onMapCreated: (YandexMapController controller) async {
-        await controller.showUserLayer(iconName: 'lib/app/assets/images/usericon.png');
+        await controller.showUserLayer(
+          iconName: 'lib/app/assets/images/usericon.png'
+        );
         await Future.wait(placemarks.map((Placemark placemark) => controller.addPlacemark(placemark)));
         await controller.setBounds(
           northEastPoint: Point(latitude: maxLat + _kPointBoundMove, longitude: maxLon + _kPointBoundMove),
