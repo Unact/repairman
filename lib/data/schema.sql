@@ -157,9 +157,9 @@ CREATE TABLE terminal_images(
     local_deleted INTEGER DEFAULT 0
 );
 CREATE TABLE terminal_images_temp(
-    pps_terminal_id INTEGER,
-    filepath TEXT,
-    filedata TEXT,
+    pps_terminal_id INTEGER NOT NULL,
+    filepath TEXT NOT NULL,
+    filedata TEXT NOT NULL,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,
     local_id INTEGER PRIMARY KEY,

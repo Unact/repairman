@@ -251,6 +251,7 @@ class _TaskPageState extends State<TaskPage> {
         onTap: () async {
           showDialog(
             context: context,
+            barrierDismissible: false,
             builder: (BuildContext context) {
               return Padding(padding: EdgeInsets.all(5.0), child: Center(child: CircularProgressIndicator()));
             }
@@ -282,6 +283,7 @@ class _TaskPageState extends State<TaskPage> {
           try {
             showDialog(
               context: context,
+              barrierDismissible: false,
               builder: (BuildContext context) {
                 return Padding(padding: EdgeInsets.all(5.0), child: Center(child: CircularProgressIndicator()));
               }
