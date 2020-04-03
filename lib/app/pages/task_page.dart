@@ -249,18 +249,29 @@ class _TaskPageState extends State<TaskPage> {
         title: Text('Добавить фотографию (${_imagesCts.length})', style: defaultTextStyle),
         contentPadding: listPanelPadding,
         onTap: () async {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return Padding(padding: EdgeInsets.all(5.0), child: Center(child: CircularProgressIndicator()));
+            }
+          );
+
           File file = await ImagePicker.pickImage(source: ImageSource.camera);
 
-          if (file != null) {
-            TerminalImageTemp image = TerminalImageTemp(
-              ppsTerminalId: widget.task.ppsTerminalId,
-              filepath: file.path,
-              filedata: base64Encode(await file.readAsBytes())
-            );
-            await image.markAndInsert();
-            await _loadData();
-            _showSnackBar('Фотография успешно сохранена');
+          if (file == null) {
+            Navigator.pop(context);
+            return;
           }
+
+          TerminalImageTemp image = TerminalImageTemp(
+            ppsTerminalId: widget.task.ppsTerminalId,
+            filepath: file.path,
+            filedata: base64Encode(await file.readAsBytes())
+          );
+          await image.markAndInsert();
+          await _loadData();
+          Navigator.pop(context);
+          _showSnackBar('Фотография успешно сохранена');
         }
       ),
       ListTile(
