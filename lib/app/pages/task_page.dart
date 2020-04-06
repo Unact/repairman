@@ -8,6 +8,7 @@ import 'package:great_circle_distance/great_circle_distance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/task.dart';
@@ -257,17 +258,18 @@ class _TaskPageState extends State<TaskPage> {
             }
           );
 
-          File file = await ImagePicker.pickImage(source: ImageSource.camera);
+          File tempfile = await ImagePicker.pickImage(source: ImageSource.camera);
 
-          if (file == null) {
+          if (tempfile == null) {
             Navigator.pop(context);
             return;
           }
 
+          Directory directory = await getApplicationDocumentsDirectory();
+          File file = await tempfile.copy('${directory.path}/${tempfile.path.split('/').last}');
           TerminalImageTemp image = TerminalImageTemp(
             ppsTerminalId: widget.task.ppsTerminalId,
-            filepath: file.path,
-            filedata: base64Encode(await file.readAsBytes())
+            filepath: file.path
           );
           await image.markAndInsert();
           await _loadData();

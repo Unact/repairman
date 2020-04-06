@@ -1,8 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-
-import 'package:path_provider/path_provider.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/database_model.dart';
@@ -12,7 +9,6 @@ class TerminalImageTemp extends DatabaseModel {
   static final String _tableName = 'terminal_images_temp';
 
   int ppsTerminalId;
-  String filedata;
   String filepath;
 
   get tableName => _tableName;
@@ -20,7 +16,6 @@ class TerminalImageTemp extends DatabaseModel {
   TerminalImageTemp({
     Map<String, dynamic> values,
     this.ppsTerminalId,
-    this.filedata,
     this.filepath
   }) {
     if (values != null) build(values);
@@ -31,14 +26,12 @@ class TerminalImageTemp extends DatabaseModel {
     super.build(values);
 
     ppsTerminalId = values['pps_terminal_id'];
-    filedata = values['filedata'];
     filepath = values['filepath'];
   }
 
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = Map<String, dynamic>();
     map['pps_terminal_id'] = ppsTerminalId;
-    map['filedata'] = filedata;
     map['filepath'] = filepath;
 
     return map;
@@ -47,16 +40,13 @@ class TerminalImageTemp extends DatabaseModel {
   Future<void> saveToRemote() async {
     File file = File(filepath);
 
-    if (!file.existsSync()) {
-      Directory directory = await getApplicationDocumentsDirectory();
-
-      file = File('${directory.path}/${filepath.split('/').last}');
-      file.createSync(recursive: true);
-      file.writeAsBytesSync(base64Decode(filedata));
+    if (file.existsSync()) {
+      await TerminalImage.saveToRemote(ppsTerminalId, file);
+      await delete();
+      await file.delete();
+    } else {
+      await delete();
     }
-
-    await TerminalImage.saveToRemote(ppsTerminalId, file);
-    await delete();
   }
 
   static Future<List<TerminalImageTemp>> all() async {
