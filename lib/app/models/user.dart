@@ -65,7 +65,7 @@ class User {
   }
 
   Future<void> loadDataFromRemote() async {
-    Map<String, dynamic> userData = await Api.get('v2/repairman/user_info');
+    Map<String, dynamic> userData = await Api.get('v1/repairman/user_info');
     LocationData currentLocation;
 
     id = userData['id'];
@@ -107,7 +107,7 @@ class User {
   }
 
   Future<void> subscribeToFirebase(bool sendNotifications) async {
-    await Api.post('v2/repairman/subscribe', queryParameters: {"send_notifications": sendNotifications});
+    await Api.post('v1/repairman/subscribe', queryParameters: {"send_notifications": sendNotifications});
     firebaseSubscribed = sendNotifications;
     await save();
   }

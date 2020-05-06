@@ -147,7 +147,7 @@ CREATE TABLE terminal_worktimes(
 CREATE TABLE terminal_images(
     id INTEGER UNIQUE,
     pps_terminal_id INTEGER,
-    short_url TEXT,
+    medium_url TEXT,
     cts DATETIME,
 
     local_ts DATETIME DEFAULT CURRENT_TIMESTAMP,

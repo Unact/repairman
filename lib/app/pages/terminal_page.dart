@@ -196,7 +196,7 @@ class _TerminalPageState extends State<TerminalPage> {
           (TerminalImage image) => Center(
             child: Container(
               padding: listViewItemsPadding,
-              child: Image.network(image.shortUrl, width: 256, height: 256)
+              child: Image.network(image.mediumUrl, width: 256, height: 256)
             )
           )
         )

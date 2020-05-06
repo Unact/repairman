@@ -133,7 +133,7 @@ class DataSync {
   }
 
   Future<void> _importData() async {
-    Map<String, dynamic> importData = await Api.get('v2/repairman');
+    Map<String, dynamic> importData = await Api.get('v1/repairman');
 
     Batch batch = App.application.data.db.batch();
     await App.application.config.importRemote(importData['app']);
@@ -161,7 +161,7 @@ class DataSync {
   }
 
   Future<void> _exportData(Map<String, dynamic> exportData) async {
-    await Api.post('v2/repairman/save', data: exportData);
+    await Api.post('v1/repairman/save', data: exportData);
   }
 
   Future<void> syncLocations() async {
@@ -184,7 +184,7 @@ class DataSync {
     if (geoPoints.isEmpty) return;
 
     try {
-      await Api.post('v2/repairman/locations', data: {
+      await Api.post('v1/repairman/locations', data: {
         'locations': geoPoints.map((req) => req.toExportMap()).toList()
       });
 

@@ -14,7 +14,7 @@ class Api {
       'POST',
       'v1/reset_password',
       headers: {
-        'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username'
+        'Authorization': 'Renew client_id=${App.application.config.clientId},login=$username'
       }
     );
   }
@@ -54,8 +54,8 @@ class Api {
       Map<String, String> headers,
       Map<String, dynamic> queryParameters,
       dynamic data,
-      List<File> files = const [],
-      String filesKey = 'files'
+      File file,
+      String fileKey = 'file'
     }
   ) async {
     return await request(
@@ -64,8 +64,8 @@ class Api {
       headers: headers,
       queryParameters: queryParameters,
       data: data,
-      files: files,
-      filesKey: filesKey
+      file: file,
+      fileKey: fileKey
     );
   }
 
@@ -76,18 +76,18 @@ class Api {
       Map<String, String> headers,
       Map<String, dynamic> queryParameters,
       dynamic data,
-      List<File>files = const [],
-      String filesKey = 'files'
+      File file,
+      String fileKey = 'file'
     }
   ) async {
     dynamic dataToSend = data;
 
-    if (data is! Map<String, dynamic> && files.isNotEmpty) {
-      throw 'files not empty, data must be Map<String, dynamic>';
+    if (data is! Map<String, dynamic> && file != null) {
+      throw 'file not empty, data must be Map<String, dynamic>';
     }
 
-    if (files.isNotEmpty) {
-      dataToSend = _createFilesFormData(data, files, filesKey);
+    if (file != null) {
+      dataToSend = _createFileFormData(data, file, fileKey);
     }
 
     try {
@@ -96,7 +96,7 @@ class Api {
       await relogin();
 
       if (dataToSend is FormData) {
-        dataToSend = _createFilesFormData(data, files, filesKey);
+        dataToSend = _createFileFormData(data, file, fileKey);
       }
 
       return await _request(method, apiMethod, headers: headers, data: dataToSend, queryParameters: queryParameters);
@@ -108,7 +108,7 @@ class Api {
 
     if (User.currentUser.token != null) {
       headers.addAll({
-        'Authorization': 'RApi client_id=${App.application.config.clientId},token=${User.currentUser.token}',
+        'Authorization': 'Renew client_id=${App.application.config.clientId},token=${User.currentUser.token}',
         'FirebaseToken': '${User.currentUser.firebaseToken}'
       });
     }
@@ -163,11 +163,9 @@ class Api {
     }
   }
 
-  static FormData _createFilesFormData(Map<String, dynamic> data, List<File> files, String filesKey) {
+  static FormData _createFileFormData(Map<String, dynamic> data, File file, String fileKey) {
     Map<String, dynamic> dataToAdd = data;
-    dataToAdd[filesKey] = files.map(
-      (file) => MultipartFile.fromBytes(file.readAsBytesSync(), filename: file.path.split('/').last)
-    ).toList();
+    dataToAdd[fileKey] = MultipartFile.fromBytes(file.readAsBytesSync(), filename: file.path.split('/').last);
 
     return FormData.fromMap(dataToAdd);
   }
@@ -196,7 +194,7 @@ class Api {
       'POST',
       'v1/authenticate',
       headers: {
-        'Authorization': 'RApi client_id=${App.application.config.clientId},login=$username,password=$password'
+        'Authorization': 'Renew client_id=${App.application.config.clientId},login=$username,password=$password'
       }
     );
     User.currentUser.token = response['token'];

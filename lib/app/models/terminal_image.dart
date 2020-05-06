@@ -13,7 +13,7 @@ class TerminalImage extends DatabaseModel {
 
   int id;
   int ppsTerminalId;
-  String shortUrl;
+  String mediumUrl;
   DateTime cts;
 
   get tableName => _tableName;
@@ -22,7 +22,7 @@ class TerminalImage extends DatabaseModel {
     Map<String, dynamic> values,
     this.id,
     this.ppsTerminalId,
-    this.shortUrl,
+    this.mediumUrl,
     this.cts
   }) {
     if (values != null) build(values);
@@ -34,7 +34,7 @@ class TerminalImage extends DatabaseModel {
 
     id = values['id'];
     ppsTerminalId = values['pps_terminal_id'];
-    shortUrl = values['short_url'];
+    mediumUrl = values['medium_url'];
     cts = Nullify.parseDate(values['cts']);
   }
 
@@ -42,25 +42,22 @@ class TerminalImage extends DatabaseModel {
     Map<String, dynamic> map = Map<String, dynamic>();
     map['id'] = id;
     map['pps_terminal_id'] = ppsTerminalId;
-    map['short_url'] = shortUrl;
+    map['medium_url'] = mediumUrl;
     map['cts'] = cts?.toIso8601String();
 
     return map;
   }
 
   static Future<void> saveToRemote(int ppsTerminalId, File file) async {
-    List<dynamic> res =  await Api.post(
-      'v2/images/PpsTerminal',
-      data: <String, dynamic>{'model_id': ppsTerminalId},
-      files: [file],
-      filesKey: 'images'
+    Map<dynamic, dynamic> res =  await Api.post(
+      'v1/repairman/save_image',
+      data: <String, dynamic>{'pps_terminal_id': ppsTerminalId},
+      file: file,
+      fileKey: 'image'
     );
-    List<dynamic> data = res.map((el) {
-      el['pps_terminal_id'] = ppsTerminalId;
-      return el;
-    }).toList();
+    res['pps_terminal_id'] = ppsTerminalId;
 
-    await Future.forEach(data, (rec) => App.application.data.db.insert(_tableName, TerminalImage(values: rec).toMap()));
+    await App.application.data.db.insert(_tableName, TerminalImage(values: res).toMap());
   }
 
   static Future<List<TerminalImage>> all() async {
