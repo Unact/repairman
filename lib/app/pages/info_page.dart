@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 
 import 'package:repairman/app/app.dart';
@@ -22,7 +23,6 @@ class InfoPage extends StatefulWidget {
 }
 
 class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
-  static const Duration _kWaitDuration = Duration(milliseconds: 300);
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   StreamSubscription<SyncEvent> syncStreamSubscription;
@@ -56,6 +56,10 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
     }
   }
 
+  void _showSnackBar(String content) {
+    _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
+  }
+
   void _showErrorSnackBar(String content) {
     _scaffoldKey.currentState?.showSnackBar(SnackBar(
       content: Text(content),
@@ -69,7 +73,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   Widget _buildBody(BuildContext context) {
     return RefreshIndicator(
       key: _refreshIndicatorKey,
-      onRefresh: _syncAll,
+      onRefresh: _syncData,
       child: ListView.builder(
         padding: EdgeInsets.only(top: 24.0, left: 8.0, right: 8.0),
         itemCount: 1,
@@ -127,7 +131,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   }
 
   Widget _buildInfoCard() {
-    if (App.application.config.newVersionAvailable) {
+    if (User.currentUser.newVersionAvailable) {
       return Card(
         child: ListTile(
           isThreeLine: true,
@@ -199,8 +203,6 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
       DateTime.now().subtract(Duration(minutes: 1)).subtract(DataSync.kSyncTimerPeriod);
 
     if (DateTime.now().difference(time) > DataSync.kSyncTimerPeriod) {
-      // Чтобы корректно отобразить RefreshIndicator надо подождать, когда закончится построение виджетов страницы
-      await Future.delayed(_kWaitDuration);
       _refreshIndicatorKey.currentState?.show();
     }
   }
@@ -209,11 +211,9 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
 
-    if (User.currentUser.isLogged()) {
-      App.application.data.dataSync.startSyncTimer();
-      WidgetsBinding.instance.addObserver(this);
-      _backgroundRefresh();
-    }
+    App.application.data.dataSync.startSyncTimer();
+    WidgetsBinding.instance.addObserver(this);
+    SchedulerBinding.instance.addPostFrameCallback((_) => _backgroundRefresh());
 
     syncStreamSubscription = App.application.data.dataSync.stream.listen((SyncEvent syncEvent) => _loadData());
 
@@ -222,26 +222,27 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _backgroundRefresh();
+    if (state == AppLifecycleState.resumed) SchedulerBinding.instance.addPostFrameCallback((_) => _backgroundRefresh());
   }
 
   @override
   void dispose() {
     super.dispose();
 
-    if (User.currentUser.isLogged()) {
-      WidgetsBinding.instance.removeObserver(this);
-    }
-
+    App.application.data.dataSync.stopSyncTimer();
+    WidgetsBinding.instance.removeObserver(this);
     syncStreamSubscription.cancel();
   }
 
-  Future<void> _syncAll() async {
+  Future<void> _syncData() async {
     try {
       await App.application.data.dataSync.syncAll();
       await _loadData();
+      _showSnackBar('Данные успешно обновлены');
     } on ApiException catch(e) {
       _showErrorSnackBar(e.errorMsg);
+    } catch(e) {
+      _showErrorSnackBar('Произошла ошибка');
     }
   }
 

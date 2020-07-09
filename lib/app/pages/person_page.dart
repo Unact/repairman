@@ -35,6 +35,8 @@ class _PersonPageState extends State<PersonPage> {
       }
       await Api.logout();
       App.application.data.dataSync.stopSyncTimer();
+      await User.currentUser.reset();
+      await App.application.data.dataSync.clearData();
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (BuildContext context) => LoginPage()),

@@ -141,7 +141,7 @@ class _TerminalsPageDelegate extends SearchDelegate<Terminal> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return Container();
+    return buildResults(context);
   }
 
   @override
@@ -153,6 +153,10 @@ class _TerminalsPageDelegate extends SearchDelegate<Terminal> {
 
     if (suggestions.isEmpty) {
       return Center(child: Text('Ничего не найдено', textAlign: TextAlign.center));
+    }
+
+    if (query.isEmpty) {
+      return Container();
     }
 
     return ListView(

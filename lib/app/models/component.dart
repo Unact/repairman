@@ -65,4 +65,8 @@ class Component extends DatabaseModel {
     batch.delete(_tableName);
     recs.forEach((rec) => batch.insert(_tableName, Component(values: rec).toMap()));
   }
+
+  static Future<void> deleteAll() async {
+    return await App.application.data.db.delete(_tableName);
+  }
 }

@@ -53,4 +53,8 @@ class TaskDefectLink extends DatabaseModel {
       where((TaskDefectLink rec) => rec.localInserted || rec.localUpdated || rec.localDeleted).
       map((req) => req.toExportMap()).toList();
   }
+
+  static Future<void> deleteAll() async {
+    return await App.application.data.db.delete(_tableName);
+  }
 }

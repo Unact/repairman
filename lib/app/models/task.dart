@@ -132,4 +132,8 @@ class Task extends DatabaseModel {
       order by tasks.servstatus, tasks.route_priority desc, tasks.dobefore
     """)).map((rec) => Task(values: rec)).toList();
   }
+
+  static Future<void> deleteAll() async {
+    return await App.application.data.db.delete(_tableName);
+  }
 }

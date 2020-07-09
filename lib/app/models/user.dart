@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:location/location.dart';
+import 'package:pub_semver/pub_semver.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,6 +17,7 @@ class User {
   String agentName;
   String token;
   String firebaseToken = '';
+  String remoteVersion;
   bool firebaseSubscribed = true;
   double curLatitude = kCurLatitude;
   double curLongitude = kCurLongitude;
@@ -24,22 +26,6 @@ class User {
   static const String kGuestUsername = 'guest';
   static const double kCurLatitude = 0.0;
   static const double kCurLongitude = 0.0;
-
-
-  Map<String, dynamic> toMap() {
-    Map<String, dynamic> map = Map<String, dynamic>();
-    map['id'] = id;
-    map['username'] = username;
-    map['password'] = password;
-    map['agent_name'] = agentName;
-    map['zone_name'] = zoneName;
-    map['email'] = email;
-    map['token'] = token;
-    map['firebase_token'] = firebaseToken;
-    map['firebase_subscribed'] = firebaseSubscribed;
-
-    return map;
-  }
 
   User.init() {
     _currentUser = this;
@@ -53,12 +39,35 @@ class User {
     token = App.application.data.prefs.getString('token');
     firebaseToken = App.application.data.prefs.getString('firebaseToken') ?? '';
     firebaseSubscribed = App.application.data.prefs.getBool('firebaseSubscribed') ?? true;
+    remoteVersion = App.application.data.prefs.getString('remoteVersion');
     curLatitude = App.application.data.prefs.getDouble('curLatitude') ?? kCurLatitude;
     curLongitude = App.application.data.prefs.getDouble('curLongitude') ?? kCurLongitude;
   }
 
   static User _currentUser;
   static User get currentUser => _currentUser;
+
+  bool get newVersionAvailable {
+    String currentVersion = App.application.config.packageInfo.version;
+
+    return remoteVersion != null && Version.parse(remoteVersion) > Version.parse(currentVersion);
+  }
+
+  Map<String, dynamic> toMap() {
+    Map<String, dynamic> map = Map<String, dynamic>();
+    map['id'] = id;
+    map['username'] = username;
+    map['password'] = password;
+    map['agent_name'] = agentName;
+    map['zone_name'] = zoneName;
+    map['email'] = email;
+    map['token'] = token;
+    map['firebase_token'] = firebaseToken;
+    map['firebase_subscribed'] = firebaseSubscribed;
+    map['remote_version'] = remoteVersion;
+
+    return map;
+  }
 
   bool isLogged() {
     return password != null;
@@ -73,6 +82,7 @@ class User {
     zoneName = userData['zone_name'];
     agentName = userData['agent_name'];
     firebaseSubscribed = userData['firebase_subscribed'];
+    remoteVersion = userData['app']['version'];
     setFirebaseToken();
     try {
       currentLocation = await Location().getLocation();
@@ -94,6 +104,7 @@ class User {
     token = null;
     firebaseToken = '';
     firebaseSubscribed = false;
+    remoteVersion = null;
     curLatitude = kCurLatitude;
     curLongitude = kCurLongitude;
 
@@ -123,6 +134,7 @@ class User {
     await (agentName != null ? prefs.setString('agentName', agentName) : prefs.remove('agentName'));
     await (token != null ? prefs.setString('token', token) : prefs.remove('token'));
     await (firebaseToken != null ? prefs.setString('firebaseToken', firebaseToken) : prefs.remove('firebaseToken'));
+    await (remoteVersion != null ? prefs.setString('remoteVersion', remoteVersion) : prefs.remove('remoteVersion'));
     await prefs.setBool('firebaseSubscribed', firebaseSubscribed);
     await (curLatitude != null ? prefs.setDouble('curLatitude', curLatitude) : prefs.remove('curLatitude'));
     await (curLongitude != null ? prefs.setDouble('curLongitude', curLongitude) : prefs.remove('curLongitude'));

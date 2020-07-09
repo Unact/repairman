@@ -16,6 +16,7 @@ import 'package:repairman/app/models/terminal_image.dart';
 import 'package:repairman/app/models/terminal_image_temp.dart';
 import 'package:repairman/app/models/terminal_worktime.dart';
 import 'package:repairman/app/models/terminal.dart';
+import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/modules/api.dart';
 
 enum SyncEvent {
@@ -133,10 +134,11 @@ class DataSync {
   }
 
   Future<void> _importData() async {
+    await User.currentUser.loadDataFromRemote();
+
     Map<String, dynamic> importData = await Api.get('v1/repairman');
 
     Batch batch = App.application.data.db.batch();
-    await App.application.config.importRemote(importData['app']);
     await Component.import(importData['components'], batch);
     await ComponentGroup.import(importData['component_groups'], batch);
     await Defect.import(importData['defects'], batch);
@@ -194,5 +196,21 @@ class DataSync {
       syncGeoPointsErrors = e.errorMsg;
       await Future.wait(geoPoints.map((geoPoint) async => await geoPoint.markInserted(true)));
     }
+  }
+
+  Future<void> clearData() async {
+    await Component.deleteAll();
+    await ComponentGroup.deleteAll();
+    await Defect.deleteAll();
+    await Repair.deleteAll();
+    await Terminal.deleteAll();
+    await TerminalComponentLink.deleteAll();
+    await TerminalImage.deleteAll();
+    await TerminalImageTemp.deleteAll();
+    await TerminalWorktime.deleteAll();
+    await Task.deleteAll();
+    await TaskDefectLink.deleteAll();
+    await TaskRepairLink.deleteAll();
+    lastDataSyncTime = '';
   }
 }

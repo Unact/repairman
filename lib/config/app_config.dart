@@ -23,34 +23,22 @@ class AppConfig {
   final String osVersion;
   final String env;
   final String sentryDsn;
-  final String clientId = 'repairman';
   final String secretKeyWord = '5005';
   final int databaseVersion;
 
   String apiBaseUrl;
   bool autoRefresh = true;
   bool geocode = true;
-  String remoteVersion;
-
-  bool get newVersionAvailable => remoteVersion != packageInfo.version;
-
 
   Future<void> save() async {
     await App.application.data.prefs.setBool('autoRefresh', autoRefresh);
     await App.application.data.prefs.setBool('geocode', geocode);
     await App.application.data.prefs.setString('apiBaseUrl', apiBaseUrl);
-    await App.application.data.prefs.setString('remoteVersion', remoteVersion);
   }
 
   void loadSaved() {
     apiBaseUrl = App.application.data.prefs.getString('apiBaseUrl') ?? apiBaseUrl;
     autoRefresh = App.application.data.prefs.getBool('autoRefresh') ?? autoRefresh;
     geocode = App.application.data.prefs.getBool('geocode') ?? geocode;
-    remoteVersion = App.application.data.prefs.getString('remoteVersion') ?? packageInfo.version;
-  }
-
-  Future<void> importRemote(Map<String, dynamic> data) async {
-    remoteVersion = data['version'];
-    await save();
   }
 }

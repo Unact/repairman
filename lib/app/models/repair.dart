@@ -41,4 +41,8 @@ class Repair extends DatabaseModel {
     batch.delete(_tableName);
     recs.forEach((rec) => batch.insert(_tableName, Repair(values: rec).toMap()));
   }
+
+  static Future<void> deleteAll() async {
+    return await App.application.data.db.delete(_tableName);
+  }
 }

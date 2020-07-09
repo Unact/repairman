@@ -8,6 +8,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   path_provider: any
+  pub_semver: any
+  flutter_user_agent: any
   sqflite: any
   dio: any
   image_picker: any

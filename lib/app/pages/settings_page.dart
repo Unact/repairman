@@ -17,8 +17,6 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final TextStyle headingStyle = TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
-  final String androidUpdateUrl = "https://github.com/Unact/repairman/releases/download/${App.application.config.remoteVersion}/app-release.apk";
-  final String iosUpdateUrl = 'itms-services://?action=download-manifest&url=https://unact.github.io/mobile_apps/repairman/manifest.plist';
 
   Widget _buildBody(BuildContext context) {
     return ListView(
@@ -51,10 +49,10 @@ class _SettingsPageState extends State<SettingsPage> {
     return Column(
       children: <Widget>[
         _buildInfoRow('Версия', App.application.config.packageInfo.version),
-        App.application.config.newVersionAvailable ?
+        User.currentUser.newVersionAvailable ?
           RaisedButton(
             child: Text('Обновить приложение'),
-            onPressed: _launchURL,
+            onPressed: _launchAppUpdate,
             color: Colors.blueAccent,
             textColor: Colors.white,
           ) :
@@ -118,8 +116,16 @@ class _SettingsPageState extends State<SettingsPage> {
     _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text(content)));
   }
 
-  void _launchURL() async {
-    await launch(Platform.isIOS ? iosUpdateUrl : androidUpdateUrl);
+  Future<void> _launchAppUpdate() async {
+    final String androidUpdateUrl = "https://github.com/Unact/repairman/releases/download/${User.currentUser.remoteVersion}/app-release.apk";
+    final String iosUpdateUrl = 'itms-services://?action=download-manifest&url=https://unact.github.io/mobile_apps/repairman/manifest.plist';
+    String url = Platform.isIOS ? iosUpdateUrl : androidUpdateUrl;
+
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      _showErrorSnackBar('Произошла ошибка');
+    }
   }
 
   @override

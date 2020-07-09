@@ -70,4 +70,8 @@ class TerminalComponentLink extends DatabaseModel {
       where((TerminalComponentLink rec) => rec.localInserted || rec.localUpdated || rec.localDeleted).
       map((req) => req.toExportMap()).toList();
   }
+
+  static Future<void> deleteAll() async {
+    return await App.application.data.db.delete(_tableName);
+  }
 }

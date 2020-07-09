@@ -62,4 +62,8 @@ class TerminalImageTemp extends DatabaseModel {
       order by terminal_images_temp.local_ts
     """)).map((rec) => TerminalImageTemp(values: rec)).toList();
   }
+
+  static Future<void> deleteAll() async {
+    return await App.application.data.db.delete(_tableName);
+  }
 }

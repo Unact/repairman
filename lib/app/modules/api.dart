@@ -2,19 +2,18 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_user_agent/flutter_user_agent.dart';
 
 import 'package:repairman/app/app.dart';
 import 'package:repairman/app/models/user.dart';
 
 class Api {
-  static String workingVersion;
-
   static Future<void> resetPassword(String username) async {
     await _request(
       'POST',
       'v1/reset_password',
       headers: {
-        'Authorization': 'Renew client_id=${App.application.config.clientId},login=$username'
+        'Authorization': 'Renew login=$username'
       }
     );
   }
@@ -104,19 +103,21 @@ class Api {
   }
 
   static Dio _createDio([Map<String, String> headers = const {}]) {
+    String version = App.application.config.packageInfo.version;
+
     if (headers == null) headers = {};
 
     if (User.currentUser.token != null) {
       headers.addAll({
-        'Authorization': 'Renew client_id=${App.application.config.clientId},token=${User.currentUser.token}',
+        'Authorization': 'Renew token=${User.currentUser.token}',
         'FirebaseToken': '${User.currentUser.firebaseToken}'
       });
     }
 
     headers.addAll({
-      'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'Repairman': '${App.application.config.packageInfo.version}'
+      'Repairman': '$version',
+      HttpHeaders.userAgentHeader: 'Repairman/$version ${FlutterUserAgent.userAgent}',
     });
 
     return Dio(BaseOptions(
@@ -147,7 +148,6 @@ class Api {
       }
 
       if (statusCode == 410) {
-        workingVersion = body['working_version'];
         throw VersionException(body['error']);
       }
 
@@ -194,7 +194,7 @@ class Api {
       'POST',
       'v1/authenticate',
       headers: {
-        'Authorization': 'Renew client_id=${App.application.config.clientId},login=$username,password=$password'
+        'Authorization': 'Renew login=$username,password=$password'
       }
     );
     User.currentUser.token = response['token'];
