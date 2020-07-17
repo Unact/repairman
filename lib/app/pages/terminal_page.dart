@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -196,7 +197,13 @@ class _TerminalPageState extends State<TerminalPage> {
           (TerminalImage image) => Center(
             child: Container(
               padding: listViewItemsPadding,
-              child: Image.network(image.mediumUrl, width: 256, height: 256)
+              child: CachedNetworkImage(
+                width: 256,
+                height: 256,
+                imageUrl: image.mediumUrl,
+                placeholder: (context, url) => Container(),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+              )
             )
           )
         )
