@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-
 
 import 'package:barcode_scan/barcode_scan.dart';
 import 'package:great_circle_distance/great_circle_distance.dart';
@@ -74,14 +72,14 @@ class _TaskPageState extends State<TaskPage> {
 
   void _scanBarcode() async {
     try {
-      String barcode = await BarcodeScanner.scan();
+      String barcode = (await BarcodeScanner.scan()).rawContent;
       widget.task.invNum = barcode;
       await widget.task.markAndUpdate();
       setState(() {});
     } on PlatformException catch (e) {
       String errorMsg = 'Не известная ошибка: $e';
 
-      if (e.code == BarcodeScanner.CameraAccessDenied) {
+      if (e.code == BarcodeScanner.cameraAccessDenied) {
         errorMsg = 'Необходимо дать доступ к использованию камеры';
       }
 
@@ -258,7 +256,7 @@ class _TaskPageState extends State<TaskPage> {
             }
           );
 
-          File tempfile = await ImagePicker.pickImage(source: ImageSource.camera);
+          PickedFile tempfile = await ImagePicker().getImage(source: ImageSource.camera);
 
           if (tempfile == null) {
             Navigator.pop(context);
@@ -266,7 +264,8 @@ class _TaskPageState extends State<TaskPage> {
           }
 
           Directory directory = await getApplicationDocumentsDirectory();
-          File file = await tempfile.copy('${directory.path}/${tempfile.path.split('/').last}');
+          File file = File('${directory.path}/${tempfile.path.split('/').last}')
+            ..writeAsBytesSync(await tempfile.readAsBytes());
           TerminalImageTemp image = TerminalImageTemp(
             ppsTerminalId: widget.task.ppsTerminalId,
             filepath: file.path

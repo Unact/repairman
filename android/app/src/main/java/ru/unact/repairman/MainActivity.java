@@ -3,8 +3,10 @@ package ru.unact.repairman;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
-import io.flutter.app.FlutterActivity;
-import io.flutter.plugin.common.MethodCall;
+import androidx.annotation.NonNull;
+
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 import android.location.Location;
@@ -47,11 +49,10 @@ public class MainActivity extends FlutterActivity {
   }
 
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
     MapKitFactory.setApiKey(BuildConfig.YANDEX_API_KEY);
 
-    methodChannel = new MethodChannel(getFlutterView(), CHANNEL);
+    methodChannel = new MethodChannel(flutterEngine.getDartExecutor().getBinaryMessenger(), CHANNEL);
     methodChannel.setMethodCallHandler(
       (call, result) -> {
         switch (call.method) {
@@ -64,7 +65,7 @@ public class MainActivity extends FlutterActivity {
 
     setupLocationManager();
 
-    GeneratedPluginRegistrant.registerWith(this);
+    GeneratedPluginRegistrant.registerWith(flutterEngine);
   }
 
   private void setupLocationManager() {
