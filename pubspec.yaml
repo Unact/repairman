@@ -1,6 +1,6 @@
 name: repairman
 description: repairman semen
-version: 1.5.3+25
+version: 1.5.4+26
 
 dependencies:
   flutter:
