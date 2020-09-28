@@ -124,7 +124,7 @@ class _LoginPageState extends State<LoginPage> {
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
                         child: Container(
-                          width: 192,
+                          width: 160,
                           child: RaisedButton(
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
                             onPressed: _submit,
@@ -137,7 +137,7 @@ class _LoginPageState extends State<LoginPage> {
                       Padding(
                         padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
                         child: Container(
-                          width: 192,
+                          width: 160,
                           child: RaisedButton(
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
                             onPressed: _getNewPassword,
