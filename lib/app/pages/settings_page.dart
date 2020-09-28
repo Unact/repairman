@@ -48,9 +48,13 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildInfo() {
     return Column(
       children: <Widget>[
-        _buildInfoRow('Версия', App.application.config.packageInfo.version),
+        _buildInfoRow(
+          'Версия',
+          App.application.config.packageInfo.version + '+' + App.application.config.packageInfo.buildNumber
+        ),
         User.currentUser.newVersionAvailable ?
           RaisedButton(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
             child: Text('Обновить приложение'),
             onPressed: _launchAppUpdate,
             color: Colors.blueAccent,

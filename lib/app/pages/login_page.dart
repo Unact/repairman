@@ -81,87 +81,107 @@ class _LoginPageState extends State<LoginPage> {
     ));
   }
 
-  Widget _buildBody(BuildContext context) {
-    return ListView(
-      children: <Widget>[
-        Container(
-          padding: EdgeInsets.only(top: 32.0, left: 16.0, right: 16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                TextFormField(
-                  onSaved: (val) => _username = val,
-                  keyboardType: TextInputType.url,
-                  decoration: InputDecoration(
-                    labelText: 'Телефон или e-mail или login',
-                  ),
-                ),
-                TextFormField(
-                  onSaved: (val) => _password = val,
-                  keyboardType: TextInputType.number,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: 'Пароль'
-                  ),
-                ),
-                _showBaseApiUrl ? TextFormField(
-                  initialValue: App.application.config.apiBaseUrl,
-                  onSaved: (val) => _baseApiUrl = val,
-                  keyboardType: TextInputType.url,
-                  decoration: InputDecoration(
-                    labelText: 'Api Url'
-                  ),
-                ) : Container(),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-                      child: Container(
-                        width: 80.0,
-                        child: RaisedButton(
-                          onPressed: _submit,
-                          color: Colors.blueAccent,
-                          textColor: Colors.white,
-                          child: Text('Войти'),
-                        ),
-                      )
+  Widget _buildLoginForm(BuildContext context) {
+    return Container(
+      height: 320,
+      child: ListView(
+        children: <Widget>[
+          Container(
+            padding: EdgeInsets.only(top: 32.0, left: 16.0, right: 16.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  TextFormField(
+                    onSaved: (val) => _username = val,
+                    keyboardType: TextInputType.url,
+                    decoration: InputDecoration(
+                      labelText: 'Телефон или e-mail или login',
                     ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-                      child: Container(
-                        width: 160.0,
-                        child: RaisedButton(
-                          onPressed: _getNewPassword,
-                          color: Colors.blueAccent,
-                          textColor: Colors.white,
-                          child: Text('Получить пароль'),
-                        ),
-                      )
+                  ),
+                  TextFormField(
+                    onSaved: (val) => _password = val,
+                    keyboardType: TextInputType.number,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: 'Пароль'
                     ),
-                  ],
-                )
-              ]
+                  ),
+                  _showBaseApiUrl ? TextFormField(
+                    initialValue: App.application.config.apiBaseUrl,
+                    onSaved: (val) => _baseApiUrl = val,
+                    keyboardType: TextInputType.url,
+                    decoration: InputDecoration(
+                      labelText: 'Api Url'
+                    ),
+                  ) : Container(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                        child: Container(
+                          width: 192,
+                          child: RaisedButton(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                            onPressed: _submit,
+                            color: Colors.blueAccent,
+                            textColor: Colors.white,
+                            child: Text('Войти'),
+                          ),
+                        )
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                        child: Container(
+                          width: 192,
+                          child: RaisedButton(
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.0)),
+                            onPressed: _getNewPassword,
+                            color: Colors.blueAccent,
+                            textColor: Colors.white,
+                            child: Text('Получить пароль'),
+                          ),
+                        )
+                      ),
+                    ],
+                  )
+                ]
+              )
             )
-          )
-        ),
-      ],
+          ),
+        ],
+      )
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    String fullVersion = App.application.config.packageInfo.version
+      + '+'
+      + App.application.config.packageInfo.buildNumber;
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
         title: Text('Войти в приложение'),
         automaticallyImplyLeading: false,
       ),
-      body: _buildBody(context)
+      body: Column(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          _buildLoginForm(context),
+          Expanded(child: Container()),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+            child: Text('Версия $fullVersion')
+          )
+        ]
+      )
     );
   }
 }
