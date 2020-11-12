@@ -36,16 +36,15 @@ class _TerminalPageState extends State<TerminalPage> {
   Placemark _placemark;
 
   Future<void> _loadData() async {
-    User user = User.currentUser;
     Terminal terminal = widget.terminal;
     _placemark = Placemark(
       point: Point(longitude: terminal.longitude, latitude: terminal.latitude),
       iconName: 'lib/app/assets/images/placeicon.png',
       onTap: (double lat, double lon) async {
-        String params = 'rtext=${user.curLatitude},${user.curLongitude}~${terminal.latitude},${terminal.longitude}';
-        String naviUrl = 'yandexmaps://maps.yandex.ru?$params';
+        String str = '${terminal.latitude},${terminal.longitude}';
 
-        if (await canLaunch(naviUrl)) await launch(naviUrl);
+        Clipboard.setData(ClipboardData(text: str));
+        _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text('Скопированы координаты точки')));
       }
     );
     _terminalImages = await TerminalImage.byPpsTerminalId(terminal.id);
