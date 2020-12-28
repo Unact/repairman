@@ -25,15 +25,15 @@ class _HomePageState extends State<HomePage> {
       items: [
         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          title: Text('Главная')
+          label: 'Главная'
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.assignment),
-          title: Text('Задачи'),
+          label: 'Задачи',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.computer),
-          title: Text('Терминалы'),
+          label: 'Терминалы',
         )
       ],
     );

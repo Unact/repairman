@@ -45,11 +45,14 @@ class DataSync {
     stream = _streamController.stream.asBroadcastStream();
   }
 
-  DateTime get lastDataSyncTime {
+  DateTime getLastDataSyncTime() {
     String time = App.application.data.prefs.getString('lastDataSyncTime');
     return time != null ? DateTime.parse(time) : null;
   }
-  set lastDataSyncTime(val) => App.application.data.prefs.setString('lastDataSyncTime', val.toString());
+
+  Future<void> setLastDataSyncTime(DateTime val) async {
+    await App.application.data.prefs.setString('lastDataSyncTime', val.toString());
+  }
 
   void startSyncTimer() {
     syncTimer = _startTimer(syncTimer, _syncTimerCallback);
@@ -127,7 +130,7 @@ class DataSync {
       syncErrors = e.errorMsg;
       rethrow;
     } finally {
-      lastDataSyncTime = DateTime.now();
+      await setLastDataSyncTime(DateTime.now());
       _isSyncing = false;
       _streamController.add(SyncEvent.syncCompleted);
     }
@@ -211,6 +214,6 @@ class DataSync {
     await Task.deleteAll();
     await TaskDefectLink.deleteAll();
     await TaskRepairLink.deleteAll();
-    lastDataSyncTime = '';
+    await setLastDataSyncTime(null);
   }
 }

@@ -6,8 +6,45 @@ import 'package:repairman/config/app_config.dart';
 
 class Sentry {
   sentryLib.SentryClient client;
+  final String osVersion;
+  final String deviceModel;
+  final String env;
 
-  Sentry._(this.client);
+  static const List<String> _skipErrors = [
+    'HttpException',
+    'SocketException',
+    'ClientException',
+    'HandshakeException'
+  ];
+
+  Sentry._({
+    @required this.client,
+    @required this.osVersion,
+    @required this.deviceModel,
+    @required this.env
+  });
+
+  Future<void> captureException(dynamic exception, dynamic stack) async {
+    User user = User.currentUser;
+    sentryLib.Event event = sentryLib.Event(
+      exception: exception,
+      stackTrace: stack,
+      userContext: sentryLib.User(
+        id: user.id.toString(),
+        username: user.username,
+        email: user.email
+      ),
+      environment: env,
+      extra: {
+        'osVersion': osVersion,
+        'deviceModel': deviceModel
+      }
+    );
+
+    if (env != 'development' && !_skipError(exception)) {
+      await client.capture(event: event);
+    }
+  }
 
   static Sentry setup(AppConfig config) {
     sentryLib.SentryClient sentryClient = sentryLib.SentryClient(
@@ -15,26 +52,17 @@ class Sentry {
       environmentAttributes: sentryLib.Event(release: config.packageInfo.version)
     );
 
-    FlutterError.onError = (FlutterErrorDetails errorDetails) async {
-      User user = User.currentUser;
-      sentryLib.Event event = sentryLib.Event(
-        exception: errorDetails.exception,
-        stackTrace: errorDetails.stack,
-        userContext: sentryLib.User(
-          id: user.id.toString(),
-          username: user.username,
-          email: user.email
-        ),
-        environment: config.env,
-        extra: {
-          'osVersion': config.osVersion,
-          'deviceModel': config.deviceModel
-        }
-      );
+    return Sentry._(
+      client: sentryClient,
+      osVersion: config.osVersion,
+      deviceModel: config.deviceModel,
+      env: config.env
+    );
+  }
 
-      await sentryClient.capture(event: event);
-    };
-
-    return Sentry._(sentryClient);
+  static bool _skipError(dynamic error) {
+    return _skipErrors.map<bool>(
+      (String exceptionText) => error.toString().contains(exceptionText)
+    ).any((bool val) => val);
   }
 }

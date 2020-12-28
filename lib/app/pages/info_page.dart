@@ -191,7 +191,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
       color: Colors.white,
       icon: Icon(Icons.info),
       onPressed: () {
-        DateTime lastsyncTime = App.application.data.dataSync.lastDataSyncTime;
+        DateTime lastsyncTime = App.application.data.dataSync.getLastDataSyncTime();
         String text = lastsyncTime != null ? DateFormat.yMMMd('ru').add_jms().format(lastsyncTime) : 'Не проводилась';
         _scaffoldKey.currentState?.showSnackBar(SnackBar(content: Text('Синхронизация: $text')));
       }
@@ -199,7 +199,7 @@ class _InfoPageState extends State<InfoPage> with WidgetsBindingObserver {
   }
 
   void _backgroundRefresh() async {
-    DateTime time = App.application.data.dataSync.lastDataSyncTime ??
+    DateTime time = App.application.data.dataSync.getLastDataSyncTime() ??
       DateTime.now().subtract(Duration(minutes: 1)).subtract(DataSync.kSyncTimerPeriod);
 
     if (DateTime.now().difference(time) > DataSync.kSyncTimerPeriod) {

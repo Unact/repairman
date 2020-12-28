@@ -1,53 +1,39 @@
-import 'dart:io';
+import 'dart:async';
 
-import 'package:device_info/device_info.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_user_agent/flutter_user_agent.dart';
-import 'package:package_info/package_info.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:repairman/app/app.dart';
-import 'package:repairman/config/app_config.dart';
-import 'package:repairman/config/app_env.dart' show appEnv;
+import 'package:repairman/app/models/user.dart';
+import 'package:repairman/app/pages/home_page.dart';
+import 'package:repairman/app/pages/login_page.dart';
 
 void main() async {
-  AndroidDeviceInfo androidDeviceInfo;
-  IosDeviceInfo iosDeviceInfo;
-  String developmentUrl;
-  String osVersion;
-  String deviceModel;
-  bool isPhysicalDevice;
-  bool development = false;
-  assert(development = true); // Метод выполняется только в debug режиме
+  App app = await App.init();
 
-  // If you're running an application and need to access the binary messenger before `runApp()` has been called (for example, during plugin initialization), then you need to explicitly call the `WidgetsFlutterBinding.ensureInitialized()` first.
-  WidgetsFlutterBinding.ensureInitialized();
+  User.init();
+  app.config.loadSaved();
 
-  await FlutterUserAgent.init();
-
-  if (Platform.isIOS) {
-    developmentUrl = 'http://localhost:3000';
-    iosDeviceInfo = await DeviceInfoPlugin().iosInfo;
-    isPhysicalDevice = iosDeviceInfo.isPhysicalDevice;
-    osVersion = iosDeviceInfo.systemVersion;
-    deviceModel = iosDeviceInfo.utsname.machine;
-  } else {
-    developmentUrl = 'http://10.0.2.2:3000';
-    androidDeviceInfo = await DeviceInfoPlugin().androidInfo;
-    isPhysicalDevice = androidDeviceInfo.isPhysicalDevice;
-    osVersion = androidDeviceInfo.version.release;
-    deviceModel = androidDeviceInfo.brand + ' - ' + androidDeviceInfo.model;
-  }
-
-  await appEnv.load();
-
-  App.setup(AppConfig(
-    packageInfo: await PackageInfo.fromPlatform(),
-    isPhysicalDevice: isPhysicalDevice,
-    deviceModel: deviceModel,
-    osVersion: osVersion,
-    env: development ? 'development' : 'production',
-    databaseVersion: 11,
-    apiBaseUrl: '${development ? developmentUrl : 'https://data.unact.ru'}/api/',
-    sentryDsn: appEnv['SENTRY_DSN']
-  )).run();
+  runZonedGuarded<Future<void>>(() async {
+    runApp(MaterialApp(
+      title: app.title,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        platform: TargetPlatform.android
+      ),
+      home: User.currentUser.isLogged() ? HomePage() : LoginPage(),
+      locale: Locale('ru', 'RU'),
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: [
+        Locale('en', 'US'),
+        Locale('ru', 'RU'),
+      ]
+    ));
+  }, (Object error, StackTrace stackTrace) {
+    app.reportError(error, stackTrace);
+  });
 }

@@ -3,10 +3,8 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
-import 'package:repairman/app/models/user.dart';
 import 'package:repairman/app/models/task.dart';
 import 'package:repairman/app/models/terminal_image.dart';
 import 'package:repairman/app/models/terminal_worktime.dart';
