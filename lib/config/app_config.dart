@@ -7,22 +7,14 @@ import 'package:repairman/app/app.dart';
 
 class AppConfig {
   AppConfig({
-    @required this.isPhysicalDevice,
-    @required this.deviceModel,
-    @required this.osVersion,
     @required this.packageInfo,
     @required this.env,
     @required this.databaseVersion,
-    @required this.apiBaseUrl,
-    @required this.sentryDsn
+    @required this.apiBaseUrl
   });
 
   final PackageInfo packageInfo;
-  final bool isPhysicalDevice;
-  final String deviceModel;
-  final String osVersion;
   final String env;
-  final String sentryDsn;
   final String secretKeyWord = '5005';
   final int databaseVersion;
 

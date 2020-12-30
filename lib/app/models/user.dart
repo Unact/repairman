@@ -114,7 +114,7 @@ class User {
   Future<void> setFirebaseToken() async {
     App appl = App.application;
 
-    firebaseToken = appl.config.isPhysicalDevice ? (await appl.data.firebaseMessaging.getToken() ?? '') : '';
+    firebaseToken = await appl.data.firebaseMessaging.getToken() ?? '';
   }
 
   Future<void> subscribeToFirebase(bool sendNotifications) async {
