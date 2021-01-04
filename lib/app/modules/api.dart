@@ -155,11 +155,11 @@ class Api {
         throw ApiException(body['error'], statusCode);
       }
     } else {
-      if (e.error is SocketException || e.error is HandshakeException) {
+      if (e.error is SocketException || e.type == DioErrorType.CONNECT_TIMEOUT) {
         throw ApiConnException();
-      } else {
-        throw e;
       }
+
+      throw e;
     }
   }
 

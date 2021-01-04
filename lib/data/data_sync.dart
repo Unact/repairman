@@ -51,7 +51,9 @@ class DataSync {
   }
 
   Future<void> setLastDataSyncTime(DateTime val) async {
-    await App.application.data.prefs.setString('lastDataSyncTime', val.toString());
+    val == null ?
+      await App.application.data.prefs.remove('lastDataSyncTime') :
+      await App.application.data.prefs.setString('lastDataSyncTime', val.toString());
   }
 
   void startSyncTimer() {
