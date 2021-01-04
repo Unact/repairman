@@ -27,6 +27,13 @@ class App {
   final AppConfig config;
   final AppData data;
 
+  static const List<String> _skipErrors = [
+    'HttpException',
+    'SocketException',
+    'ClientException',
+    'HandshakeException'
+  ];
+
   static Future<App> init() async {
     if (_application != null)
       return _application;
@@ -76,7 +83,7 @@ class App {
         options.beforeSend = (sentryLib.SentryEvent event, {dynamic hint}) {
           User user = User.currentUser;
 
-          return event.copyWith(user: sentryLib.User(
+          return _skipErrors.any((el) => el == event.exception.type) ? null : event.copyWith(user: sentryLib.User(
             id: user.id.toString(),
             username: user.username,
             email: user.email
