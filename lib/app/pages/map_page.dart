@@ -38,7 +38,7 @@ class _MapPageState extends State<MapPage> {
       Placemark placemark = Placemark(
         point: point,
         iconName: 'lib/app/assets/images/$iconPostfix',
-        onTap: (double lat, double lon) async {
+        onTap: (Point point) async {
           await Navigator.push(context, MaterialPageRoute(builder: (context) => TerminalPage(terminal: terminal)));
         }
       );

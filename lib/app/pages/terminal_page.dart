@@ -38,7 +38,7 @@ class _TerminalPageState extends State<TerminalPage> {
     _placemark = Placemark(
       point: Point(longitude: terminal.longitude, latitude: terminal.latitude),
       iconName: 'lib/app/assets/images/placeicon.png',
-      onTap: (double lat, double lon) async {
+      onTap: (Point point) async {
         String str = '${terminal.latitude},${terminal.longitude}';
 
         Clipboard.setData(ClipboardData(text: str));

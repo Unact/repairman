@@ -31,7 +31,8 @@ class App {
     'HttpException',
     'SocketException',
     'ClientException',
-    'HandshakeException'
+    'HandshakeException',
+    'HttpExceptionWithStatus'
   ];
 
   static Future<App> init() async {
