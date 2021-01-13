@@ -594,7 +594,7 @@ packages:
       name: yandex_mapkit
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.11"
+    version: "0.5.0"
 sdks:
   dart: ">=2.10.0-110 <2.11.0"
   flutter: ">=1.20.0 <2.0.0"

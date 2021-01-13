@@ -37,7 +37,9 @@ class _TerminalPageState extends State<TerminalPage> {
     Terminal terminal = widget.terminal;
     _placemark = Placemark(
       point: Point(longitude: terminal.longitude, latitude: terminal.latitude),
-      iconName: 'lib/app/assets/images/placeicon.png',
+      style: PlacemarkStyle(
+        iconName: 'lib/app/assets/images/placeicon.png',
+      ),
       onTap: (Point point) async {
         String str = '${terminal.latitude},${terminal.longitude}';
 
